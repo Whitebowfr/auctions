@@ -679,6 +679,8 @@ app.use('/login', (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
+app.use(express.static(path.join(__dirname, 'build')));
+
 // Initialize and start server
 const startServer = async () => {
   try {
