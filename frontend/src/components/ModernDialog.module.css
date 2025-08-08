@@ -1,0 +1,86 @@
+.modernDialog {
+  backdrop-filter: blur(5px);
+}
+
+.modernDialog .MuiPaper-root {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dialogTitle {
+  background-color: #f8fafc;
+  padding: 16px 24px;
+  font-weight: 600;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dialogTitle {
+  padding: 32px 32px 16px 32px !important;
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  color: #0f172a;
+}
+
+.dialogContent {
+  padding: 24px;
+}
+
+.dialogContent {
+  padding: 16px 32px 24px 32px !important;
+}
+
+.dialogActions {
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.dialogActions {
+  padding: 24px 32px 32px 32px !important;
+  gap: 12px;
+}
+
+.modernTextField {
+  margin-bottom: 16px;
+}
+
+.modernTextField input, .modernTextField textarea {
+  font-size: 0.9rem;
+}
+
+.modernTextField .MuiOutlinedInput-root {
+  border-radius: 12px !important;
+}
+
+.modernTextField .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #94a3b8;
+}
+
+.modernTextField .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #2563eb;
+  border-width: 2px;
+}
+
+.primaryButton {
+  background-color: #3b82f6;
+  text-transform: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.primaryButton:hover {
+  background-color: #2563eb;
+}
+
+.secondaryButton {
+  color: #64748b;
+  text-transform: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.secondaryButton:hover {
+  background-color: #f1f5f9;
+}

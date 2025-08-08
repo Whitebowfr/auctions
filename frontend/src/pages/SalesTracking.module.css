@@ -1,0 +1,80 @@
+.container {
+  padding: 24px 0;
+}
+
+.backButton {
+  background: transparent !important;
+  color: #64748b !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  margin-bottom: 16px !important;
+  padding: 8px 16px !important;
+}
+
+.backButton:hover {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-weight: 700 !important;
+  font-size: 2.25rem !important;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+.recordButton {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+  border-radius: 12px !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  padding: 12px 24px !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25) !important;
+  transition: all 0.3s ease !important;
+}
+
+.recordButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.35) !important;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.statCard {
+  background: white !important;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  padding: 24px !important;
+}
+
+.statNumber {
+  font-weight: 700 !important;
+  font-size: 2rem !important;
+  margin-bottom: 4px !important;
+}
+
+.statLabel {
+  color: #64748b;
+  font-size: 0.875rem !important;
+  font-weight: 500;
+}
+
+.noSalesAlert {
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+  border: 1px solid #f59e0b !important;
+}

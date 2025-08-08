@@ -1,0 +1,24 @@
+.formContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 16px;
+}
+
+.errorText {
+    color: #d32f2f;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+/* Styles for the form fields */
+.formField {
+    margin-bottom: 16px;
+}
+
+/* Success message styling */
+.successAlert {
+    margin-top: 16px;
+    background-color: #f0fdf4;
+    border-color: #86efac;
+}

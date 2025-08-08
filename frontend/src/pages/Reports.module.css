@@ -1,0 +1,134 @@
+.container {
+  padding: 24px 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-weight: 700 !important;
+  font-size: 2.25rem !important;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+.exportButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border-radius: 12px !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  padding: 12px 24px !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25) !important;
+  transition: all 0.3s ease !important;
+}
+
+.exportButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35) !important;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.summaryCard {
+  background: white !important;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.3s ease !important;
+}
+
+.summaryCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+.summaryCardContent {
+  padding: 28px !important;
+  text-align: center;
+}
+
+.summaryNumber {
+  font-weight: 700 !important;
+  font-size: 2.5rem !important;
+  margin-bottom: 8px !important;
+}
+
+.summaryLabel {
+  color: #64748b;
+  font-size: 0.875rem !important;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px !important;
+}
+
+.summarySubtext {
+  color: #94a3b8;
+  font-size: 0.75rem !important;
+}
+
+.detailsCard {
+  background: white;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  padding: 32px !important;
+  margin-bottom: 32px;
+}
+
+.detailsTitle {
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  color: #0f172a;
+  margin-bottom: 24px !important;
+}
+
+.detailItem {
+  padding: 12px 0 !important;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detailItem:last-child {
+  border-bottom: none;
+}
+
+.detailLabel {
+  font-weight: 600 !important;
+  color: #374151;
+  font-size: 0.875rem !important;
+}
+
+.detailValue {
+  color: #64748b;
+  font-size: 0.875rem !important;
+}
+
+.reportsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.reportCard {
+  background: white;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  padding: 32px !important;
+}
+
+.reportTitle {
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  color: #0f172a;
+  margin-bottom: 20px !important;
+}

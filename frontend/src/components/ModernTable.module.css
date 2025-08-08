@@ -1,0 +1,40 @@
+.tableContainer {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.tableHeader {
+  background-color: #f8fafc;
+}
+
+.tableHeaderCell {
+  font-weight: 600;
+  color: #475569;
+  padding: 16px;
+}
+
+.tableRow {
+  transition: background-color 0.2s;
+}
+
+.tableRow:hover {
+  background-color: #f1f5f9;
+}
+
+.tableCell {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.statusChip {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-size: 0.7rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  height: 24px;
+}

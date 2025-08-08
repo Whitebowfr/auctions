@@ -1,0 +1,118 @@
+.container {
+  padding: 24px 0;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-weight: 700 !important;
+  font-size: 2.25rem !important;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+.searchField {
+  width: 300px;
+}
+
+.statsCard {
+  margin-bottom: 32px;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  overflow: hidden;
+}
+
+.statsContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.statItem {
+  text-align: center;
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #f8fafc;
+}
+
+.clientCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.clientAvatar {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.clientName {
+  font-weight: 600 !important;
+  color: #1e293b;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.countChip {
+  font-weight: 600 !important;
+  min-width: 36px;
+}
+
+.moneyText {
+  font-weight: 600 !important;
+  color: #047857;
+}
+
+.viewButton {
+  text-transform: none !important;
+  font-weight: 500 !important;
+  color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  border-radius: 8px !important;
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.pagination {
+  margin-top: 16px;
+}
+
+@media (max-width: 960px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .searchField {
+    width: 100%;
+  }
+  
+  .statsContainer {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

@@ -1,0 +1,87 @@
+.header {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15) !important;
+}
+
+.toolbar {
+  min-height: 70px !important;
+  padding: 0 24px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}
+
+.logoIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  backdrop-filter: blur(10px);
+  font-size: 20px;
+}
+
+.logoText {
+  font-weight: 600 !important;
+  letter-spacing: -0.025em;
+  font-size: 1.5rem !important;
+}
+
+.logoSubtext {
+  opacity: 0.8;
+  font-size: 0.75rem;
+  color: white;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.navContainer {
+  display: flex;
+  gap: 8px;
+}
+
+.navButton {
+  color: white !important;
+  padding: 8px 24px !important;
+  border-radius: 12px !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  position: relative;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.navButton:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.navButton.active {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(10px);
+}
+
+.navButton.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+}

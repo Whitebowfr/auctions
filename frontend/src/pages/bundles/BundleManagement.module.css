@@ -1,0 +1,82 @@
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.backButton {
+  margin-bottom: 16px;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.addButton {
+  background-color: #3b82f6;
+  text-transform: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.infoAlert {
+  margin-bottom: 24px;
+}
+
+.infoText {
+  font-weight: 600;
+}
+
+.sectionTitle {
+  margin-bottom: 16px;
+  margin-top: 16px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.soldSectionTitle {
+  margin-bottom: 16px;
+  margin-top: 32px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.bundleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.imageUploadContainer {
+  margin-top: 8px;
+}
+
+.imageUploadInput {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.imagePreview {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.previewImage {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}

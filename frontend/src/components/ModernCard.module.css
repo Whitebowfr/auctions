@@ -1,0 +1,74 @@
+.modernCard {
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.modernCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.cardImage {
+  height: 160px;
+  object-fit: cover;
+}
+
+.cardContent {
+  padding: 16px;
+  padding-bottom: 0;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.cardDescription {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.chipContainer {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.modernChip {
+  font-size: 0.7rem;
+  height: 24px;
+}
+
+.priceText {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.soldPrice {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.cardActions {
+  padding: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.actionButton {
+  text-transform: none;
+  font-size: 0.8rem;
+}

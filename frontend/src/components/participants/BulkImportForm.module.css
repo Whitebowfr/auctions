@@ -1,0 +1,19 @@
+.bulkTextArea {
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.helpText {
+    color: #64748b;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+.sampleText {
+    background-color: #f8fafc;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    margin-top: 12px;
+}

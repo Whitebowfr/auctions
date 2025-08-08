@@ -1,0 +1,35 @@
+.formGrid {
+  margin-top: 4px;
+}
+
+.uploadLabel {
+  font-weight: 500;
+  color: #374151;
+}
+
+.imageUploadContainer {
+  margin-top: 8px;
+}
+
+.imageUploadInput {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.fileInput {
+  width: 100%;
+}
+
+.imagePreview {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.previewImage {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
