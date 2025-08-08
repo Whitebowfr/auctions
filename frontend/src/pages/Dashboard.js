@@ -71,15 +71,15 @@ const Dashboard = () => {
 
   const dashboardCards = [
     {
-      title: 'Manage Auctions',
-      description: 'Create and manage auction events with comprehensive tools for organization and tracking.',
+      title: 'Gérer les ventes aux enchères',
+      description: 'Créez et modifier des ventes existantes, en gérant les lots et les ventes.',
       action: () => navigate('/auctions'),
       color: '#2563eb',
       icon: '🏛️'
     },
     {
       title: 'Participants',
-      description: 'Add participants individually or in bulk, manage bidder numbers and contact information.',
+      description: "Accédez à la liste de tous les clients et à leur historique d'achat et de paiement.",
       action: () => navigate('/clients'),
       color: '#10b981',
       icon: '👥'
@@ -95,37 +95,37 @@ const Dashboard = () => {
     <Box className={styles.container}>
       <Box className={styles.dashboardHeader}>
         <Typography variant="h2" className={styles.title}>
-          Auction Management Dashboard
+          Tableau de bord
         </Typography>
         
         <Typography variant="h6" className={styles.subtitle}>
-          Welcome to your professional auction management system. Streamline every aspect of your auction from planning to reporting.
+          Bienvenue dans votre gestionnaire de ventes aux enchères.
         </Typography>
       </Box>
       
       {/* Stats Overview Section */}
       <Grid container spacing={3} className={styles.statsSection}>
-        <Grid item xs={12} md={4}>
+        <Grid sx={{xs:12, md:4}}>
           <Card className={styles.statsCard}>
             <CardContent>
               <Typography variant="h6" className={styles.statsTitle}>
-                Total Revenue
+                Revenu total
               </Typography>
               <Typography variant="h3" className={styles.statsValue} sx={{ color: '#10b981' }}>
                 {formatCurrency(stats.totalRevenue)}
               </Typography>
               <Typography variant="body2" className={styles.statsSubtext}>
-                From {stats.totalSales} sales across all auctions
+                De {stats.totalSales} ventes
               </Typography>
             </CardContent>
           </Card>
         </Grid>
         
-        <Grid item xs={12} md={8}>
+        <Grid sx={{xs:12, md:8}}>
           <Card className={styles.statsCard}>
             <CardContent>
               <Typography variant="h6" className={styles.statsTitle}>
-                Overview
+                Vue d'ensemble
               </Typography>
               <Box className={styles.overviewGrid}>
                 <Box className={styles.overviewItem}>
@@ -133,7 +133,7 @@ const Dashboard = () => {
                     {stats.totalAuctions}
                   </Typography>
                   <Typography variant="body2" className={styles.overviewLabel}>
-                    Auctions
+                    Ventes aux enchères
                   </Typography>
                 </Box>
                 <Box className={styles.overviewItem}>
@@ -149,7 +149,7 @@ const Dashboard = () => {
                     {stats.totalBundles}
                   </Typography>
                   <Typography variant="body2" className={styles.overviewLabel}>
-                    Bundles
+                    Lots
                   </Typography>
                 </Box>
                 <Box className={styles.overviewItem}>
@@ -157,7 +157,7 @@ const Dashboard = () => {
                     {stats.totalSales}
                   </Typography>
                   <Typography variant="body2" className={styles.overviewLabel}>
-                    Sales
+                    Ventes
                   </Typography>
                 </Box>
               </Box>
@@ -208,7 +208,7 @@ const Dashboard = () => {
       {recentAuctions.length > 0 && (
         <Box className={styles.recentSection}>
           <Typography variant="h5" className={styles.sectionTitle}>
-            Recent Auctions
+            Ventes aux enchères récentes
           </Typography>
           <Card className={styles.recentCard}>
             <List>
@@ -227,7 +227,8 @@ const Dashboard = () => {
                     <ListItemText 
                       primary={auction.name}
                       secondary={
-                        <Box className={styles.auctionStats}>
+                        <Typography component="span" variant="body2">
+                        <Box component="span" className={styles.auctionStats}>
                           <Chip 
                             size="small" 
                             label={`${auction.participants?.length || 0} participants`}
@@ -235,15 +236,16 @@ const Dashboard = () => {
                           />
                           <Chip 
                             size="small" 
-                            label={`${auction.bundles?.length || 0} bundles`}
+                            label={`${auction.bundles?.length || 0} lots`}
                             className={styles.statChip}
                           />
                           <Chip 
                             size="small" 
-                            label={`${auction.sales?.length || 0} sales`}
+                            label={`${auction.sales?.length || 0} ventes`}
                             className={styles.statChip}
                           />
                         </Box>
+                        </Typography>
                       }
                     />
                     <Button 
@@ -255,7 +257,7 @@ const Dashboard = () => {
                         navigate(`/auction/${auction.id}`);
                       }}
                     >
-                      View
+                      Voir
                     </Button>
                   </ListItem>
                   {index < recentAuctions.length - 1 && <Divider variant="inset" component="li" />}
@@ -270,7 +272,7 @@ const Dashboard = () => {
               className={styles.viewAllButton}
               onClick={() => navigate('/auctions')}
             >
-              View All Auctions
+              Voir toutes les ventes aux enchères
             </Button>
           </Box>
         </Box>
