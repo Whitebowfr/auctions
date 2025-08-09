@@ -30,4 +30,4 @@ export function getAuctionTimeStatus (enchere) {
   }
 };
 
-export const getRootUrl = () => process.env.root_URL || "http://localhost:8080"
+export const getRootUrl = () => process.env.REACT_APP_URL || "http://localhost:8080"

@@ -16,7 +16,7 @@ const {
 } = require('./db');
 
 const app = express();
-const URL = process.env.ROOT_URL || "http://localhost:8080"
+const URL = process.env.REACT_APP_URL || "http://localhost:8080"
 const PORT = process.env.PORT || 8080;
 
 // Middleware
