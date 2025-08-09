@@ -1,12 +1,34 @@
 import { getRootUrl } from "./utils";
 
-export const getBundleImageUrl = (bundle) => {
-  if (bundle.image_url) {
-    return getRootUrl() +bundle.image_url;
+/**
+ * Gets the image URL for a bundle, checking both the bundleImages collection
+ * and the legacy image_url property
+ * 
+ * @param {Object} bundle - The bundle object
+ * @param {Object} bundleImages - Collection of images indexed by bundle ID
+ * @returns {string} - URL to the bundle image
+ */
+export const getBundleImageUrl = (bundle, bundleImages = {}) => {
+  // First check if we have images in the bundleImages collection
+  if (bundleImages && bundleImages[bundle.id] && bundleImages[bundle.id].length > 0) {
+    return getRootUrl() + `/uploads/${bundleImages[bundle.id][0].file_path}`;
   }
-  return 'https://via.placeholder.com/300x200?text=No+Image';
+  
+  // Fallback to direct image_url if it exists
+  if (bundle.image_url) {
+    return getRootUrl() + bundle.image_url;
+  }
+  
+  // Return placeholder if no image found
+  return 'https://via.placeholder.com/300x200?text=Pas+d%27image';
 };
 
+/**
+ * Handle image upload for preview
+ * 
+ * @param {File} file - The uploaded file
+ * @param {Function} callback - Callback function to receive the data URL
+ */
 export const handleImageUpload = (file, callback) => {
   if (!file) return;
   

@@ -46,32 +46,35 @@ const BundleManagement = () => {
 
   // Load images for all bundles
   useEffect(() => {
-    const loadBundleImages = async () => {
-      if (auction && auction.bundles) {
-        const imagePromises = auction.bundles.map(async (bundle) => {
+      const loadBundleImages = async () => {
+    if (auction && auction.bundles && auction.bundles.length > 0) {
+      try {
+        // Create a map to store images by bundleId
+        const imagesMap = {};
+        
+        // Load images for each bundle
+        await Promise.all(auction.bundles.map(async (bundle) => {
           try {
             const response = await fetch(getRootUrl() + `/api/lots/${bundle.id}/images`);
             if (response.ok) {
               const images = await response.json();
-              return { bundleId: bundle.id, images };
+              imagesMap[bundle.id] = images;
             }
-          } catch (error) {
-            console.error(`Failed to load images for bundle ${bundle.id}:`, error);
+          } catch (err) {
+            console.error(`Failed to load images for bundle ${bundle.id}:`, err);
+            imagesMap[bundle.id] = [];
           }
-          return { bundleId: bundle.id, images: [] };
-        });
-
-        const results = await Promise.all(imagePromises);
-        const imagesMap = {};
-        results.forEach(({ bundleId, images }) => {
-          imagesMap[bundleId] = images;
-        });
+        }));
+        
         setBundleImages(imagesMap);
+      } catch (error) {
+        console.error('Failed to load bundle images:', error);
       }
-    };
+    }
+  };
 
-    loadBundleImages();
-  }, [auction]);
+  loadBundleImages();
+}, [auction]);
 
   if (!auction) {
     return <Alert severity="error">Vente non trouvée.</Alert>;

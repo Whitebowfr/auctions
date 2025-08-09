@@ -9,19 +9,22 @@ const BundleCard = ({ bundle, imageUrl, isSold, onSell, onDelete, onViewSale }) 
       component="img"
       height="160"
       image={imageUrl}
-      alt={bundle.name}
+      alt={bundle.name || `Lot #${bundle.id}`}
       className={cardStyles.cardImage}
+      sx={{ objectFit: 'cover' }}
     />
     <CardContent className={cardStyles.cardContent}>
       <Typography variant="h6" className={cardStyles.cardTitle}>
         {bundle.name || `Lot #${bundle.id}`}
       </Typography>
-      <Typography 
-        variant="body2" 
-        className={cardStyles.cardDescription}
-      >
-        {bundle.description}
-      </Typography>
+      {bundle.description && (
+        <Typography 
+          variant="body2" 
+          className={cardStyles.cardDescription}
+        >
+          {bundle.description}
+        </Typography>
+      )}
       <Box className={cardStyles.chipContainer}>
         <Chip 
           label={bundle.category || 'Non catégorisé'} 

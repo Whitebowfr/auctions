@@ -670,17 +670,14 @@ app.get('/api/encheres/:enchereId/report', asyncHandler(async (req, res) => {
   });
 }));
 
-// Auth endpoint (keeping your existing one)
-app.use('/login', (req, res) => {
-  res.send({
-    token: 'test123'
-  });
-});
-
 // Error handling middleware
 app.use(errorHandler);
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('*', function (req, res) {
+  res.sendFile(path.resolve(__dirname, '/public/index.html'));
+});
 
 // Initialize and start server
 const startServer = async () => {
