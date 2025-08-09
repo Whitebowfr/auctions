@@ -10,7 +10,6 @@ import {
   Switch,
   Grid,
   Box,
-  Typography,
   InputLabel
 } from '@mui/material';
 import styles from '../ModernDialog.module.css';

@@ -1,6 +1,6 @@
 import { getRootUrl } from "../utils/utils";
 
-const API_BASE_URL = getRootUrl() + "/api/";
+const API_BASE_URL = getRootUrl() + "/api";
 
 class ApiService {
   async request(endpoint, options = {}) {

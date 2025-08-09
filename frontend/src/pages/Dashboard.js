@@ -6,10 +6,8 @@ import {
   CardContent, 
   Button,
   Grid,
-  IconButton,
   Divider,
   Avatar,
-  Tooltip,
   List,
   ListItem,
   ListItemText,
@@ -197,7 +195,7 @@ const Dashboard = () => {
                   card.action();
                 }}
               >
-                Get Started →
+                Accéder →
               </Button>
             </CardContent>
           </Card>

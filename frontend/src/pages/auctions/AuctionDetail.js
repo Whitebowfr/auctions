@@ -7,7 +7,6 @@ import {
   CardContent,
   Button,
   Paper,
-  Divider,
   Chip,
   Alert
 } from '@mui/material';

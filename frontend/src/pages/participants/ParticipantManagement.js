@@ -104,7 +104,7 @@ const ParticipantManagement = () => {
     };
 
     const handleFormChange = (field, value) => {
-        if (field == "phone") {
+        if (field === "phone") {
             value = formatAsPhoneNumber(value)
         }
 

@@ -17,7 +17,7 @@ export const formatAsPhoneNumber = (text) => {
   text = text.replaceAll(' ', '')
   if (text.length < 4) return text
   let output = ""
-  if (text[0] == "+") {
+  if (text[0] === "+") {
     output = "+" + text[1] + text[2] + ' ' + text[3] + ' '
     text = text.substring(4)
   }

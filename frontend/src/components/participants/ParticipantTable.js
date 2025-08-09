@@ -13,7 +13,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import dialogStyles from '../ModernDialog.module.css';
 import tableStyles from '../ModernTable.module.css';
-import { useAuction } from '../../context/AuctionContext';
 
 const ParticipantTable = ({ participants, auctionId, handleDeleteParticipant }) => {
     const navigate = useNavigate();

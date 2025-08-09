@@ -6,7 +6,6 @@ import {
   Paper,
   Card,
   CardContent,
-  Grid,
   Chip,
   Alert,
   Dialog,
@@ -25,10 +24,8 @@ import {
   TrendingUp,
   TrendingDown,
   Inventory2,
-  CreditCard,
   Edit,
   Receipt,
-  Print,
   PictureAsPdf
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -64,7 +61,6 @@ const ParticipantDetail = () => {
   // Calculate totals using the correct field names
   const totalSpent = participantSales.reduce((sum, sale) => sum + (parseFloat(sale.finalPrice) || 0), 0);
   const totalItems = participantSales.length;
-  const averagePrice = totalItems > 0 ? totalSpent / totalItems : 0;
   
   // Get bundle details for each purchase
   const purchaseDetails = participantSales.map(sale => {

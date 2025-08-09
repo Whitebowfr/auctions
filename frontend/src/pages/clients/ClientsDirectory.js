@@ -19,7 +19,7 @@ import {
   Pagination
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Search, Person, Email, Phone } from '@mui/icons-material';
+import { Search, Email, Phone } from '@mui/icons-material';
 import { useAuction } from '../../context/AuctionContext';
 import tableStyles from '../../components/ModernTable.module.css';
 import styles from './ClientsDirectory.module.css';

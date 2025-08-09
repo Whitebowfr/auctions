@@ -96,7 +96,7 @@ const ParticipantForm = ({
                         value={participantForm.phone}
                         onChange={(e) => handleFormChange('phone', e.target.value)}
                         className={dialogStyles.modernTextField}
-                        error={validatePhoneNumber(participantForm.phone) != ''}
+                        error={validatePhoneNumber(participantForm.phone) !== ''}
                         helperText={validatePhoneNumber(participantForm.phone)} 
                     />
                 </Grid>

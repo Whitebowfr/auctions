@@ -27,7 +27,7 @@ import { useAuction } from '../context/AuctionContext';
 import styles from './SalesTracking.module.css';
 import dialogStyles from '../components/ModernDialog.module.css';
 import tableStyles from '../components/ModernTable.module.css';
-import { formatCurrency, formatProfit } from '../utils/formatters';
+import { formatCurrency } from '../utils/formatters';
 
 const SalesTracking = () => {
   const { id } = useParams();
@@ -179,7 +179,7 @@ const SalesTracking = () => {
                   </TableCell>
                   <TableCell className={tableStyles.tableCell}>
                     <Chip 
-                      label={formatProfit(sale.profit)}
+                      label={formatCurrency(sale.profit)}
                       color={(parseFloat(sale.profit || 0)) >= 0 ? "success" : "error"}
                       size="small"
                       className={tableStyles.statusChip}
