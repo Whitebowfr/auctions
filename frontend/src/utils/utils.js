@@ -29,3 +29,5 @@ export function getAuctionTimeStatus (enchere) {
     return { label: `${Math.ceil(Math.abs(daysDiff) / 7)} weeks ago`, color: 'error', icon: '📋' };
   }
 };
+
+export const getRootUrl = () => process.env.root_URL || "http://localhost:8080"

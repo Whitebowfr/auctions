@@ -16,6 +16,7 @@ const {
 } = require('./db');
 
 const app = express();
+const URL = process.env.ROOT_URL || "http://localhost:8080"
 const PORT = process.env.PORT || 8080;
 
 // Middleware
@@ -635,7 +636,7 @@ app.get('/api/encheres/:enchereId/report', asyncHandler(async (req, res) => {
   }
   
   // Get stats
-  const statsResponse = await fetch(`http://localhost:${PORT}/api/encheres/${enchereId}/stats`);
+  const statsResponse = await fetch(`${URL}/api/encheres/${enchereId}/stats`);
   const stats = await statsResponse.json();
   
   // Get top sales
@@ -687,8 +688,8 @@ const startServer = async () => {
     await testConnection();
     
     app.listen(PORT, () => {
-      console.log(`🚀 API is running on http://localhost:${PORT}`);
-      console.log(`📁 File uploads available at http://localhost:${PORT}/uploads/`);
+      console.log(`🚀 API is running on ${URL}, port ${PORT}`);
+      console.log(`📁 File uploads available at ${URL}/uploads/`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

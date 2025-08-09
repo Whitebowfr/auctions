@@ -12,6 +12,7 @@ import BundleCard from '../../components/bundles/BundleCard';
 import AddBundleDialog from '../../components/bundles/AddBundleDialog';
 import SellBundleDialog from '../../components/bundles/SellBundleDialog';
 import { getBundleImageUrl } from '../../utils/imageHandlers';
+import { getRootUrl } from '../../utils/utils';
 
 const BundleManagement = () => {
   const { id } = useParams();
@@ -49,7 +50,7 @@ const BundleManagement = () => {
       if (auction && auction.bundles) {
         const imagePromises = auction.bundles.map(async (bundle) => {
           try {
-            const response = await fetch(`http://localhost:8080/api/lots/${bundle.id}/images`);
+            const response = await fetch(getRootUrl() + `/api/lots/${bundle.id}/images`);
             if (response.ok) {
               const images = await response.json();
               return { bundleId: bundle.id, images };
@@ -165,7 +166,7 @@ const BundleManagement = () => {
     // Show confirmation dialog
     if (window.confirm("Êtes-vous sûr de vouloir supprimer ce lot?")) {
       // Call API to delete bundle
-      fetch(`http://localhost:8080/api/lots/${bundleId}`, {
+      fetch(getRootUrl() + `/api/lots/${bundleId}`, {
         method: 'DELETE',
       })
         .then(response => {

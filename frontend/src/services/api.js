@@ -1,4 +1,6 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+import { getRootUrl } from "../utils/utils";
+
+const API_BASE_URL = getRootUrl() + "/api/";
 
 class ApiService {
   async request(endpoint, options = {}) {

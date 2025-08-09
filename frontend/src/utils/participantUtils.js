@@ -1,6 +1,7 @@
 // Participant management utility functions
 
 import { formatAsPhoneNumber } from "./formatters";
+import { getRootUrl } from "./utils";
 
 /**
  * Filters out participants already in this auction
@@ -42,7 +43,7 @@ export const processBulkImport = (bulkText) => {
  * @returns {Promise} - Promise resolving to the updated participant
  */
 export const updateParticipant = async (participantId, formData) => {
-    const response = await fetch(`http://localhost:8080/api/clients/${participantId}`, {
+    const response = await fetch(getRootUrl() + `/api/clients/${participantId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',

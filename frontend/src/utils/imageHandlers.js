@@ -1,6 +1,8 @@
+import { getRootUrl } from "./utils";
+
 export const getBundleImageUrl = (bundle) => {
   if (bundle.image_url) {
-    return `http://localhost:8080${bundle.image_url}`;
+    return getRootUrl() +bundle.image_url;
   }
   return 'https://via.placeholder.com/300x200?text=No+Image';
 };
