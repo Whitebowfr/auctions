@@ -20,7 +20,8 @@ import {
   Alert,
   Chip,
   Card,
-  CardContent
+  CardContent,
+  InputAdornment
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuction } from '../context/AuctionContext';
@@ -165,7 +166,25 @@ const SalesTracking = () => {
                 <TableRow key={sale.id} className={tableStyles.tableRow}>
                   <TableCell className={tableStyles.tableCell}>{sale.date}</TableCell>
                   <TableCell className={tableStyles.tableCell}>{sale.bundleName}</TableCell>
-                  <TableCell className={tableStyles.tableCell}>{sale.participantName}</TableCell>
+                  <TableCell className={tableStyles.tableCell}>
+                    <Button
+                        variant="text"
+                        onClick={() => navigate(`/auction/${auction.id}/participants/${sale.participantId}`)}
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: 500,
+                            color: '#2563eb',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            '&:hover': {
+                                backgroundColor: '#eff6ff',
+                                color: '#1e40af'
+                            }
+                        }}
+                    >
+                        {sale.participantName}
+                    </Button>
+                  </TableCell>
                   <TableCell className={tableStyles.tableCell}>
                     <Typography sx={{ fontWeight: 600, color: '#2563eb' }}>
                       #{sale.bidderNumber}
@@ -205,7 +224,7 @@ const SalesTracking = () => {
         </DialogTitle>
         <DialogContent className={dialogStyles.dialogContent}>
           <Grid container spacing={4} sx={{ mt: 0.5 }}> {/* Increased spacing from 3 to 4 */}
-            <Grid item xs={12}>
+            <Grid sx={{xs: 12}}>
               <Autocomplete
                 options={availableBundles}
                 getOptionLabel={(option) => `${option.name || `Lot #${option.id}`} (Prix de départ: ${formatCurrency(option.starting_price)})`}
@@ -261,7 +280,7 @@ const SalesTracking = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid sx={{xs: 12}}>
               <Autocomplete
                 options={auction.participants}
                 getOptionLabel={(option) => `${option.name} (#${option.local_number})`}
@@ -313,18 +332,20 @@ const SalesTracking = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid sx={{xs: 12}}>
               <TextField
                 fullWidth
                 label="Prix de vente final"
                 type="number"
-                step="0.01"
+                step={0.1}
                 value={formData.finalPrice}
                 onChange={(e) => setFormData({...formData, finalPrice: e.target.value})}
                 className={dialogStyles.modernTextField}
                 size="medium" // Make input larger
-                InputProps={{
-                  endAdornment: '€'
+                slotProps={{
+                  input: {
+                    endAdornment: (<InputAdornment position='end'>€</InputAdornment>)
+                  }
                 }}
                 sx={{
                   '& .MuiInputBase-root': {
@@ -333,25 +354,6 @@ const SalesTracking = () => {
                   },
                   '& .MuiInputLabel-root': {
                     fontSize: '1.1rem'   // Larger label
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={4} // Increased from 3 to 4 for larger text area
-                label="Notes (optionnel)"
-                value={formData.notes}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                className={dialogStyles.modernTextField}
-                sx={{
-                  '& .MuiInputBase-root': {
-                    fontSize: '1.1rem' // Larger font
-                  },
-                  '& .MuiInputLabel-root': {
-                    fontSize: '1.1rem' // Larger label
                   }
                 }}
               />
@@ -373,7 +375,7 @@ const SalesTracking = () => {
             className={dialogStyles.primaryButton}
             size="large" // Larger buttons
           >
-            💾 Enregistrer la vente
+            Enregistrer la vente
           </Button>
         </DialogActions>
       </Dialog>

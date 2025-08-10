@@ -7,7 +7,8 @@ import {
   Button,
   TextField,
   Grid,
-  Autocomplete
+  Autocomplete,
+  InputAdornment
 } from '@mui/material';
 import dialogStyles from '../ModernDialog.module.css';
 
@@ -33,7 +34,7 @@ const SellBundleDialog = ({
       </DialogTitle>
       <DialogContent className={dialogStyles.dialogContent}>
         <Grid container spacing={3} sx={{ mt: 0.5 }}>
-          <Grid item xs={12}>
+          <Grid sx={{xs: 12}}>
             <Autocomplete
               options={participants || []}
               getOptionLabel={(option) => `${option.name} (#${option.local_number})`}
@@ -54,7 +55,7 @@ const SellBundleDialog = ({
               )}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid sx={{xs: 12}}>
             <TextField
               fullWidth
               label="Prix de vente"
@@ -66,8 +67,10 @@ const SellBundleDialog = ({
                 finalPrice: e.target.value
               })}
               className={dialogStyles.modernTextField}
-              InputProps={{
-                endAdornment: '€'
+              slotProps={{
+                input: {
+                  endAdornment: (<InputAdornment position='end'>€</InputAdornment>)
+                }
               }}
             />
           </Grid>

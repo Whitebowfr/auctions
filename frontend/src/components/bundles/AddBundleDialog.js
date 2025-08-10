@@ -9,7 +9,8 @@ import {
   Grid,
   Box,
   Typography,
-  Autocomplete
+  Autocomplete,
+  InputAdornment
 } from '@mui/material';
 import dialogStyles from '../ModernDialog.module.css';
 import styles from './AddBundleDialog.module.css';
@@ -36,7 +37,7 @@ const AddBundleDialog = ({
       </DialogTitle>
       <DialogContent className={dialogStyles.dialogContent}>
         <Grid container spacing={3} className={styles.formGrid}>
-          <Grid item xs={12}>
+          <Grid size={{xs: 12}}>
             <TextField
               fullWidth
               label="Nom du lot"
@@ -45,7 +46,7 @@ const AddBundleDialog = ({
               className={dialogStyles.modernTextField}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{xs: 12}}>
             <TextField
               fullWidth
               multiline
@@ -56,7 +57,7 @@ const AddBundleDialog = ({
               className={dialogStyles.modernTextField}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{xs: 12, sm:6}}>
             <TextField
               fullWidth
               label="Prix de départ"
@@ -65,12 +66,14 @@ const AddBundleDialog = ({
               value={formData.starting_price}
               onChange={(e) => setFormData({...formData, starting_price: e.target.value})}
               className={dialogStyles.modernTextField}
-              InputProps={{
-                endAdornment: '€'
+              slotProps={{
+                input: {
+                  endAdornment: (<InputAdornment position='end'>€</InputAdornment>)
+                }
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{xs: 12, sm:6}}>
             <Autocomplete
               freeSolo
               options={existingCategories}
@@ -92,7 +95,7 @@ const AddBundleDialog = ({
               )}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{xs: 12}}>
             <TextField
               fullWidth
               multiline
@@ -103,7 +106,7 @@ const AddBundleDialog = ({
               className={dialogStyles.modernTextField}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{xs: 12}}>
             <Box className={styles.imageUploadContainer}>
               <Typography variant="body2" className={styles.uploadLabel}>
                 📸 Ajouter une image:

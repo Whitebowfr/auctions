@@ -3,7 +3,7 @@ export const formatCurrency = (value) => {
 };
 
 export const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString();
+  return new Date(dateString).toLocaleDateString("fr-FR");
 };
 
 export const formatProfit = (startingPrice, finalPrice) => {

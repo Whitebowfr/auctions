@@ -131,7 +131,7 @@ const ParticipantDetail = () => {
             </Box>
             <Box className={styles.contactItem}>
               <DateRange color="action" />
-              <Typography>Enregistré le : {new Date().toLocaleDateString()}</Typography>
+              <Typography>Enregistré le : {new Date().toLocaleDateString("fr-FR")}</Typography>
             </Box>
           </Box>
 

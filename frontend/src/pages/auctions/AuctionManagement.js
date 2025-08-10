@@ -23,6 +23,7 @@ import styles from './AuctionManagement.module.css';
 import dialogStyles from '../../components/ModernDialog.module.css';
 import cardStyles from '../../components/ModernCard.module.css';
 import { getAuctionTimeStatus } from '../../utils/utils';
+import { formatDate } from '../../utils/formatters';
 
 const AuctionManagement = () => {
   const navigate = useNavigate();
@@ -94,7 +95,7 @@ const AuctionManagement = () => {
               </Typography>
               
               <Typography variant="body2" sx={{ color: '#64748b', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                📅 {new Date(enchere.date).toLocaleDateString()}
+                📅 {formatDate(enchere.date)}
               </Typography>
               <Typography variant="body2" sx={{ color: '#64748b', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                 📍 {enchere.address}
@@ -154,7 +155,7 @@ const AuctionManagement = () => {
         </DialogTitle>
         <DialogContent className={dialogStyles.dialogContent}>
           <Grid container spacing={3} sx={{ mt: 0.5 }}>
-            <Grid item xs={12}>
+            <Grid sx={{xs: 12}}>
               <TextField
                 fullWidth
                 label="Nom de la vente"
@@ -164,7 +165,7 @@ const AuctionManagement = () => {
                 disabled={submitting}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid sx={{xs: 12, sm: 6}}>
               <DatePicker
                 fullWidth
                 label="Date"
@@ -177,7 +178,7 @@ const AuctionManagement = () => {
                 disabled={submitting}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid sx={{xs: 12, sm: 6}}>
               <TextField
                 fullWidth
                 label="Lieu"

@@ -86,12 +86,13 @@ const ClientsDirectory = () => {
           className={styles.searchField}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
+          slotProps={{
+            input: {
             startAdornment: (
               <InputAdornment position="start">
                 <Search />
               </InputAdornment>
-            ),
+            )}
           }}
         />
       </Box>

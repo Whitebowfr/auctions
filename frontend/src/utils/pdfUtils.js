@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { formatCurrency } from './formatters';
+import { formatCurrency, formatDate } from './formatters';
 import { applyPlugin } from 'jspdf-autotable'
 
 /**
@@ -21,7 +21,7 @@ export const generateParticipantBill = (participant, purchases, auction, customi
     color: customizations.color || '#2563eb',
     logo: customizations.logo || null,
     includeNotes: customizations.includeNotes !== undefined ? customizations.includeNotes : true,
-    footer: customizations.footer || `${auction.name} - ${new Date().toLocaleDateString()}`,
+    footer: customizations.footer || `${auction.name} - Édité le ${new Date().toLocaleDateString("fr-FR")}`,
     paid: customizations.paid || false
   };
 
@@ -43,7 +43,7 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   // Add auction information
   doc.setFontSize(11);
   doc.setTextColor('#666666');
-  doc.text(`Date: ${new Date(auction.date).toLocaleDateString()}`, 14, 45);
+  doc.text(`Date: ${formatDate(auction.date)}`, 14, 45);
   doc.text(`Lieu: ${auction.address || 'Non spécifié'}`, 14, 52);
 
   // Add participant information
@@ -60,13 +60,11 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   // Add purchases table
   doc.autoTable({
     startY: 105,
-    head: [['Lot', 'Description', 'Prix de départ', 'Prix final', 'Différence']],
+    head: [['Lot', 'Description', 'Prix']],
     body: purchases.map(purchase => [
       purchase.bundle?.name || `Lot #${purchase.bundleId}`,
       purchase.bundle?.description?.substring(0, 30) + (purchase.bundle?.description?.length > 30 ? '...' : '') || 'Pas de description',
-      `${formatCurrency(purchase.startingPrice)}`,
       `${formatCurrency(purchase.finalPrice)}`,
-      `${formatCurrency(purchase.finalPrice - purchase.startingPrice)}`
     ]),
     headStyles: {
       fillColor: options.color,

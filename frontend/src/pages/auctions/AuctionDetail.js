@@ -13,7 +13,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuction } from '../../context/AuctionContext';
 import { getAuctionTimeStatus } from '../../utils/utils';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 
 const AuctionDetail = () => {
   const { id } = useParams();
@@ -97,7 +97,7 @@ const AuctionDetail = () => {
               Informations sur la vente
             </Typography>
             <Typography variant="body1" gutterBottom>
-              📅 <strong>Date:</strong> {auction.date}
+              📅 <strong>Date:</strong> {formatDate(auction.date)}
             </Typography>
             <Typography variant="body1" gutterBottom>
               📍 <strong>Lieu:</strong> {auction.address}

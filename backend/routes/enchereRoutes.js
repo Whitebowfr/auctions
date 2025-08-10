@@ -27,10 +27,10 @@ router.delete('/:id', asyncHandler(deleteEnchere));
 
 
 // GET /api/lots (from an enchere)
-router.get('/:id/lots', asyncHandler(getLotsForEnchere));
+router.get('/:enchereId/lots', asyncHandler(getLotsForEnchere));
 
 
 // POST /api/lots (create for an enchere)
-router.post('/:id/lots', asyncHandler(createLot));
+router.post('/:enchereId/lots', asyncHandler(createLot));
 
 module.exports = router;

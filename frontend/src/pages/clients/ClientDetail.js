@@ -38,7 +38,7 @@ import { useAuction } from '../../context/AuctionContext';
 import tableStyles from '../../components/ModernTable.module.css';
 import dialogStyles from '../../components/ModernDialog.module.css';
 import styles from './ClientDetail.module.css';
-import { formatCurrency, formatAsPhoneNumber, validatePhoneNumber } from '../../utils/formatters';
+import { formatCurrency, formatAsPhoneNumber, validatePhoneNumber, formatDate } from '../../utils/formatters';
 
 const ClientDetail = () => {
   const { id } = useParams();
@@ -261,7 +261,7 @@ const ClientDetail = () => {
           </Card>
         </Grid>
         
-        <Grid item xs={12} md={8}>
+        <Grid sx={{xs: 12, md: 8}}>
           <Paper className={styles.tabsContainer}>
             <Tabs
               value={tabValue}
@@ -310,7 +310,7 @@ const ClientDetail = () => {
                                 <Typography variant="subtitle2">{auction.name}</Typography>
                               </TableCell>
                               <TableCell className={tableStyles.tableCell}>
-                                {new Date(auction.date).toLocaleDateString()}
+                                {formatDate(auction.date)}
                               </TableCell>
                               <TableCell className={tableStyles.tableCell}>
                                 <Chip
@@ -391,7 +391,7 @@ const ClientDetail = () => {
                               </Typography>
                             </TableCell>
                             <TableCell className={tableStyles.tableCell}>
-                              {new Date(purchase.auctionDate).toLocaleDateString()}
+                              {formatDate(purchase.auctionDate)}
                             </TableCell>
                           </TableRow>
                         ))
@@ -426,7 +426,7 @@ const ClientDetail = () => {
         </DialogTitle>
         <DialogContent className={dialogStyles.dialogContent}>
           <Grid container spacing={3} sx={{ mt: 0.5 }}>
-            <Grid item xs={12}>
+            <Grid sx={{xs: 12}}>
               <TextField
                 fullWidth
                 label="Nom"
@@ -436,7 +436,7 @@ const ClientDetail = () => {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid sx={{xs: 12, sm: 6}}>
               <TextField
                 fullWidth
                 label="Email"
@@ -446,7 +446,7 @@ const ClientDetail = () => {
                 className={dialogStyles.modernTextField}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid sx={{xs: 12, sm: 6}}>
               <TextField
                 fullWidth
                 label="Téléphone"
@@ -457,7 +457,7 @@ const ClientDetail = () => {
                 helperText={validatePhoneNumber(editForm.phone)}
               />
             </Grid>
-            <Grid item xs={12} size={6}>
+            <Grid sx={{xs: 12, sm: 6}}>
               <TextField
                 fullWidth
                 label="Adresse"
@@ -466,7 +466,7 @@ const ClientDetail = () => {
                 className={dialogStyles.modernTextField}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid sx={{xs: 12}}>
               <TextField
                 fullWidth
                 label="Notes"

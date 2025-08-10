@@ -43,9 +43,9 @@ const getLotById = async (req, res) => {
  */
 const createLot = async (req, res) => {
   const { enchereId } = req.params;
-  const { name, description, startingPrice, category, notes } = req.body;
+  const { name, description, starting_price, category, notes } = req.body;
   
-  if (!name || !startingPrice) {
+  if (!name || !starting_price) {
     return res.status(400).json({ message: 'Name and starting price are required' });
   }
   
@@ -57,7 +57,7 @@ const createLot = async (req, res) => {
   
   const result = await post_request(
     "INSERT INTO lots (enchere_id, name, description, starting_price, category, notes) VALUES (?, ?, ?, ?, ?, ?)",
-    [enchereId, name, description || '', startingPrice, category || '', notes || '']
+    [enchereId, name, description || '', starting_price, category || '', notes || '']
   );
   
   const newLot = await get_request("SELECT * FROM lots WHERE id = ?", [result.insertId]);
@@ -69,9 +69,9 @@ const createLot = async (req, res) => {
  */
 const updateLot = async (req, res) => {
   const { id } = req.params;
-  const { name, description, startingPrice, category, notes } = req.body;
+  const { name, description, starting_price, category, notes } = req.body;
   
-  if (!name || !startingPrice) {
+  if (!name || !starting_price) {
     return res.status(400).json({ message: 'Name and starting price are required' });
   }
   
@@ -83,7 +83,7 @@ const updateLot = async (req, res) => {
   
   await put_request(
     "UPDATE lots SET name = ?, description = ?, starting_price = ?, category = ?, notes = ? WHERE id = ?",
-    [name, description || '', startingPrice, category || '', notes || '', id]
+    [name, description || '', starting_price, category || '', notes || '', id]
   );
   
   const updatedLot = await get_request("SELECT * FROM lots WHERE id = ?", [id]);
