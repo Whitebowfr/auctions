@@ -57,9 +57,9 @@ export const AuctionProvider = ({ children }) => {
                 participantId: lot.sold_to,
                 participantName: participants.find(p => p.id === lot.sold_to)?.name || 'Unknown',
                 bidderNumber: participants.find(p => p.id === lot.sold_to)?.local_number || '000',
-                startingPrice: lot.starting_price,
-                finalPrice: lot.sold_price,
-                profit: lot.sold_price - lot.starting_price,
+                startingPrice: parseFloat(lot.starting_price),
+                finalPrice: parseFloat(lot.sold_price),
+                profit: parseFloat(lot.sold_price) - parseFloat(lot.starting_price),
                 date: new Date().toLocaleDateString(), // You might want to add a sale_date field to your DB
                 notes: ''
               }))

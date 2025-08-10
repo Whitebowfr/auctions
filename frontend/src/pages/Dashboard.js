@@ -17,6 +17,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuction } from '../context/AuctionContext';
 import styles from './Dashboard.module.css';
+import { formatCurrency } from '../utils/formatters';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const Dashboard = () => {
         
         if (auction.sales) {
           auction.sales.forEach(sale => {
-            totalRevenue += sale.finalPrice || 0;
+            totalRevenue += parseFloat(sale.finalPrice) || 0;
           });
         }
       });
@@ -59,13 +60,6 @@ const Dashboard = () => {
       });
     }
   }, [auctions]);
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('fr-FR', { 
-      style: 'currency', 
-      currency: 'EUR' 
-    }).format(amount);
-  };
 
   const dashboardCards = [
     {
@@ -111,6 +105,8 @@ const Dashboard = () => {
               </Typography>
               <Typography variant="h3" className={styles.statsValue} sx={{ color: '#10b981' }}>
                 {formatCurrency(stats.totalRevenue)}
+                {stats.totalRevenue}
+                {JSON.stringify(auctions)}
               </Typography>
               <Typography variant="body2" className={styles.statsSubtext}>
                 De {stats.totalSales} ventes

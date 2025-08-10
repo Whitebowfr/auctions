@@ -34,7 +34,7 @@ const Reports = () => {
     return <div>Auction not found</div>;
   }
 
-  const totalRevenue = auction.sales.reduce((sum, sale) => sum + sale.finalPrice, 0);
+  const totalRevenue = auction.sales.reduce((sum, sale) => sum + parseFloat(sale.finalPrice), 0);
   const totalStartingValue = auction.bundles.reduce((sum, bundle) => sum + parseFloat(bundle.startingPrice || 0), 0);
   const totalProfit = totalRevenue - totalStartingValue;
   const soldBundles = auction.bundles.filter(b => b.status === 'Sold').length;
