@@ -21,7 +21,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuction } from '../context/AuctionContext';
 import styles from './Reports.module.css';
 import tableStyles from '../components/ModernTable.module.css';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, formatDate } from '../utils/formatters';
 
 const Reports = () => {
   const { id } = useParams();
@@ -31,7 +31,7 @@ const Reports = () => {
   const auction = auctions.find(a => a.id === parseInt(id));
 
   if (!auction) {
-    return <div>Auction not found</div>;
+    return <div>Vente aux enchères introuvable</div>;
   }
 
   const totalRevenue = auction.sales.reduce((sum, sale) => sum + parseFloat(sale.finalPrice), 0);
@@ -98,19 +98,19 @@ const Reports = () => {
           fontWeight: '500 !important'
         }}
       >
-        ← Back to {auction.name}
+        ← Retour à {auction.name}
       </Button>
 
       <Box className={styles.header}>
         <Typography variant="h4" className={styles.title}>
-          📊 Reports & Summary - {auction.name}
+          📊 Résumé et statistiques - {auction.name}
         </Typography>
         <Button 
           variant="contained" 
           onClick={exportReport}
           className={styles.exportButton}
         >
-          📁 Export Report
+          📁 Exporter le rapport
         </Button>
       </Box>
 
@@ -119,7 +119,7 @@ const Reports = () => {
         <Card className={styles.summaryCard}>
           <CardContent className={styles.summaryCardContent}>
             <Typography variant="body2" className={styles.summaryLabel}>
-              Total Revenue
+              Revenu total
             </Typography>
             <Typography variant="h3" className={styles.summaryNumber} color="success.main">
               {formatCurrency(totalRevenue)}
@@ -129,26 +129,26 @@ const Reports = () => {
         <Card className={styles.summaryCard}>
           <CardContent className={styles.summaryCardContent}>
             <Typography variant="body2" className={styles.summaryLabel}>
-              Total Profit
+              Écart total avec les prix de départ
             </Typography>
             <Typography variant="h3" className={styles.summaryNumber} color="primary">
               {formatCurrency(totalProfit)}
             </Typography>
             <Typography variant="body2" className={styles.summarySubtext}>
-              {profitMargin}% margin
+              {profitMargin}%
             </Typography>
           </CardContent>
         </Card>
         <Card className={styles.summaryCard}>
           <CardContent className={styles.summaryCardContent}>
             <Typography variant="body2" className={styles.summaryLabel}>
-              Items Sold
+              Nombre de lots vendus
             </Typography>
             <Typography variant="h3" className={styles.summaryNumber}>
               {soldBundles}/{auction.bundles.length}
             </Typography>
             <Typography variant="body2" className={styles.summarySubtext}>
-              {successRate}% success rate
+              {successRate}% de ventes
             </Typography>
           </CardContent>
         </Card>
@@ -167,24 +167,24 @@ const Reports = () => {
       {/* Auction Details */}
       <Paper className={styles.detailsCard}>
         <Typography variant="h5" className={styles.detailsTitle}>
-          Auction Details
+          Détails
         </Typography>
         <List>
           <ListItem className={styles.detailItem}>
             <ListItemText 
-              primary={<span className={styles.detailLabel}>Auction Name</span>} 
+              primary={<span className={styles.detailLabel}>Nom</span>} 
               secondary={<span className={styles.detailValue}>{auction.name}</span>} 
             />
           </ListItem>
           <ListItem className={styles.detailItem}>
             <ListItemText 
               primary={<span className={styles.detailLabel}>Date</span>} 
-              secondary={<span className={styles.detailValue}>{auction.date}</span>} 
+              secondary={<span className={styles.detailValue}>{formatDate(auction.date)}</span>} 
             />
           </ListItem>
           <ListItem className={styles.detailItem}>
             <ListItemText 
-              primary={<span className={styles.detailLabel}>Location</span>} 
+              primary={<span className={styles.detailLabel}>Adresse</span>} 
               secondary={<span className={styles.detailValue}>{auction.location}</span>} 
             />
           </ListItem>
@@ -195,15 +195,15 @@ const Reports = () => {
         {/* Top Sales */}
         <Paper className={styles.reportCard}>
           <Typography variant="h5" className={styles.reportTitle}>
-            🏆 Top 5 Sales
+            🏆 Top 5 des ventes
           </Typography>
           <TableContainer>
             <Table size="small">
               <TableHead className={tableStyles.tableHeader}>
                 <TableRow>
-                  <TableCell className={tableStyles.tableHeaderCell}>Bundle</TableCell>
-                  <TableCell className={tableStyles.tableHeaderCell}>Buyer</TableCell>
-                  <TableCell className={tableStyles.tableHeaderCell} align="right">Price</TableCell>
+                  <TableCell className={tableStyles.tableHeaderCell}>Lot</TableCell>
+                  <TableCell className={tableStyles.tableHeaderCell}>Acheteur</TableCell>
+                  <TableCell className={tableStyles.tableHeaderCell} align="right">Prix</TableCell>
                   <TableCell className={tableStyles.tableHeaderCell} align="right">Profit</TableCell>
                 </TableRow>
               </TableHead>
@@ -231,16 +231,16 @@ const Reports = () => {
         {/* Category Breakdown */}
         <Paper className={styles.reportCard}>
           <Typography variant="h5" className={styles.reportTitle}>
-            📈 Sales by Category
+            📈 Ventes par catégorie
           </Typography>
           <TableContainer>
             <Table size="small">
               <TableHead className={tableStyles.tableHeader}>
                 <TableRow>
-                  <TableCell className={tableStyles.tableHeaderCell}>Category</TableCell>
-                  <TableCell className={tableStyles.tableHeaderCell} align="right">Items</TableCell>
-                  <TableCell className={tableStyles.tableHeaderCell} align="right">Revenue</TableCell>
-                  <TableCell className={tableStyles.tableHeaderCell} align="right">Avg Price</TableCell>
+                  <TableCell className={tableStyles.tableHeaderCell}>Catégorie</TableCell>
+                  <TableCell className={tableStyles.tableHeaderCell} align="right">Nombre vendus</TableCell>
+                  <TableCell className={tableStyles.tableHeaderCell} align="right">Revenus</TableCell>
+                  <TableCell className={tableStyles.tableHeaderCell} align="right">Prix moyen</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
