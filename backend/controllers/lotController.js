@@ -123,9 +123,9 @@ const deleteLot = async (req, res) => {
  */
 const markLotAsSold = async (req, res) => {
   const { id } = req.params;
-  const { participantId, soldPrice } = req.body;
+  const { clientId, soldPrice } = req.body;
   
-  if (!participantId || !soldPrice) {
+  if (!clientId || !soldPrice) {
     return res.status(400).json({ message: 'Participant ID and sold price are required' });
   }
   
@@ -138,7 +138,7 @@ const markLotAsSold = async (req, res) => {
   // Check if participant exists in this enchere
   const participants = await get_request(
     "SELECT * FROM participation WHERE enchere_id = ? AND client_id = ?",
-    [lots[0].enchere_id, participantId]
+    [lots[0].enchere_id, clientId]
   );
   
   if (participants.length === 0) {
@@ -147,13 +147,13 @@ const markLotAsSold = async (req, res) => {
   
   await put_request(
     "UPDATE lots SET sold_to = ?, sold_price = ? WHERE id = ?",
-    [participantId, soldPrice, id]
+    [clientId, soldPrice, id]
   );
   
   const updatedLot = await get_request("SELECT * FROM lots WHERE id = ?", [id]);
   
   // Get participant name
-  const clients = await get_request("SELECT name FROM client WHERE id = ?", [participantId]);
+  const clients = await get_request("SELECT name FROM client WHERE id = ?", [clientId]);
   if (clients.length > 0) {
     updatedLot[0].sold_to_name = clients[0].name;
   }
