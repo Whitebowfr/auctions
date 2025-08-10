@@ -13,14 +13,8 @@ const {
 } = require('../controllers/lotController');
 const { uploadLotImage } = require('../controllers/imageController');
 
-// GET /api/lots (from an enchere)
-router.get('/enchere/:enchereId', asyncHandler(getLotsForEnchere));
-
 // GET /api/lots/:id
 router.get('/:id', asyncHandler(getLotById));
-
-// POST /api/lots (create for an enchere)
-router.post('/enchere/:enchereId', asyncHandler(createLot));
 
 // PUT /api/lots/:id
 router.put('/:id', asyncHandler(updateLot));
