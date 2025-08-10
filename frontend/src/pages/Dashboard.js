@@ -105,8 +105,6 @@ const Dashboard = () => {
               </Typography>
               <Typography variant="h3" className={styles.statsValue} sx={{ color: '#10b981' }}>
                 {formatCurrency(stats.totalRevenue)}
-                {stats.totalRevenue}
-                {JSON.stringify(auctions)}
               </Typography>
               <Typography variant="body2" className={styles.statsSubtext}>
                 De {stats.totalSales} ventes

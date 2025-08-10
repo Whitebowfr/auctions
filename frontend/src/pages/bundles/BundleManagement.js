@@ -81,7 +81,6 @@ const BundleManagement = () => {
   }
 
   const handleSubmit = async () => {
-    console.log('Submitting bundle data:', formData);
     
     const bundleData = {
       name: formData.name,
@@ -91,10 +90,7 @@ const BundleManagement = () => {
       notes: formData.notes,  // Add notes to bundleData
       imageFile: formData.imageFile
     };
-    
-    console.log('Bundle data to send:', bundleData);
-    console.log('Image file:', formData.imageFile);
-    
+        
     try {
       await addBundle(auction.id, bundleData);
       setFormData({ 

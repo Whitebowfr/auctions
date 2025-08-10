@@ -51,7 +51,6 @@ const AuctionManagement = () => {
 
   // Fix the handleViewAuction function:
   const handleViewAuction = (enchere) => {
-    console.log('Navigating to auction:', enchere); // Add debug log
     navigate(`/auction/${enchere.id}`);
   };
 

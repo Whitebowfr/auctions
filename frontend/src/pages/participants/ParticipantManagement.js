@@ -147,13 +147,10 @@ const ParticipantManagement = () => {
     // Update handleUpdateAndAdd with console logs
     const handleUpdateAndAdd = async () => {
         if (!selectedParticipant || !participantForm.name.trim()) return;
-        
-        console.log('Updating participant with data:', participantForm); // Add log
-        
+                
         try {
             // First update the client using the utility function
             const result = await updateParticipant(selectedParticipant.id, participantForm);
-            console.log('Update response:', result); // Add log
             
             // Then add them to the auction
             addParticipant(auction.id, {
