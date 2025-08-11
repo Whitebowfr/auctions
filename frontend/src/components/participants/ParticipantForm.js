@@ -9,6 +9,7 @@ import {
 import styles from './ParticipantForm.module.css';
 import dialogStyles from '../ModernDialog.module.css';
 import { validatePhoneNumber } from '../../utils/formatters';
+import { useState, useEffect } from 'react';
 
 const ParticipantForm = ({
     participantForm,
@@ -16,8 +17,56 @@ const ParticipantForm = ({
     selectedParticipant,
     isNewParticipant,
     availableParticipants,
-    handleParticipantSelect
+    handleParticipantSelect,
+    auctionParticipants = []
 }) => {
+    const [nextAvailableNumber, setNextAvailableNumber] = useState(1);
+    const [bidderNumberError, setBidderNumberError] = useState('');
+    
+    // Find next available bidder number
+    useEffect(() => {
+        // Get all used bidder numbers
+        const usedNumbers = auctionParticipants.map(p => 
+            parseInt(p.local_number)
+        ).filter(num => !isNaN(num));
+        
+        // Find next available number
+        let nextNumber = 1;
+        while (usedNumbers.includes(nextNumber)) {
+            nextNumber++;
+        }
+        
+        setNextAvailableNumber(nextNumber);
+        
+        // Set default bidder number if none is selected
+        if (!participantForm.local_number) {
+            handleFormChange('local_number', nextNumber.toString());
+        }
+    }, [auctionParticipants, participantForm.local_number, handleFormChange]);
+    
+    // Validate bidder number
+    const validateBidderNumber = (value) => {
+        if (!value) return 'Le numéro d\'enchérisseur est requis';
+        
+        const usedNumbers = auctionParticipants
+            .filter(p => p.id !== selectedParticipant?.id) // Exclude current participant
+            .map(p => p.local_number);
+            
+        if (usedNumbers.includes(value)) {
+            return 'Ce numéro est déjà utilisé';
+        }
+        
+        return '';
+    };
+    
+    // Handle bidder number change
+    const handleBidderNumberChange = (e) => {
+        const value = e.target.value;
+        const error = validateBidderNumber(value);
+        setBidderNumberError(error);
+        handleFormChange('local_number', value);
+    };
+
     return (
         <Box className={styles.formContainer}>
             <Autocomplete
@@ -75,8 +124,25 @@ const ParticipantForm = ({
                 )}
             />
 
-            <Grid container spacing={2}>
-                <Grid sx={{xs: 12}} size={6}>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+                {/* Simple number input with default value */}
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        fullWidth
+                        label="Numéro d'enchérisseur"
+                        type="number"
+                        value={participantForm.local_number || ''}
+                        onChange={handleBidderNumberChange}
+                        className={dialogStyles.modernTextField}
+                        error={!!bidderNumberError}
+                        helperText={bidderNumberError || `Prochain numéro disponible: ${nextAvailableNumber}`}
+                        InputProps={{
+                            inputProps: { min: 1 }
+                        }}
+                    />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth
                         label="Email"
@@ -87,7 +153,7 @@ const ParticipantForm = ({
                         required={isNewParticipant}
                     />
                 </Grid>
-                <Grid sx={{xs: 12, sm: 6}} size={6}>
+                <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth
                         label="Téléphone"
@@ -100,7 +166,7 @@ const ParticipantForm = ({
                         helperText={validatePhoneNumber(participantForm.phone)} 
                     />
                 </Grid>
-                <Grid sx={{xs: 12, sm: 6}} size={12}>
+                <Grid item xs={12}>
                     <TextField
                         fullWidth
                         label="Adresse"
@@ -109,7 +175,7 @@ const ParticipantForm = ({
                         className={dialogStyles.modernTextField}
                     />
                 </Grid>
-                <Grid sx={{xs: 12}} size={12}>
+                <Grid item xs={12}>
                     <TextField
                         fullWidth
                         multiline

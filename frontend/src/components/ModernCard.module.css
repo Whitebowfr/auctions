@@ -72,3 +72,18 @@
   text-transform: none;
   font-size: 0.8rem;
 }
+
+.bundleNumber {
+  color: #3b82f6;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.bundleNumberBadge {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 1 !important;
+  font-weight: bold !important;
+  opacity: 0.9 !important;
+}

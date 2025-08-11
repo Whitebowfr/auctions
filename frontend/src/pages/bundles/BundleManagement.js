@@ -122,6 +122,7 @@ const BundleManagement = () => {
   // Add this function to handle the sell button click
   const handleSellBundle = (bundle) => {
     setSelectedBundle(bundle);
+    setSellFormData({ participantId: null, finalPrice: bundle.starting_price })
     setSellDialog(true);
   };
 
@@ -241,7 +242,7 @@ const BundleManagement = () => {
       {availableBundles.length > 0 && (
         <>
           <Typography variant="h6" className={styles.sectionTitle}>
-            Lots disponibles ({availableBundles.length})
+            Lots disponibles ({availableBundles.length}) - IDs: {availableBundles.map(b => `#${b.id}`).join(', ')}
           </Typography>
           <Box className={styles.bundleGrid}>
             {availableBundles.map((bundle) => (
@@ -262,7 +263,9 @@ const BundleManagement = () => {
       {soldBundles.length > 0 && (
         <>
           <Typography variant="h6" className={styles.soldSectionTitle}>
-            Lots vendus ({soldBundles.length})
+            Lots vendus ({soldBundles.length}) - IDs: {soldBundles.length > 0 && soldBundles.length <= 5 
+    ? soldBundles.map(b => `#${b.id}`).join(', ')
+    : `#${soldBundles[0].id} - #${soldBundles[soldBundles.length-1].id}`}
           </Typography>
           <Box className={styles.bundleGrid}>
             {soldBundles.map((bundle) => (

@@ -14,19 +14,19 @@ export function getAuctionTimeStatus (enchere) {
   const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
   if (daysDiff === 0) {
-    return { label: 'Today', color: 'success', icon: '🔥' };
+    return { label: "Aujourd'hui", color: 'success', icon: '🔥' };
   } else if (daysDiff === 1) {
-    return { label: 'Tomorrow', color: 'warning', icon: '⏰' };
+    return { label: 'Demain', color: 'warning', icon: '⏰' };
   } else if (daysDiff > 0 && daysDiff <= 7) {
-    return { label: `In ${daysDiff} days`, color: 'info', icon: '📆' };
+    return { label: `Dans ${daysDiff} jours`, color: 'info', icon: '📆' };
   } else if (daysDiff > 7) {
-    return { label: `In ${Math.ceil(daysDiff / 7)} weeks`, color: 'primary', icon: '📅' };
+    return { label: `Dans ${Math.ceil(daysDiff / 7)} semaines`, color: 'primary', icon: '📅' };
   } else if (daysDiff === -1) {
-    return { label: 'Yesterday', color: 'error', icon: '⏳' };
+    return { label: 'Hier', color: 'error', icon: '⏳' };
   } else if (daysDiff < -1 && daysDiff >= -7) {
-    return { label: `${Math.abs(daysDiff)} days ago`, color: 'error', icon: '⏳' };
+    return { label: `Il y a ${Math.abs(daysDiff)} jours`, color: 'error', icon: '⏳' };
   } else {
-    return { label: `${Math.ceil(Math.abs(daysDiff) / 7)} weeks ago`, color: 'error', icon: '📋' };
+    return { label: `Il y a ${Math.ceil(Math.abs(daysDiff) / 7)} semaines`, color: 'error', icon: '📋' };
   }
 };
 

@@ -226,8 +226,8 @@ const SalesTracking = () => {
           <Grid container spacing={4} sx={{ mt: 0.5 }}> {/* Increased spacing from 3 to 4 */}
             <Grid sx={{xs: 12}}>
               <Autocomplete
-                options={availableBundles}
-                getOptionLabel={(option) => `${option.name || `Lot #${option.id}`} (Prix de départ: ${formatCurrency(option.starting_price)})`}
+                options={availableBundles.sort((a, b) => a.id - b.id)} // Sort by ID
+                getOptionLabel={(option) => `#${option.id} - ${option.name || 'Sans nom'} (Prix: ${formatCurrency(option.starting_price)})`}
                 value={availableBundles.find(b => b.id === formData.bundleId) || null}
                 onChange={(event, newValue) => {
                   setFormData({
@@ -254,10 +254,19 @@ const SalesTracking = () => {
                     }}
                   />
                 )}
+                renderOption={(props, option) => (
+                  <li {...props}>
+                    <strong style={{ color: '#3b82f6', marginRight: '8px' }}>#{option.id}</strong>
+                    {option.name || 'Sans nom'} 
+                    <span style={{ marginLeft: 'auto', color: '#64748b' }}>
+                      {formatCurrency(option.starting_price)}
+                    </span>
+                  </li>
+                )}
                 slotProps={{
                   listbox: {
                     style: {
-                      fontSize: '1.1rem', // FIXED: was '11rem'
+                      fontSize: '1.1rem',
                       maxHeight: '300px'
                     }
                   },
@@ -282,12 +291,21 @@ const SalesTracking = () => {
             </Grid>
             <Grid sx={{xs: 12}}>
               <Autocomplete
-                options={auction.participants}
+                options={auction.participants.sort((a, b) => a.local_number - b.local_number)}
                 getOptionLabel={(option) => `${option.name} (#${option.local_number})`}
                 value={auction.participants.find(p => p.id === formData.participantId) || null}
                 onChange={(event, newValue) => {
                   setFormData({...formData, participantId: newValue ? newValue.id : null});
                 }}
+                renderOption={(props, option) => (
+                  <li {...props}>
+                    <span style={{ marginRight: '8px', fontWeight: 'bold', color: '#3b82f6' }}>
+                      #{option.local_number}
+                    </span>
+                    {option.name}
+                    
+                  </li>
+                )}
                 renderInput={(params) => (
                   <TextField 
                     {...params} 
@@ -309,7 +327,7 @@ const SalesTracking = () => {
                 slotProps={{
                   listbox: {
                     style: {
-                      fontSize: '1.1rem', // FIXED: was '11rem'
+                      fontSize: '1.1rem',
                       maxHeight: '300px'
                     }
                   },

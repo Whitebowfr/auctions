@@ -1,0 +1,5 @@
+- Rajout des honoraires (11.90%) et la TVA (20%)
+- Fix DB
+- Import fichier excel dans les lots
+- Modifier lots
+- Modifier nom apparaissant sur la facture

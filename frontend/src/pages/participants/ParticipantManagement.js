@@ -247,6 +247,7 @@ const ParticipantManagement = () => {
                             isNewParticipant={isNewParticipant}
                             availableParticipants={availableParticipants}
                             handleParticipantSelect={handleParticipantSelect}
+                            auctionParticipants={auction.participants} // Add this prop
                         />
                     )}
 

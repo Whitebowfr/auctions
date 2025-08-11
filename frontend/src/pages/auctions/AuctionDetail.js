@@ -58,8 +58,8 @@ const AuctionDetail = () => {
       count: auction.bundles.length
     },
     {
-      title: 'Gérer les ventes',
-      description: `${auction.sales.length} ventes enregistrées`,
+      title: 'Gérer les lots vendus',
+      description: `${auction.sales.length} lots vendus`,
       action: () => navigate(`/auction/${auction.id}/sales`),
       color: '#9c27b0',
       count: auction.sales.length

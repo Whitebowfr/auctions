@@ -30,13 +30,13 @@ const SellBundleDialog = ({
       className={dialogStyles.modernDialog}
     >
       <DialogTitle className={dialogStyles.dialogTitle}>
-        Vendre: {selectedBundle?.name || `Lot #${selectedBundle?.id}`}
+        Vendre le lot #{selectedBundle?.id} - {selectedBundle?.name || 'Sans nom'}
       </DialogTitle>
       <DialogContent className={dialogStyles.dialogContent}>
         <Grid container spacing={3} sx={{ mt: 0.5 }}>
-          <Grid sx={{xs: 12}}>
+          <Grid sx={{xs: 12}} size={4}>
             <Autocomplete
-              options={participants || []}
+              options={participants?.sort((a, b) => a.local_number - b.local_number) || []}
               getOptionLabel={(option) => `${option.name} (#${option.local_number})`}
               value={participants?.find(p => p.id === sellFormData.participantId) || null}
               onChange={(event, newValue) => {
@@ -45,6 +45,14 @@ const SellBundleDialog = ({
                   participantId: newValue ? newValue.id : null
                 });
               }}
+              renderOption={(props, option) => (
+                <li {...props}>
+                  <span style={{ marginRight: '8px', fontWeight: 'bold', color: '#3b82f6' }}>
+                    #{option.local_number}
+                  </span>
+                  {option.name} 
+                </li>
+              )}
               renderInput={(params) => (
                 <TextField 
                   {...params} 

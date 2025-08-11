@@ -179,7 +179,22 @@ export const AuctionProvider = ({ children }) => {
       
       // Then add them as a participant to the enchere
       const enchere = encheres.find(e => e.id === enchereId);
-      const localNumber = enchere ? enchere.participants.length + 1 : 1;
+      
+      // Use provided local_number if available, otherwise generate the next available one
+      let localNumber;
+      if (participantData.local_number) {
+        localNumber = participantData.local_number;
+      } else {
+        // Find next available local number
+        const usedNumbers = enchere ? enchere.participants.map(p => 
+          parseInt(p.local_number)
+        ).filter(num => !isNaN(num)) : [];
+        
+        localNumber = 1;
+        while (usedNumbers.includes(localNumber)) {
+          localNumber++;
+        }
+      }
       
       await apiService.addParticipant(enchereId, client.id, localNumber, participantData.notes);
       

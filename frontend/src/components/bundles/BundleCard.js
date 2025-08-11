@@ -14,9 +14,31 @@ const BundleCard = ({ bundle, imageUrl, isSold, onSell, onDelete, onViewSale }) 
       sx={{ objectFit: 'cover' }}
     />
     <CardContent className={cardStyles.cardContent}>
+      {/* Add bundle number badge */}
+      <Chip
+        label={`#${bundle.id}`}
+        size="small"
+        color="primary"
+        className={cardStyles.bundleNumberBadge}
+        sx={{
+          position: 'absolute',
+          top: '8px',
+          right: '8px',
+          fontWeight: 'bold',
+          zIndex: 1
+        }}
+      />
+      
       <Typography variant="h6" className={cardStyles.cardTitle}>
-        {bundle.name || `Lot #${bundle.id}`}
+        {bundle.name ? (
+          <>
+            <span className={cardStyles.bundleNumber}>#{bundle.id}</span> {bundle.name}
+          </>
+        ) : (
+          `Lot #${bundle.id}`
+        )}
       </Typography>
+      
       {bundle.description && (
         <Typography 
           variant="body2" 
@@ -56,7 +78,7 @@ const BundleCard = ({ bundle, imageUrl, isSold, onSell, onDelete, onViewSale }) 
           onClick={() => onSell(bundle)}
           startIcon={<AttachMoney />}
         >
-          Vendre
+          Vendre #{bundle.id}
         </Button>
       )}
       {isSold && (
@@ -67,7 +89,7 @@ const BundleCard = ({ bundle, imageUrl, isSold, onSell, onDelete, onViewSale }) 
           onClick={() => onViewSale(bundle)}
           startIcon={<Visibility />}
         >
-          Voir la vente
+          Voir la vente #{bundle.id}
         </Button>
       )}
       <Button 

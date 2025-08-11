@@ -1,0 +1,67 @@
+Date : 2025-08-10 20:38:51
+Directory : /home/whitebow/Documents/dev/encheres-project/backend
+Total : 29 files,  2667 codes, 187 comments, 241 blanks, all 3095 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| JSON       |          4 |      1,634 |          0 |          2 |      1,636 |
+| JavaScript |         22 |        977 |        186 |        233 |      1,396 |
+| MS SQL     |          1 |         54 |          0 |          6 |         60 |
+| HTML       |          1 |          1 |          0 |          0 |          1 |
+| PostCSS    |          1 |          1 |          1 |          0 |          2 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                         | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                            |         29 |      2,667 |        187 |        241 |      3,095 |
+| . (Files)                                                                                    |          5 |      1,852 |         19 |         40 |      1,911 |
+| controllers                                                                                  |          6 |        532 |        117 |        146 |        795 |
+| middleware                                                                                   |          3 |         38 |          7 |          5 |         50 |
+| public                                                                                       |          8 |        132 |          9 |         12 |        153 |
+| public (Files)                                                                               |          3 |         40 |          0 |          0 |         40 |
+| public/static                                                                                |          5 |         92 |          9 |         12 |        113 |
+| public/static/css                                                                            |          1 |          1 |          1 |          0 |          2 |
+| public/static/js                                                                             |          4 |         91 |          8 |         12 |        111 |
+| routes                                                                                       |          6 |         88 |         26 |         34 |        148 |
+| utils                                                                                        |          1 |         25 |          9 |          4 |         38 |
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                     | language   | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| /home/whitebow/Documents/dev/encheres-project/backend/controllers/analyticsController.js     | JavaScript |         95 |         13 |         19 |        127 |
+| /home/whitebow/Documents/dev/encheres-project/backend/controllers/clientController.js        | JavaScript |         65 |         18 |         20 |        103 |
+| /home/whitebow/Documents/dev/encheres-project/backend/controllers/enchereController.js       | JavaScript |         86 |         20 |         25 |        131 |
+| /home/whitebow/Documents/dev/encheres-project/backend/controllers/imageController.js         | JavaScript |         48 |         14 |         15 |         77 |
+| /home/whitebow/Documents/dev/encheres-project/backend/controllers/lotController.js           | JavaScript |        115 |         30 |         37 |        182 |
+| /home/whitebow/Documents/dev/encheres-project/backend/controllers/participationController.js | JavaScript |        123 |         22 |         30 |        175 |
+| /home/whitebow/Documents/dev/encheres-project/backend/db.js                                  | JavaScript |        158 |         11 |         19 |        188 |
+| /home/whitebow/Documents/dev/encheres-project/backend/middleware/asyncHandler.js             | JavaScript |          4 |          3 |          1 |          8 |
+| /home/whitebow/Documents/dev/encheres-project/backend/middleware/errorHandler.js             | JavaScript |          8 |          3 |          1 |         12 |
+| /home/whitebow/Documents/dev/encheres-project/backend/middleware/upload.js                   | JavaScript |         26 |          1 |          3 |         30 |
+| /home/whitebow/Documents/dev/encheres-project/backend/package-lock.json                      | JSON       |      1,564 |          0 |          1 |      1,565 |
+| /home/whitebow/Documents/dev/encheres-project/backend/package.json                           | JSON       |         31 |          0 |          1 |         32 |
+| /home/whitebow/Documents/dev/encheres-project/backend/public/asset-manifest.json             | JSON       |         19 |          0 |          0 |         19 |
+| /home/whitebow/Documents/dev/encheres-project/backend/public/index.html                      | HTML       |          1 |          0 |          0 |          1 |
+| /home/whitebow/Documents/dev/encheres-project/backend/public/manifest.json                   | JSON       |         20 |          0 |          0 |         20 |
+| /home/whitebow/Documents/dev/encheres-project/backend/public/static/css/main.e8dbc284.css    | PostCSS    |          1 |          1 |          0 |          2 |
+| /home/whitebow/Documents/dev/encheres-project/backend/public/static/js/239.f250c1ac.chunk.js | JavaScript |          1 |          2 |          0 |          3 |
+| /home/whitebow/Documents/dev/encheres-project/backend/public/static/js/732.e931e226.chunk.js | JavaScript |          1 |          1 |          0 |          2 |
+| /home/whitebow/Documents/dev/encheres-project/backend/public/static/js/977.8bc91af0.chunk.js | JavaScript |          1 |          2 |          0 |          3 |
+| /home/whitebow/Documents/dev/encheres-project/backend/public/static/js/main.382ef2ff.js      | JavaScript |         88 |          3 |         12 |        103 |
+| /home/whitebow/Documents/dev/encheres-project/backend/routes/analyticsRoutes.js              | JavaScript |         12 |          3 |          4 |         19 |
+| /home/whitebow/Documents/dev/encheres-project/backend/routes/clientRoutes.js                 | JavaScript |         16 |          5 |          6 |         27 |
+| /home/whitebow/Documents/dev/encheres-project/backend/routes/enchereRoutes.js                | JavaScript |         19 |          7 |         10 |         36 |
+| /home/whitebow/Documents/dev/encheres-project/backend/routes/imageRoutes.js                  | JavaScript |          6 |          1 |          2 |          9 |
+| /home/whitebow/Documents/dev/encheres-project/backend/routes/lotRoutes.js                    | JavaScript |         21 |          6 |          7 |         34 |
+| /home/whitebow/Documents/dev/encheres-project/backend/routes/participationRoutes.js          | JavaScript |         14 |          4 |          5 |         23 |
+| /home/whitebow/Documents/dev/encheres-project/backend/server.js                              | JavaScript |         45 |          8 |         13 |         66 |
+| /home/whitebow/Documents/dev/encheres-project/backend/template.sql                           | MS SQL     |         54 |          0 |          6 |         60 |
+| /home/whitebow/Documents/dev/encheres-project/backend/utils/fileUtils.js                     | JavaScript |         25 |          9 |          4 |         38 |
+| Total                                                                                        |            |      2,667 |        187 |        241 |      3,095 |
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

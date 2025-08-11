@@ -34,7 +34,7 @@ const getParticipants = async (req, res) => {
  */
 const addParticipant = async (req, res) => {
   const { enchereId } = req.params;
-  const { clientId, localNumber, notes } = req.body;
+  const { clientId, localNumber } = req.body;
   
   if (!clientId) {
     return res.status(400).json({ message: 'Client ID is required' });
@@ -64,8 +64,8 @@ const addParticipant = async (req, res) => {
   
   // Create participation record
   await post_request(
-    "INSERT INTO participation (enchere_id, client_id, local_number, notes) VALUES (?, ?, ?, ?)",
-    [enchereId, clientId, localNumber || '', notes || '']
+    "INSERT INTO participation (enchere_id, client_id, local_number) VALUES (?, ?, ?)",
+    [enchereId, clientId, localNumber || '']
   );
   
   // Get the client details
@@ -92,11 +92,11 @@ const addParticipant = async (req, res) => {
 };
 
 /**
- * Update a participant's details (local number, notes)
+ * Update a participant's details (local number)
  */
 const updateParticipant = async (req, res) => {
   const { enchereId, clientId } = req.params;
-  const { localNumber, notes } = req.body;
+  const { localNumber } = req.body;
   
   // Check if participation exists
   const participations = await get_request(
@@ -109,8 +109,8 @@ const updateParticipant = async (req, res) => {
   }
   
   await put_request(
-    "UPDATE participation SET local_number = ?, notes = ? WHERE enchere_id = ? AND client_id = ?",
-    [localNumber || '', notes || '', enchereId, clientId]
+    "UPDATE participation SET local_number = ? WHERE enchere_id = ? AND client_id = ?",
+    [localNumber || '', enchereId, clientId]
   );
   
   // Get updated client and participation details
@@ -129,7 +129,6 @@ const updateParticipant = async (req, res) => {
     phone: client.phone,
     address: client.address,
     local_number: participation.local_number,
-    notes: participation.notes,
     registered_at: participation.registered_at
   };
   
