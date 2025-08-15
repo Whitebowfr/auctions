@@ -1,9 +1,9 @@
 import { Card, CardMedia, CardContent, CardActions, Typography, Chip, Button, Box } from '@mui/material';
-import { AttachMoney, Delete, Visibility } from '@mui/icons-material';
+import { AttachMoney, Delete, Visibility, Edit } from '@mui/icons-material'; // Add Edit
 import cardStyles from '../ModernCard.module.css';
 import { formatCurrency } from '../../utils/formatters';
 
-const BundleCard = ({ bundle, imageUrl, isSold, onSell, onDelete, onViewSale }) => (
+const BundleCard = ({ bundle, imageUrl, isSold, onSell, onDelete, onViewSale, onEdit }) => (
   <Card className={cardStyles.modernCard}>
     <CardMedia
       component="img"
@@ -71,36 +71,46 @@ const BundleCard = ({ bundle, imageUrl, isSold, onSell, onDelete, onViewSale }) 
     </CardContent>
     <CardActions className={cardStyles.cardActions}>
       {!isSold && (
-        <Button 
-          size="small" 
-          color="primary"
-          className={cardStyles.actionButton}
-          onClick={() => onSell(bundle)}
-          startIcon={<AttachMoney />}
-        >
-          Vendre #{bundle.id}
-        </Button>
+        <>
+          <Button 
+            size="small" 
+            color="primary"
+            className={cardStyles.actionButton}
+            onClick={() => onSell(bundle)}
+            startIcon={<AttachMoney />}
+          >
+            Vendre
+          </Button>
+        </>
       )}
       {isSold && (
-        <Button 
-          size="small" 
-          color="info"
-          className={cardStyles.actionButton}
-          onClick={() => onViewSale(bundle)}
-          startIcon={<Visibility />}
-        >
-          Voir la vente #{bundle.id}
-        </Button>
+        <>
+          <Button 
+            size="small" 
+            color="info"
+            className={cardStyles.actionButton}
+            onClick={() => onViewSale(bundle)}
+            startIcon={<Visibility />}
+          >
+            Voir la vente
+          </Button>
+          
+        </>
       )}
+      <Button 
+            size="small" 
+            color="secondary"
+            className={cardStyles.actionButton}
+            onClick={() => onEdit(bundle)}
+            startIcon={<Edit />}
+          />
       <Button 
         size="small" 
         color="error"
         className={cardStyles.actionButton}
         onClick={() => onDelete(bundle.id)}
         startIcon={<Delete />}
-      >
-        Supprimer
-      </Button>
+      />
     </CardActions>
   </Card>
 );

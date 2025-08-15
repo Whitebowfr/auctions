@@ -3,7 +3,7 @@
 - [x] Pouvoir forcer les numéros d'acheteurs
 - [x] Autofill dans bundlemanager du prix de départ
 - [x] Les lots ont des numéros
-- Import fichier excel dans les lots
-- Modifier lots
+- [x] Import fichier excel dans les lots
+- [x] Modifier lots
 - [x] Modifier nom apparaissant sur la facture
 - Download récap des lots avant/après

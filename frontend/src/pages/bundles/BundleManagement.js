@@ -13,23 +13,28 @@ import AddBundleDialog from '../../components/bundles/AddBundleDialog';
 import SellBundleDialog from '../../components/bundles/SellBundleDialog';
 import { getBundleImageUrl } from '../../utils/imageHandlers';
 import { getRootUrl } from '../../utils/utils';
+import { processBulkBundleImport } from '../../utils/bundleUtils';
 
 const BundleManagement = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { auctions, addBundle, addSale } = useAuction(); // Add addSale here
+  const { auctions, addBundle, addSale, updateBundle } = useAuction(); // Add updateBundle
   
   const auction = auctions.find(a => a.id === parseInt(id));
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({
+    id: null,
     name: '',
     description: '',
     starting_price: '',
     category: '',
-    notes: '',         // Add notes field
+    notes: '',
     imageFile: null,
     imagePreview: ''
   });
+
+  // Add isEditMode state
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Add this state for the sell dialog
   const [sellDialog, setSellDialog] = useState(false);
@@ -44,68 +49,129 @@ const BundleManagement = () => {
   // Add missing bundleImages state
   const [bundleImages, setBundleImages] = useState({});
 
+  // Add this state variable
+  const [bulkText, setBulkText] = useState('');
+
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(false);
+
   // Load images for all bundles
   useEffect(() => {
-      const loadBundleImages = async () => {
-    if (auction && auction.bundles && auction.bundles.length > 0) {
-      try {
-        // Create a map to store images by bundleId
-        const imagesMap = {};
-        
-        // Load images for each bundle
-        await Promise.all(auction.bundles.map(async (bundle) => {
-          try {
-            const response = await fetch(getRootUrl() + `/api/lots/${bundle.id}/images`);
-            if (response.ok) {
-              const images = await response.json();
-              imagesMap[bundle.id] = images;
+    const loadBundleImages = async () => {
+      if (auction && auction.bundles && auction.bundles.length > 0) {
+        try {
+          // Create a map to store images by bundleId
+          const imagesMap = {};
+          
+          // Load images for each bundle
+          await Promise.all(auction.bundles.map(async (bundle) => {
+            try {
+              const response = await fetch(getRootUrl() + `/api/lots/${bundle.id}/images`);
+              if (response.ok) {
+                const images = await response.json();
+                imagesMap[bundle.id] = images;
+              }
+            } catch (err) {
+              console.error(`Failed to load images for bundle ${bundle.id}:`, err);
+              imagesMap[bundle.id] = [];
             }
-          } catch (err) {
-            console.error(`Failed to load images for bundle ${bundle.id}:`, err);
-            imagesMap[bundle.id] = [];
-          }
-        }));
-        
-        setBundleImages(imagesMap);
-      } catch (error) {
-        console.error('Failed to load bundle images:', error);
+          }));
+          
+          setBundleImages(imagesMap);
+        } catch (error) {
+          console.error('Failed to load bundle images:', error);
+        }
       }
-    }
-  };
+    };
 
-  loadBundleImages();
-}, [auction]);
+    loadBundleImages();
+  }, [auction]);
 
   if (!auction) {
     return <Alert severity="error">Vente non trouvée.</Alert>;
   }
 
-  const handleSubmit = async () => {
-    
-    const bundleData = {
-      name: formData.name,
-      description: formData.description,
-      startingPrice: parseFloat(formData.starting_price) || 0,
-      category: formData.category,
-      notes: formData.notes,  // Add notes to bundleData
-      imageFile: formData.imageFile
-    };
-        
-    try {
-      await addBundle(auction.id, bundleData);
-      setFormData({ 
-        name: '', 
-        description: '', 
-        starting_price: '', 
-        category: '', 
-        notes: '',      // Reset notes field
-        imageFile: null,
-        imagePreview: ''
-      });
-      setOpenDialog(false);
-    } catch (error) {
-      console.error('Failed to add bundle:', error);
+  // Handle Edit Bundle
+  const handleEditBundle = (bundle) => {
+    // Prepare image preview if available
+    let imagePreview = '';
+    if (bundleImages[bundle.id] && bundleImages[bundle.id].length > 0) {
+      imagePreview = getRootUrl() + `/uploads/${bundleImages[bundle.id][0].file_path}`;
     }
+
+    // Set form data with bundle values
+    setFormData({
+      id: bundle.id,
+      name: bundle.name || '',
+      description: bundle.description || '',
+      starting_price: bundle.starting_price || '',
+      category: bundle.category || '',
+      notes: bundle.notes || '',
+      imageFile: null,
+      imagePreview: imagePreview
+    });
+    
+    // Set edit mode and open dialog
+    setIsEditMode(true);
+    setOpenDialog(true);
+  };
+
+  const handleSubmit = async () => {
+    // Different handling for add vs edit
+    if (isEditMode) {
+      // Update existing bundle
+      const bundleData = {
+        id: formData.id,
+        name: formData.name,
+        description: formData.description,
+        startingPrice: parseFloat(formData.starting_price) || 0,
+        category: formData.category,
+        notes: formData.notes,
+        imageFile: formData.imageFile
+      };
+      
+      try {
+        await updateBundle(bundleData);
+        
+        // Clean up form and close dialog
+        resetForm();
+        setOpenDialog(false);
+        setIsEditMode(false);
+      } catch (error) {
+        console.error('Failed to update bundle:', error);
+      }
+    } else {
+      // Add new bundle
+      const bundleData = {
+        name: formData.name,
+        description: formData.description,
+        startingPrice: parseFloat(formData.starting_price) || 0,
+        category: formData.category,
+        notes: formData.notes,
+        imageFile: formData.imageFile
+      };
+      
+      try {
+        await addBundle(auction.id, bundleData);
+        resetForm();
+        setOpenDialog(false);
+      } catch (error) {
+        console.error('Failed to add bundle:', error);
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      id: null,
+      name: '',
+      description: '',
+      starting_price: '',
+      category: '',
+      notes: '',
+      imageFile: null,
+      imagePreview: ''
+    });
   };
 
   const handleImageUpload = (event) => {
@@ -122,7 +188,7 @@ const BundleManagement = () => {
   // Add this function to handle the sell button click
   const handleSellBundle = (bundle) => {
     setSelectedBundle(bundle);
-    setSellFormData({ participantId: null, finalPrice: bundle.starting_price })
+    setSellFormData({ participantId: null, finalPrice: bundle.starting_price });
     setSellDialog(true);
   };
 
@@ -154,6 +220,35 @@ const BundleManagement = () => {
       setSellDialog(false);
     } catch (error) {
       console.error('Failed to record sale:', error);
+    }
+  };
+
+  // Add this function after handleSubmit
+  const handleBulkImport = async () => {
+    if (!bulkText.trim()) return;
+    
+    try {
+      const bundles = processBulkBundleImport(bulkText);
+      console.log('Importing bundles:', bundles);
+      
+      // Show loading indicator or message
+      setIsLoading(true);
+      
+      // Process bundles sequentially to avoid race conditions
+      for (const bundle of bundles) {
+        await addBundle(auction.id, bundle);
+      }
+      
+      // Reset form and close dialog
+      setBulkText('');
+      setOpenDialog(false);
+      setIsLoading(false);
+      
+      // Refresh the page to show new bundles
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to import bundles:', error);
+      setIsLoading(false);
     }
   };
 
@@ -225,7 +320,11 @@ const BundleManagement = () => {
         </Typography>
         <Button 
           variant="contained" 
-          onClick={() => setOpenDialog(true)}
+          onClick={() => {
+            resetForm();
+            setIsEditMode(false);
+            setOpenDialog(true);
+          }}
           className={styles.addButton}
         >
           ➕ Ajouter un lot
@@ -237,6 +336,15 @@ const BundleManagement = () => {
           Nombre de lots: {auction.bundles.length} | Disponibles: {availableBundles.length}
         </Typography>
       </Alert>
+
+      {/* Show loading state */}
+      {isLoading && (
+        <Alert severity="info" className={styles.infoAlert}>
+          <Typography className={styles.infoText}>
+            Importation des lots en cours...
+          </Typography>
+        </Alert>
+      )}
 
       {/* Available Bundles Section */}
       {availableBundles.length > 0 && (
@@ -252,6 +360,7 @@ const BundleManagement = () => {
                 imageUrl={getBundleImageUrl(bundle, bundleImages)}
                 isSold={false}
                 onSell={handleSellBundle}
+                onEdit={handleEditBundle}
                 onDelete={handleDeleteBundle}
               />
             ))}
@@ -264,8 +373,8 @@ const BundleManagement = () => {
         <>
           <Typography variant="h6" className={styles.soldSectionTitle}>
             Lots vendus ({soldBundles.length}) - IDs: {soldBundles.length > 0 && soldBundles.length <= 5 
-    ? soldBundles.map(b => `#${b.id}`).join(', ')
-    : `#${soldBundles[0].id} - #${soldBundles[soldBundles.length-1].id}`}
+              ? soldBundles.map(b => `#${b.id}`).join(', ')
+              : `#${soldBundles[0].id} - #${soldBundles[soldBundles.length-1].id}`}
           </Typography>
           <Box className={styles.bundleGrid}>
             {soldBundles.map((bundle) => (
@@ -275,6 +384,7 @@ const BundleManagement = () => {
                 imageUrl={getBundleImageUrl(bundle, bundleImages)}
                 isSold={true}
                 onViewSale={handleViewSale}
+                onEdit={handleEditBundle}
                 onDelete={handleDeleteBundle}
               />
             ))}
@@ -282,15 +392,23 @@ const BundleManagement = () => {
         </>
       )}
 
-      {/* Add Bundle Dialog */}
+      {/* Add/Edit Bundle Dialog */}
       <AddBundleDialog
         open={openDialog}
-        onClose={() => setOpenDialog(false)}
+        onClose={() => {
+          setOpenDialog(false);
+          setIsEditMode(false);
+          resetForm();
+        }}
         formData={formData}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
+        handleBulkImport={handleBulkImport}
         handleImageUpload={handleImageUpload}
         existingCategories={existingCategories}
+        bulkText={bulkText}
+        setBulkText={setBulkText}
+        isEditMode={isEditMode}
       />
 
       {/* Sell Bundle Dialog */}

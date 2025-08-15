@@ -33,3 +33,25 @@
   border-radius: 8px;
   border: 1px solid #e2e8f0;
 }
+
+.helpText {
+  color: #64748b;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.sampleText {
+  background-color: #f8fafc;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.bulkTextArea {
+  font-family: monospace !important;
+  font-size: 0.9rem !important;
+}

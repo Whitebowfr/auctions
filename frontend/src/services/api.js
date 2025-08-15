@@ -109,7 +109,7 @@ class ApiService {
         description: bundle.description,
         category: bundle.category,
         starting_price: bundle.startingPrice,
-        notes: bundle.notes  // Add notes
+        notes: bundle.notes
       },
     });
   }

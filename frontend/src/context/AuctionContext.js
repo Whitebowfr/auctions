@@ -257,6 +257,42 @@ export const AuctionProvider = ({ children }) => {
     }
   };
 
+  const updateBundle = async (bundleData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Update the lot
+      await apiService.updateBundle(bundleData.id, {
+        name: bundleData.name,
+        description: bundleData.description,
+        category: bundleData.category,
+        startingPrice: bundleData.startingPrice,
+        notes: bundleData.notes
+      });
+      
+      // If there's an image file, upload it
+      if (bundleData.imageFile) {
+        try {
+          await apiService.uploadImage(bundleData.id, {
+            file: bundleData.imageFile,
+            name: bundleData.name || 'Bundle Image',
+            description: bundleData.description || ''
+          });
+        } catch (imageError) {
+          console.error('Failed to upload image:', imageError);
+          // Continue anyway - the bundle was updated successfully
+        }
+      }
+      
+      await loadEncheres(); // Reload all encheres
+      return true;
+    } catch (error) {
+      handleError(error, 'Updating bundle');
+      throw error;
+    }
+  };
+
   // Sales operations
   const addSale = async (enchereId, saleData) => {
     try {
@@ -330,6 +366,7 @@ export const AuctionProvider = ({ children }) => {
       addOrUpdateClient,
       addParticipant,
       addBundle,
+      updateBundle,
       addSale,
       getEnchereStats,
       getClientPurchases,
