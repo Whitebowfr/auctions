@@ -107,7 +107,7 @@ const ClientDetail = () => {
   };
   
   const handleViewAuction = (auctionId) => {
-    navigate(`/auction/${auctionId}`);
+    navigate(`/auction/${auctionId}/participant/${id}`);
   };
 
   const handleOpenEditDialog = () => {

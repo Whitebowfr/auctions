@@ -36,10 +36,10 @@ export const generateParticipantBill = (participant, purchases, auction, customi
 
   doc.setFontSize(11);
   doc.setTextColor('#000000');
-  doc.text(`Nom: ${options.participant}`, 130, 50);
-  doc.text(`Email: ${participant.email || 'Non spécifié'}`, 130, 57);
-  doc.text(`Téléphone: ${participant.phone || 'Non spécifié'}`, 130, 64);
-  doc.text(`Numéro d'enchérisseur: #${participant.local_number}`, 130, 71);
+  doc.text(`Nom: ${options.participant}`, 130, 35);
+  doc.text(`Email: ${participant.email || 'Non spécifié'}`, 130, 42);
+  doc.text(`Téléphone: ${participant.phone || 'Non spécifié'}`, 130, 49);
+  doc.text(`Numéro d'enchérisseur: #${participant.local_number}`, 130, 56);
 
   doc.setTextColor('#666666');
   doc.text(`VENTE DU ${formatDate(auction.date)} à ${auction.address || 'Non spécifié'}`, 14, 77);
@@ -59,11 +59,10 @@ export const generateParticipantBill = (participant, purchases, auction, customi
       `${formatCurrency(purchase.finalPrice)}`,
     ])
 
-  tableBody.push([{colSpan: 2, content: "Dont TVA 20.00% :", styles: { halign: 'right' },}, `${formatCurrency(totalAmount*0.2)}`])
   // Add purchases table
   doc.autoTable({
-    startY: 105,
-    head: [['Lot', 'Description', 'Prix']],
+    startY: 110,
+    head: [['Lot', 'Description', 'Prix (TTC)']],
     body: tableBody,
     headStyles: {
       fillColor: '#2563eb',
@@ -77,13 +76,20 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   });
   doc.setFontSize(12);
   doc.text(`Sous-total 1: ${formatCurrency(totalAmount)}` , 130, doc.lastAutoTable.finalY + 5);
+  doc.setFontSize(10);
+  doc.setTextColor('#666666');
+  doc.text(`(Dont TVA 20%: ${formatCurrency(totalAmount*0.2)})` , 130, doc.lastAutoTable.finalY + 10);
   
+  doc.setFontSize(12);
+  doc.setTextColor('#000000')
   const frais = totalAmount*0.118
   const tva_frais = frais * 0.2
   doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 10,
+    startY: doc.lastAutoTable.finalY + 20,
+    tableWidth: "wrap",
     head: [['Frais de vente (11.80% HT)', `${formatCurrency(frais)}`]],
-    body: [["TVA (20%)", `${formatCurrency(tva_frais)}`]]
+    body: [["TVA (20%)", `${formatCurrency(tva_frais)}`]],
+    styles: { cellPadding: 1 }
   })
 
   doc.setFontSize(12);
@@ -94,10 +100,10 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   
   // Add total
   const finalY = doc.lastAutoTable.finalY + 15;
-  doc.setFontSize(12);
+  doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('Total:', 130, finalY);
-  doc.setFontSize(14);
+  doc.setFontSize(16);
   doc.text(`${formatCurrency(finalAmount)}`, 150, finalY);
 
   // Add payment status
