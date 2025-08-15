@@ -86,7 +86,7 @@ const createEnchere = async (req, res) => {
  */
 const updateEnchere = async (req, res) => {
   const { id } = req.params;
-  const { name, date, address, notes } = req.body;
+  const { name, date, address, metadata } = req.body;
   
   if (!name || !date) {
     return res.status(400).json({ message: 'Name and date are required' });
@@ -98,10 +98,20 @@ const updateEnchere = async (req, res) => {
     return res.status(404).json({ message: 'Enchere not found' });
   }
   
-  await put_request(
-    "UPDATE encheres SET name = ?, date = ?, address = ?, notes = ? WHERE id = ?",
-    [name, date, address || '', notes || '', id]
-  );
+  // Update the enchere with optional metadata
+  const updateFields = [name, date.split("T")[0], address || ''];
+  let query = "UPDATE encheres SET name = ?, date = ?, address = ?";
+  
+  // If metadata is provided, add it to the query
+  if (metadata) {
+    query += ", metadata = ?";
+    updateFields.push(metadata);
+  }
+  
+  query += " WHERE id = ?";
+  updateFields.push(id);
+  
+  await put_request(query, updateFields);
   
   const updatedEnchere = await get_request("SELECT * FROM encheres WHERE id = ?", [id]);
   res.json(updatedEnchere[0]);

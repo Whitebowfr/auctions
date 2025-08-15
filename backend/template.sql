@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS encheres (
     name NVARCHAR(40),
     date DATE,
     address MEDIUMTEXT DEFAULT '',
+    metadata SMALLTEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
