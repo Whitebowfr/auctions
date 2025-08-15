@@ -18,56 +18,55 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   // Default values merged with customizations
   const options = {
     title: customizations.title || `Facture - ${auction.name}`,
-    color: customizations.color || '#2563eb',
     logo: customizations.logo || null,
     includeNotes: customizations.includeNotes !== undefined ? customizations.includeNotes : true,
     footer: customizations.footer || `${auction.name} - Édité le ${new Date().toLocaleDateString("fr-FR")}`,
-    paid: customizations.paid || false
+    paid: customizations.paid || false,
+    participant: customizations.participantName || participant.name
   };
 
   // Add logo if provided
   if (options.logo) {
     doc.addImage(options.logo, 'JPEG', 14, 10, 50, 20);
-  } else {
-    // Default header styling
-    doc.setFontSize(22);
-    doc.setTextColor(options.color);
-    doc.text('Vente aux enchères', 14, 20);
   }
 
-  // Add bill title
-  doc.setFontSize(18);
-  doc.setTextColor('#000000');
-  doc.text(options.title, 14, 35);
+  doc.setFontSize(11)
+  doc.text('S.C.P R. GRANIER - L. DAVID \n Commissaires de Justice associés \n 66, rue de la République \n BP 52 \n 47202 MARMANDE Cedex \n\n Tél : 05 53 64 12 59 \n Fax : 05 53 64 07 15 \n etude@huisser47.fr \n CDC 40031 000011 43474Z 67', 45, 12, { align: "center"})
 
-  // Add auction information
+
   doc.setFontSize(11);
+  doc.setTextColor('#000000');
+  doc.text(`Nom: ${options.participant}`, 130, 50);
+  doc.text(`Email: ${participant.email || 'Non spécifié'}`, 130, 57);
+  doc.text(`Téléphone: ${participant.phone || 'Non spécifié'}`, 130, 64);
+  doc.text(`Numéro d'enchérisseur: #${participant.local_number}`, 130, 71);
+
   doc.setTextColor('#666666');
-  doc.text(`Date: ${formatDate(auction.date)}`, 14, 45);
-  doc.text(`Lieu: ${auction.address || 'Non spécifié'}`, 14, 52);
+  doc.text(`VENTE DU ${formatDate(auction.date)} à ${auction.address || 'Non spécifié'}`, 14, 77);
 
-  // Add participant information
-  doc.setFontSize(12);
+  doc.setTextColor('#666666');
+  doc.text(options.title, 14, 71);
+
   doc.setTextColor('#000000');
-  doc.text('Informations client', 14, 65);
-  
-  doc.setFontSize(11);
-  doc.text(`Nom: ${participant.name}`, 14, 72);
-  doc.text(`Email: ${participant.email || 'Non spécifié'}`, 14, 79);
-  doc.text(`Téléphone: ${participant.phone || 'Non spécifié'}`, 14, 86);
-  doc.text(`Numéro d'enchérisseur: #${participant.local_number}`, 14, 93);
 
+  doc.text('\t\t Madame, monsieur, \n\n \t\t Je vous prie de trouver ci-dessous, le détail des achats que vous avez effectués lors de la vente \n référencée en marge, à savoir :', 10, 90)
+
+  const totalAmount = purchases.reduce((sum, purchase) => sum + parseFloat(purchase.finalPrice || 0), 0);
+
+  let tableBody = purchases.map(purchase => [
+      purchase.bundle?.name || `Lot #${purchase.bundleId}`,
+      purchase.bundle?.description?.substring(0, 30) + (purchase.bundle?.description?.length > 30 ? '...' : '') || 'Pas de description',
+      `${formatCurrency(purchase.finalPrice)}`,
+    ])
+
+  tableBody.push([{colSpan: 2, content: "Dont TVA 20.00% :", styles: { halign: 'right' },}, `${formatCurrency(totalAmount*0.2)}`])
   // Add purchases table
   doc.autoTable({
     startY: 105,
     head: [['Lot', 'Description', 'Prix']],
-    body: purchases.map(purchase => [
-      purchase.bundle?.name || `Lot #${purchase.bundleId}`,
-      purchase.bundle?.description?.substring(0, 30) + (purchase.bundle?.description?.length > 30 ? '...' : '') || 'Pas de description',
-      `${formatCurrency(purchase.finalPrice)}`,
-    ]),
+    body: tableBody,
     headStyles: {
-      fillColor: options.color,
+      fillColor: '#2563eb',
       textColor: '#FFFFFF',
       fontStyle: 'bold'
     },
@@ -76,17 +75,30 @@ export const generateParticipantBill = (participant, purchases, auction, customi
     },
     margin: { top: 105 }
   });
+  doc.setFontSize(12);
+  doc.text(`Sous-total 1: ${formatCurrency(totalAmount)}` , 130, doc.lastAutoTable.finalY + 5);
+  
+  const frais = totalAmount*0.118
+  const tva_frais = frais * 0.2
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 10,
+    head: [['Frais de vente (11.80% HT)', `${formatCurrency(frais)}`]],
+    body: [["TVA (20%)", `${formatCurrency(tva_frais)}`]]
+  })
 
+  doc.setFontSize(12);
+  doc.text(`Sous-total 2: ${formatCurrency(frais + tva_frais)}` , 130, doc.lastAutoTable.finalY + 5);
+  
+  const finalAmount = totalAmount + frais + tva_frais
   // Calculate total
-  const totalAmount = purchases.reduce((sum, purchase) => sum + parseFloat(purchase.finalPrice || 0), 0);
   
   // Add total
-  const finalY = doc.lastAutoTable.finalY + 10;
+  const finalY = doc.lastAutoTable.finalY + 15;
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('Total:', 130, finalY);
   doc.setFontSize(14);
-  doc.text(`${formatCurrency(totalAmount)}`, 150, finalY);
+  doc.text(`${formatCurrency(finalAmount)}`, 150, finalY);
 
   // Add payment status
   if (options.paid) {

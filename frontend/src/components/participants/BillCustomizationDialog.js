@@ -23,10 +23,10 @@ const BillCustomizationDialog = ({
 }) => {
   const [customizations, setCustomizations] = useState({
     title: `Facture - ${participant?.name || 'Client'}`,
-    color: '#2563eb',
     includeNotes: true,
     paid: false,
-    footer: `${auction?.name || 'Vente aux enchères'} - Le ${new Date().toLocaleDateString("fr-FR")}`
+    footer: `${auction?.name || 'Vente aux enchères'} - Le ${new Date().toLocaleDateString("fr-FR")}`,
+    name: `${participant?.name}`
   });
 
   const [logoFile, setLogoFile] = useState(null);
@@ -45,13 +45,6 @@ const BillCustomizationDialog = ({
       setLogoFile(file);
       setLogoPreview(URL.createObjectURL(file));
     }
-  };
-
-  const handleColorChange = (e) => {
-    setCustomizations({
-      ...customizations,
-      color: e.target.value
-    });
   };
 
   const handleGenerate = () => {
@@ -97,11 +90,10 @@ const BillCustomizationDialog = ({
           <Grid sx={{xs: 12, sm: 6}}>
             <TextField
               fullWidth
-              label="Couleur principale (hex)"
-              value={customizations.color}
-              onChange={handleColorChange}
+              label="Nom affiché"
+              value={customizations.name}
+              onChange={(e) => handleChange('name', e.target.value)}
               className={styles.modernTextField}
-              placeholder="#2563eb"
             />
           </Grid>
           
