@@ -82,12 +82,12 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   
   doc.setFontSize(12);
   doc.setTextColor('#000000')
-  const frais = totalAmount*0.118
+  const frais = totalAmount*auction.managementFeeRate/100
   const tva_frais = frais * 0.2
   doc.autoTable({
     startY: doc.lastAutoTable.finalY + 20,
     tableWidth: "wrap",
-    head: [['Frais de vente (11.80% HT)', `${formatCurrency(frais)}`]],
+    head: [[`Honoraires (${auction.managementFeeRate}% HT)`, `${formatCurrency(frais)}`]],
     body: [["TVA (20%)", `${formatCurrency(tva_frais)}`]],
     styles: { cellPadding: 1 }
   })

@@ -60,6 +60,7 @@ const ParticipantDetail = () => {
   
   // Calculate totals using the correct field names
   const totalSpent = participantSales.reduce((sum, sale) => sum + (parseFloat(sale.finalPrice) || 0), 0);
+  const totalOwed = totalSpent + totalSpent * auction.managementFeeRate / 100 * 1.2
   const totalItems = participantSales.length;
   
   // Get bundle details for each purchase
@@ -320,7 +321,10 @@ const ParticipantDetail = () => {
               Montant total dû :
             </Typography>
             <Typography variant="h3" className={styles.totalOwedAmount}>
-              {formatCurrency(totalSpent)}
+              {formatCurrency(totalOwed)}
+            </Typography>
+            <Typography className={styles.summaryLabel}>
+              (Dont Honoraires : `${formatCurrency(totalSpent*auction.managementFeeRate/100*1.2)} TTC`)
             </Typography>
           </Paper>
         </>
