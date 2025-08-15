@@ -70,10 +70,15 @@ class ApiService {
     return this.request(`/encheres/${id}`);
   }
 
-  async updateAuction(id, auction) {
+  async updateAuction(id, data) {
     return this.request(`/encheres/${id}`, {
       method: 'PUT',
-      body: auction,
+      body: {
+        name: data.name,
+        date: data.date,
+        address: data.address,
+        metadata: data.metadata
+      },
     });
   }
 

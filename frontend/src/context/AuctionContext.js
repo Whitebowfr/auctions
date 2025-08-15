@@ -41,6 +41,19 @@ export const AuctionProvider = ({ children }) => {
       const encheresWithDetails = await Promise.all(
         encheresList.map(async (enchere) => {
           try {
+            // Parse metadata if it exists
+            let managementFeeRate = 11.8; // Default value
+            if (enchere.metadata) {
+              try {
+                const metadata = JSON.parse(enchere.metadata);
+                if (metadata.managementFeeRate) {
+                  managementFeeRate = parseFloat(metadata.managementFeeRate);
+                }
+              } catch (e) {
+                console.error('Failed to parse metadata:', e);
+              }
+            }
+            
             const [participants, lots] = await Promise.all([
               apiService.getParticipants(enchere.id),
               apiService.getBundles(enchere.id)
@@ -48,6 +61,7 @@ export const AuctionProvider = ({ children }) => {
             
             return {
               ...enchere,
+              managementFeeRate,
               participants,
               bundles: lots, // Map lots to bundles for frontend compatibility
               sales: lots.filter(lot => lot.sold_to !== null).map(lot => ({
@@ -106,11 +120,22 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const updatedEnchere = await apiService.updateAuction(id, {
+      
+      // Create a data object with just the fields API expects
+      const updateData = {
         name: updates.name,
         date: updates.date,
-        address: updates.location
-      });
+        address: updates.location || updates.address
+      };
+      
+      // If we have a management fee rate, add it to metadata field
+      if (updates.managementFeeRate !== undefined) {
+        updateData.metadata = JSON.stringify({
+          managementFeeRate: parseFloat(updates.managementFeeRate)
+        });
+      }
+      
+      const updatedEnchere = await apiService.updateAuction(id, updateData);
       
       await loadEncheres(); // Reload all encheres
       return updatedEnchere;
@@ -344,8 +369,6 @@ export const AuctionProvider = ({ children }) => {
   // Compatibility aliases for existing frontend code
   const auctions = encheres;
   const globalParticipants = clients;
-  const addAuction = addEnchere;
-  const updateAuction = updateEnchere;
   const addOrUpdateGlobalParticipant = addOrUpdateClient;
 
   return (
@@ -377,8 +400,6 @@ export const AuctionProvider = ({ children }) => {
       currentAuction: currentEnchere,
       setCurrentAuction: setCurrentEnchere,
       globalParticipants,
-      addAuction,
-      updateAuction,
       addOrUpdateGlobalParticipant,
       deleteParticipant
     }}>
