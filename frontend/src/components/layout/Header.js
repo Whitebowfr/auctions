@@ -8,7 +8,6 @@ const Header = () => {
   const location = useLocation();
 
   const navItems = [
-    { label: 'Dashboard', path: '/' },
     { label: 'Enchères', path: '/auctions' },
     { label: 'Clients', path: '/clients'}
   ];
@@ -21,7 +20,7 @@ const Header = () => {
   return (
     <AppBar position="static" className={styles.header} elevation={0}>
       <Toolbar className={styles.toolbar}>
-        <Box className={styles.logo} onClick={() => navigate('/')}>
+        <Box className={styles.logo} onClick={() => navigate('/auctions')}>
           <Box className={styles.logoIcon}>
             <GavelIcon/>
           </Box>

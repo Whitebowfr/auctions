@@ -3,15 +3,12 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-const { testConnection } = require('./db');
 const { errorHandler } = require('./middleware/errorHandler');
-const { setupUploadDir } = require('./utils/fileUtils');
 
 // Import routes
 const clientRoutes = require('./routes/clientRoutes');
 const enchereRoutes = require('./routes/enchereRoutes');
 const lotRoutes = require('./routes/lotRoutes');
-const imageRoutes = require('./routes/imageRoutes');
 const participationRoutes = require('./routes/participationRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 
@@ -24,15 +21,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Setup uploads directory
-const uploadsDir = setupUploadDir();
-app.use('/uploads', express.static(uploadsDir));
+// Note: image/file upload features are disabled in the lightweight JSON backend
 
 // API Routes
 app.use('/api/clients', clientRoutes);
 app.use('/api/encheres', enchereRoutes);
 app.use('/api/lots', lotRoutes);
-app.use('/api/images', imageRoutes);
 app.use('/api', participationRoutes); // Contains nested routes
 app.use('/api', analyticsRoutes);     // Contains nested routes
 
@@ -50,11 +44,8 @@ app.get('*', function (req, res) {
 // Initialize and start server
 const startServer = async () => {
   try {
-    await testConnection();
-    
     app.listen(PORT, () => {
       console.log(`🚀 API is running on ${URL}, port ${PORT}`);
-      console.log(`📁 File uploads available at ${URL}/uploads/`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

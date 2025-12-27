@@ -18,7 +18,8 @@ const ParticipantForm = ({
     isNewParticipant,
     availableParticipants,
     handleParticipantSelect,
-    auctionParticipants = []
+    auctionParticipants = [],
+    onEnter
 }) => {
     const [nextAvailableNumber, setNextAvailableNumber] = useState(1);
     const [bidderNumberError, setBidderNumberError] = useState('');
@@ -120,6 +121,11 @@ const ParticipantForm = ({
                         {...params}
                         label="Chercher ou ajouter un participant"
                         className={dialogStyles.modernTextField}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && typeof onEnter === 'function') {
+                                onEnter(e);
+                            }
+                        }}
                     />
                 )}
             />

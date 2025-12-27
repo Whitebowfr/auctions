@@ -1,10 +1,10 @@
-const { get_request, post_request, put_request, delete_request } = require('../db');
+const db = require('../db');
 
 /**
  * Get all encheres (auctions)
  */
 const getAllEncheres = async (req, res) => {
-  const encheres = await get_request("SELECT * FROM encheres ORDER BY date DESC");
+  const encheres = db.getAll('encheres').sort((a,b) => new Date(b.date) - new Date(a.date));
   res.json(encheres);
 };
 
@@ -15,50 +15,45 @@ const getEnchereById = async (req, res) => {
   const { id } = req.params;
   
   // Get basic enchere data
-  const encheres = await get_request("SELECT * FROM encheres WHERE id = ?", [id]);
-  
-  if (encheres.length === 0) {
-    return res.status(404).json({ message: 'Enchere not found' });
-  }
-  
-  const enchere = encheres[0];
-  
-  // Get bundles (lots)
-  enchere.bundles = await get_request("SELECT * FROM lots WHERE enchere_id = ? ORDER BY id", [id]);
-  
-  // Get participants
-  const participations = await get_request(`
-    SELECT p.*, c.name, c.email, c.phone, c.address
-    FROM participation p
-    JOIN client c ON p.client_id = c.id
-    WHERE p.enchere_id = ?
-    ORDER BY p.registered_at DESC
-  `, [id]);
-  
-  enchere.participants = participations.map(p => ({
-    id: p.client_id,
-    participation_id: p.id,
-    name: p.name,
-    email: p.email,
-    phone: p.phone,
-    address: p.address,
-    local_number: p.local_number,
-    registered_at: p.registered_at
-  }));
-  
-  // Get sales
-  const sales = await get_request(`
-    SELECT l.id as bundleId, l.name as bundleName, l.starting_price, l.sold_price as finalPrice,
-           p.client_id as participantId, c.name as participantName, p.local_number as bidderNumber
-    FROM lots l
-    JOIN participation p ON l.sold_to = p.client_id AND l.enchere_id = p.enchere_id
-    JOIN client c ON p.client_id = c.id
-    WHERE l.enchere_id = ? AND l.sold_to IS NOT NULL
-    ORDER BY l.id
-  `, [id]);
-  
-  enchere.sales = sales;
-  
+  const enchere = db.getById('encheres', id);
+  if (!enchere) return res.status(404).json({ message: 'Enchere not found' });
+
+  // Bundles
+  enchere.bundles = db.getAll('lots').filter(l => l.enchere_id === Number(id)).sort((a,b) => a.id - b.id);
+
+  // Participants (join participation + clients)
+  const participations = db.getAll('participation').filter(p => p.enchere_id === Number(id));
+  enchere.participants = participations.map(p => {
+    const client = db.getById('clients', p.client_id) || {};
+    return {
+      id: client.id,
+      participation_id: p.id,
+      name: client.name,
+      email: client.email,
+      phone: client.phone,
+      address: client.address,
+      local_number: p.local_number,
+      registered_at: p.registered_at
+    };
+  });
+
+  // Sales: lots with sold_to
+  enchere.sales = db.getAll('lots')
+    .filter(l => l.enchere_id === Number(id) && l.sold_to)
+    .map(l => {
+      const participation = db.getAll('participation').find(p => p.enchere_id === l.enchere_id && p.client_id === l.sold_to) || {};
+      const client = db.getById('clients', l.sold_to) || {};
+      return {
+        bundleId: l.id,
+        bundleName: l.name,
+        starting_price: l.starting_price,
+        finalPrice: l.sold_price,
+        participantId: client.id,
+        participantName: client.name,
+        bidderNumber: participation.local_number || ''
+      };
+    });
+
   res.json(enchere);
 };
 
@@ -66,19 +61,11 @@ const getEnchereById = async (req, res) => {
  * Create a new enchere
  */
 const createEnchere = async (req, res) => {
-  const { name, date, address, notes } = req.body;
-  
-  if (!name || !date) {
-    return res.status(400).json({ message: 'Name and date are required' });
-  }
-  
-  const result = await post_request(
-    "INSERT INTO encheres (name, date, address, notes) VALUES (?, ?, ?, ?)",
-    [name, date, address || '', notes || '']
-  );
-  
-  const newEnchere = await get_request("SELECT * FROM encheres WHERE id = ?", [result.insertId]);
-  res.status(201).json(newEnchere[0]);
+  const { name, date, address } = req.body;
+  if (!name || !date) return res.status(400).json({ message: 'Name and date are required' });
+
+  const record = db.insert('encheres', { name, date, address: address || '' });
+  res.status(201).json(record);
 };
 
 /**
@@ -87,34 +74,15 @@ const createEnchere = async (req, res) => {
 const updateEnchere = async (req, res) => {
   const { id } = req.params;
   const { name, date, address, metadata } = req.body;
-  
-  if (!name || !date) {
-    return res.status(400).json({ message: 'Name and date are required' });
-  }
-  
-  // Check if enchere exists
-  const existing = await get_request("SELECT id FROM encheres WHERE id = ?", [id]);
-  if (existing.length === 0) {
-    return res.status(404).json({ message: 'Enchere not found' });
-  }
-  
-  // Update the enchere with optional metadata
-  const updateFields = [name, date.split("T")[0], address || ''];
-  let query = "UPDATE encheres SET name = ?, date = ?, address = ?";
-  
-  // If metadata is provided, add it to the query
-  if (metadata) {
-    query += ", metadata = ?";
-    updateFields.push(metadata);
-  }
-  
-  query += " WHERE id = ?";
-  updateFields.push(id);
-  
-  await put_request(query, updateFields);
-  
-  const updatedEnchere = await get_request("SELECT * FROM encheres WHERE id = ?", [id]);
-  res.json(updatedEnchere[0]);
+  if (!name || !date) return res.status(400).json({ message: 'Name and date are required' });
+
+  const existing = db.getById('encheres', id);
+  if (!existing) return res.status(404).json({ message: 'Enchere not found' });
+
+  const updates = { name, date, address: address || '' };
+  if (metadata) updates.metadata = metadata;
+  const updated = db.update('encheres', id, updates);
+  res.json(updated);
 };
 
 /**
@@ -122,13 +90,13 @@ const updateEnchere = async (req, res) => {
  */
 const deleteEnchere = async (req, res) => {
   const { id } = req.params;
-  
-  const result = await delete_request("DELETE FROM encheres WHERE id = ?", [id]);
-  
-  if (result.affectedRows === 0) {
-    return res.status(404).json({ message: 'Enchere not found' });
-  }
-  
+  const ok = db.remove('encheres', id);
+  if (!ok) return res.status(404).json({ message: 'Enchere not found' });
+  // Also remove lots and participations for that enchere
+  const data = db.loadData();
+  data.lots = data.lots.filter(l => l.enchere_id !== Number(id));
+  data.participation = data.participation.filter(p => p.enchere_id !== Number(id));
+  db.saveData(data);
   res.json({ message: 'Enchere deleted successfully' });
 };
 

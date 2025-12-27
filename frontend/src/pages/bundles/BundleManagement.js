@@ -11,8 +11,7 @@ import styles from './BundleManagement.module.css';
 import BundleCard from '../../components/bundles/BundleCard';
 import AddBundleDialog from '../../components/bundles/AddBundleDialog';
 import SellBundleDialog from '../../components/bundles/SellBundleDialog';
-import { getBundleImageUrl } from '../../utils/imageHandlers';
-import { getRootUrl } from '../../utils/utils';
+// image handling removed for lightweight backend
 import { processBulkBundleImport } from '../../utils/bundleUtils';
 
 const BundleManagement = () => {
@@ -46,8 +45,7 @@ const BundleManagement = () => {
     finalPrice: ''
   });
 
-  // Add missing bundleImages state
-  const [bundleImages, setBundleImages] = useState({});
+  // image handling removed
 
   // Add this state variable
   const [bulkText, setBulkText] = useState('');
@@ -55,37 +53,7 @@ const BundleManagement = () => {
   // Add loading state
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load images for all bundles
-  useEffect(() => {
-    const loadBundleImages = async () => {
-      if (auction && auction.bundles && auction.bundles.length > 0) {
-        try {
-          // Create a map to store images by bundleId
-          const imagesMap = {};
-          
-          // Load images for each bundle
-          await Promise.all(auction.bundles.map(async (bundle) => {
-            try {
-              const response = await fetch(getRootUrl() + `/api/lots/${bundle.id}/images`);
-              if (response.ok) {
-                const images = await response.json();
-                imagesMap[bundle.id] = images;
-              }
-            } catch (err) {
-              console.error(`Failed to load images for bundle ${bundle.id}:`, err);
-              imagesMap[bundle.id] = [];
-            }
-          }));
-          
-          setBundleImages(imagesMap);
-        } catch (error) {
-          console.error('Failed to load bundle images:', error);
-        }
-      }
-    };
-
-    loadBundleImages();
-  }, [auction]);
+  // images removed — no-op
 
   if (!auction) {
     return <Alert severity="error">Vente non trouvée.</Alert>;
@@ -93,13 +61,7 @@ const BundleManagement = () => {
 
   // Handle Edit Bundle
   const handleEditBundle = (bundle) => {
-    // Prepare image preview if available
-    let imagePreview = '';
-    if (bundleImages[bundle.id] && bundleImages[bundle.id].length > 0) {
-      imagePreview = getRootUrl() + `/uploads/${bundleImages[bundle.id][0].file_path}`;
-    }
-
-    // Set form data with bundle values
+    // Set form data with bundle values (image fields removed)
     setFormData({
       id: bundle.id,
       name: bundle.name || '',
@@ -108,7 +70,7 @@ const BundleManagement = () => {
       category: bundle.category || '',
       notes: bundle.notes || '',
       imageFile: null,
-      imagePreview: imagePreview
+      imagePreview: ''
     });
     
     // Set edit mode and open dialog
@@ -175,14 +137,7 @@ const BundleManagement = () => {
   };
 
   const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setFormData({ 
-        ...formData, 
-        imageFile: file,
-        imagePreview: URL.createObjectURL(file)
-      });
-    }
+    // image uploads removed
   };
 
   // Add this function to handle the sell button click
@@ -261,7 +216,7 @@ const BundleManagement = () => {
     // Show confirmation dialog
     if (window.confirm("Êtes-vous sûr de vouloir supprimer ce lot?")) {
       // Call API to delete bundle
-      fetch(getRootUrl() + `/api/lots/${bundleId}`, {
+      fetch(`/api/lots/${bundleId}`, {
         method: 'DELETE',
       })
         .then(response => {
@@ -357,7 +312,6 @@ const BundleManagement = () => {
               <BundleCard
                 key={bundle.id}
                 bundle={bundle}
-                imageUrl={getBundleImageUrl(bundle, bundleImages)}
                 isSold={false}
                 onSell={handleSellBundle}
                 onEdit={handleEditBundle}
@@ -381,7 +335,6 @@ const BundleManagement = () => {
               <BundleCard
                 key={bundle.id}
                 bundle={bundle}
-                imageUrl={getBundleImageUrl(bundle, bundleImages)}
                 isSold={true}
                 onViewSale={handleViewSale}
                 onEdit={handleEditBundle}
@@ -404,7 +357,7 @@ const BundleManagement = () => {
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleBulkImport={handleBulkImport}
-        handleImageUpload={handleImageUpload}
+        /* image upload removed */
         existingCategories={existingCategories}
         bulkText={bulkText}
         setBulkText={setBulkText}

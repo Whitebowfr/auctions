@@ -5,10 +5,9 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme';
 import { AuctionProvider } from './context/AuctionContext';
 import Header from './components/layout/Header';
-import Dashboard from './pages/Dashboard';
 import AuctionManagement from './pages/auctions/AuctionManagement';
 import AuctionDetail from './pages/auctions/AuctionDetail';
-import ParticipantManagement from './pages/participants/ParticipantManagement';
+// Participant list page removed - participants are managed inline in AuctionDetail
 import BundleManagement from './pages/bundles/BundleManagement';
 import SalesTracking from './pages/SalesTracking';
 import Reports from './pages/Reports';
@@ -33,10 +32,10 @@ function App() {
           <Header />
           <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<AuctionManagement />} />
               <Route path="/auctions" element={<AuctionManagement />} />
               <Route path="/auction/:id" element={<AuctionDetail />} />
-              <Route path="/auction/:id/participants" element={<ParticipantManagement />} />
+              {/* Participant listing page removed; use AuctionDetail participants tab instead */}
               <Route path="/auction/:id/bundles" element={<BundleManagement />} />
               <Route path="/auction/:id/sales" element={<SalesTracking />} />
               <Route path="/auction/:id/reports" element={<Reports />} />

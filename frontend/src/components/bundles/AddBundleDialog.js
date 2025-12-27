@@ -92,22 +92,7 @@ const AddBundleDialog = ({
                 className={dialogStyles.modernTextField}
               />
             </Grid>
-            <Grid sx={{xs: 12, sm: 6}}>
-              <TextField
-                fullWidth
-                label="Prix de départ"
-                type="number"
-                step="0.01"
-                value={formData.starting_price}
-                onChange={(e) => setFormData({...formData, starting_price: e.target.value})}
-                className={dialogStyles.modernTextField}
-                slotProps={{
-                                input: {
-                                  endAdornment: (<InputAdornment position='end'>€</InputAdornment>)
-                                }
-                              }}
-              />
-            </Grid>
+            {/* Starting price removed — we no longer set a default starting price */}
             <Grid  sx={{xs: 12, sm: 6}}>
               <Autocomplete
                 freeSolo
@@ -141,30 +126,7 @@ const AddBundleDialog = ({
                 className={dialogStyles.modernTextField}
               />
             </Grid>
-            <Grid  sx={{xs: 12}}>
-              <Box className={styles.imageUploadContainer}>
-                <Typography variant="body2" className={styles.uploadLabel}>
-                  📸 {isEditMode ? 'Modifier l\'image:' : 'Ajouter une image:'}
-                </Typography>
-                <Box className={styles.imageUploadInput}>
-                  <input
-                    accept="image/*"
-                    type="file"
-                    onChange={handleImageUpload}
-                    className={styles.fileInput}
-                  />
-                </Box>
-                {formData.imagePreview && (
-                  <Box className={styles.imagePreview}>
-                    <img 
-                      src={formData.imagePreview} 
-                      alt="Preview" 
-                      className={styles.previewImage}
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Grid>
+            {/* Image upload removed — lightweight backend does not store images */}
           </Grid>
         ) : (
           // Bulk Import Form
@@ -206,11 +168,11 @@ const AddBundleDialog = ({
         </Button>
         
         {(tabValue === 0 || isEditMode) ? (
-          <Button 
+            <Button 
             onClick={handleSubmit} 
             variant="contained"
             className={dialogStyles.primaryButton}
-            disabled={!formData.name || !formData.starting_price}
+            disabled={!formData.name}
           >
             {isEditMode ? '💾 Enregistrer les modifications' : '➕ Ajouter un lot'}
           </Button>

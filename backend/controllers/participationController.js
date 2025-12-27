@@ -1,32 +1,25 @@
-const { get_request, post_request, put_request, delete_request } = require('../db');
+const db = require('../db');
 
 /**
  * Get all participants for an enchere
  */
 const getParticipants = async (req, res) => {
   const { enchereId } = req.params;
-  
-  const participants = await get_request(`
-    SELECT p.*, c.name, c.email, c.phone, c.address
-    FROM participation p
-    JOIN client c ON p.client_id = c.id
-    WHERE p.enchere_id = ?
-    ORDER BY p.registered_at DESC
-  `, [enchereId]);
-  
-  // Format the response
-  const formattedParticipants = participants.map(p => ({
-    id: p.client_id,
-    participation_id: p.id,
-    name: p.name,
-    email: p.email,
-    phone: p.phone,
-    address: p.address,
-    local_number: p.local_number,
-    registered_at: p.registered_at
-  }));
-  
-  res.json(formattedParticipants);
+  const parts = db.getAll('participation').filter(p => p.enchere_id === Number(enchereId));
+  const formatted = parts.map(p => {
+    const c = db.getById('clients', p.client_id) || {};
+    return {
+      id: c.id,
+      participation_id: p.id,
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      address: c.address,
+      local_number: p.local_number,
+      registered_at: p.registered_at
+    };
+  });
+  res.json(formatted);
 };
 
 /**
@@ -35,59 +28,28 @@ const getParticipants = async (req, res) => {
 const addParticipant = async (req, res) => {
   const { enchereId } = req.params;
   const { clientId, localNumber } = req.body;
-  
-  if (!clientId) {
-    return res.status(400).json({ message: 'Client ID is required' });
-  }
-  
-  // Check if enchere exists
-  const encheres = await get_request("SELECT id FROM encheres WHERE id = ?", [enchereId]);
-  if (encheres.length === 0) {
-    return res.status(404).json({ message: 'Enchere not found' });
-  }
-  
-  // Check if client exists
-  const clients = await get_request("SELECT id FROM client WHERE id = ?", [clientId]);
-  if (clients.length === 0) {
-    return res.status(404).json({ message: 'Client not found' });
-  }
-  
-  // Check if client is already a participant
-  const existing = await get_request(
-    "SELECT id FROM participation WHERE enchere_id = ? AND client_id = ?",
-    [enchereId, clientId]
-  );
-  
-  if (existing.length > 0) {
-    return res.status(409).json({ message: 'Client is already a participant' });
-  }
-  
-  // Create participation record
-  await post_request(
-    "INSERT INTO participation (enchere_id, client_id, local_number) VALUES (?, ?, ?)",
-    [enchereId, clientId, localNumber || '']
-  );
-  
-  // Get the client details
-  const [client] = await get_request("SELECT * FROM client WHERE id = ?", [clientId]);
-  
-  // Get the participation record
-  const [participation] = await get_request(
-    "SELECT * FROM participation WHERE enchere_id = ? AND client_id = ?",
-    [enchereId, clientId]
-  );
-  
+  if (!clientId) return res.status(400).json({ message: 'Client ID is required' });
+
+  const enchere = db.getById('encheres', enchereId);
+  if (!enchere) return res.status(404).json({ message: 'Enchere not found' });
+
+  const client = db.getById('clients', clientId);
+  if (!client) return res.status(404).json({ message: 'Client not found' });
+
+  const existing = db.getAll('participation').find(p => p.enchere_id === Number(enchereId) && p.client_id === Number(clientId));
+  if (existing) return res.status(409).json({ message: 'Client is already a participant' });
+
+  const record = db.insert('participation', { enchere_id: Number(enchereId), client_id: Number(clientId), local_number: localNumber || '' });
   const response = {
     id: client.id,
-    participation_id: participation.id,
+    participation_id: record.id,
     name: client.name,
     email: client.email,
     phone: client.phone,
     address: client.address,
-    local_number: participation.local_number,
-    registered_at: participation.registered_at
+    local_number: record.local_number,
+    registered_at: record.created_at
   };
-  
   res.status(201).json(response);
 };
 
@@ -97,41 +59,21 @@ const addParticipant = async (req, res) => {
 const updateParticipant = async (req, res) => {
   const { enchereId, clientId } = req.params;
   const { localNumber } = req.body;
-  
-  // Check if participation exists
-  const participations = await get_request(
-    "SELECT id FROM participation WHERE enchere_id = ? AND client_id = ?",
-    [enchereId, clientId]
-  );
-  
-  if (participations.length === 0) {
-    return res.status(404).json({ message: 'Participant not found' });
-  }
-  
-  await put_request(
-    "UPDATE participation SET local_number = ? WHERE enchere_id = ? AND client_id = ?",
-    [localNumber || '', enchereId, clientId]
-  );
-  
-  // Get updated client and participation details
-  const [client] = await get_request("SELECT * FROM client WHERE id = ?", [clientId]);
-  
-  const [participation] = await get_request(
-    "SELECT * FROM participation WHERE enchere_id = ? AND client_id = ?",
-    [enchereId, clientId]
-  );
-  
+  const participation = db.getAll('participation').find(p => p.enchere_id === Number(enchereId) && p.client_id === Number(clientId));
+  if (!participation) return res.status(404).json({ message: 'Participant not found' });
+
+  const updated = db.update('participation', participation.id, { local_number: localNumber || '' });
+  const client = db.getById('clients', clientId) || {};
   const response = {
     id: client.id,
-    participation_id: participation.id,
+    participation_id: updated.id,
     name: client.name,
     email: client.email,
     phone: client.phone,
     address: client.address,
-    local_number: participation.local_number,
-    registered_at: participation.registered_at
+    local_number: updated.local_number,
+    registered_at: updated.created_at
   };
-  
   res.json(response);
 };
 
@@ -140,29 +82,13 @@ const updateParticipant = async (req, res) => {
  */
 const removeParticipant = async (req, res) => {
   const { enchereId, clientId } = req.params;
-  
-  // Check if participant has bought any lots
-  const lotsBought = await get_request(
-    "SELECT COUNT(*) as count FROM lots WHERE enchere_id = ? AND sold_to = ?",
-    [enchereId, clientId]
-  );
-  
-  if (lotsBought[0].count > 0) {
-    return res.status(400).json({
-      message: 'Cannot remove participant who has purchased lots',
-      lotsBought: lotsBought[0].count
-    });
-  }
-  
-  const result = await delete_request(
-    "DELETE FROM participation WHERE enchere_id = ? AND client_id = ?",
-    [enchereId, clientId]
-  );
-  
-  if (result.affectedRows === 0) {
-    return res.status(404).json({ message: 'Participant not found' });
-  }
-  
+  const lotsBought = db.getAll('lots').filter(l => l.enchere_id === Number(enchereId) && l.sold_to === Number(clientId)).length;
+  if (lotsBought > 0) return res.status(400).json({ message: 'Cannot remove participant who has purchased lots', lotsBought });
+
+  const participation = db.getAll('participation').find(p => p.enchere_id === Number(enchereId) && p.client_id === Number(clientId));
+  if (!participation) return res.status(404).json({ message: 'Participant not found' });
+
+  db.remove('participation', participation.id);
   res.json({ message: 'Participant removed successfully' });
 };
 

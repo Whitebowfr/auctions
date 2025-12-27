@@ -1,10 +1,10 @@
-const { get_request, post_request, put_request, delete_request } = require('../db');
+const db = require('../db');
 
 /**
  * Get all clients
  */
 const getAllClients = async (req, res) => {
-  const clients = await get_request("SELECT * FROM client ORDER BY name");
+  const clients = db.getAll('clients').sort((a,b) => (a.name || '').localeCompare(b.name || ''));
   res.json(clients);
 };
 
@@ -13,13 +13,9 @@ const getAllClients = async (req, res) => {
  */
 const getClientById = async (req, res) => {
   const { id } = req.params;
-  const clients = await get_request("SELECT * FROM client WHERE id = ?", [id]);
-  
-  if (clients.length === 0) {
-    return res.status(404).json({ message: 'Client not found' });
-  }
-  
-  res.json(clients[0]);
+  const client = db.getById('clients', id);
+  if (!client) return res.status(404).json({ message: 'Client not found' });
+  res.json(client);
 };
 
 /**
@@ -27,24 +23,13 @@ const getClientById = async (req, res) => {
  */
 const createClient = async (req, res) => {
   const { name, email, phone, address } = req.body;
-  
-  if (!name || !email) {
-    return res.status(400).json({ message: 'Name and email are required' });
-  }
-  
-  // Check if email already exists
-  const existing = await get_request("SELECT id FROM client WHERE email = ?", [email]);
-  if (existing.length > 0) {
-    return res.status(409).json({ message: 'Client with this email already exists' });
-  }
-  
-  const result = await post_request(
-    "INSERT INTO client (name, email, phone, address, notes) VALUES (?, ?, ?, ?, ?)",
-    [name, email, phone || '', address || '', req.body.notes || '']
-  );
-  
-  const newClient = await get_request("SELECT * FROM client WHERE id = ?", [result.insertId]);
-  res.status(201).json(newClient[0]);
+  if (!name || !email) return res.status(400).json({ message: 'Name and email are required' });
+
+  const existing = db.getAll('clients').find(c => (c.email || '').toLowerCase() === (email || '').toLowerCase());
+  if (existing) return res.status(409).json({ message: 'Client with this email already exists' });
+
+  const record = db.insert('clients', { name, email, phone: phone || '', address: address || '' });
+  res.status(201).json(record);
 };
 
 /**
@@ -52,31 +37,17 @@ const createClient = async (req, res) => {
  */
 const updateClient = async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone, address, notes } = req.body;
-  
-  if (!name || !email) {
-    return res.status(400).json({ message: 'Name and email are required' });
-  }
-  
-  // Check if client exists
-  const existing = await get_request("SELECT id FROM client WHERE id = ?", [id]);
-  if (existing.length === 0) {
-    return res.status(404).json({ message: 'Client not found' });
-  }
-  
-  // Check if email is taken by another client
-  const emailCheck = await get_request("SELECT id FROM client WHERE email = ? AND id != ?", [email, id]);
-  if (emailCheck.length > 0) {
-    return res.status(409).json({ message: 'Email is already taken by another client' });
-  }
-  
-  await put_request(
-    "UPDATE client SET name = ?, email = ?, phone = ?, address = ?, notes = ? WHERE id = ?",
-    [name, email, phone || '', address || '', notes || '', id]
-  );
-  
-  const updatedClient = await get_request("SELECT * FROM client WHERE id = ?", [id]);
-  res.json(updatedClient[0]);
+  const { name, email, phone, address } = req.body;
+  if (!name || !email) return res.status(400).json({ message: 'Name and email are required' });
+
+  const existing = db.getById('clients', id);
+  if (!existing) return res.status(404).json({ message: 'Client not found' });
+
+  const emailTaken = db.getAll('clients').find(c => c.email === email && c.id !== Number(id));
+  if (emailTaken) return res.status(409).json({ message: 'Email is already taken by another client' });
+
+  const updated = db.update('clients', id, { name, email, phone: phone || '', address: address || '' });
+  res.json(updated);
 };
 
 /**
@@ -84,13 +55,8 @@ const updateClient = async (req, res) => {
  */
 const deleteClient = async (req, res) => {
   const { id } = req.params;
-  
-  const result = await delete_request("DELETE FROM client WHERE id = ?", [id]);
-  
-  if (result.affectedRows === 0) {
-    return res.status(404).json({ message: 'Client not found' });
-  }
-  
+  const ok = db.remove('clients', id);
+  if (!ok) return res.status(404).json({ message: 'Client not found' });
   res.json({ message: 'Client deleted successfully' });
 };
 

@@ -198,13 +198,18 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
-      // First, create or update the client
-      const client = await addOrUpdateClient(participantData);
-      
+      // If an existing client id is provided, skip client creation/update
+      let client;
+      if (participantData.id) {
+        client = { id: participantData.id };
+      } else {
+        // First, create or update the client
+        client = await addOrUpdateClient(participantData);
+      }
+
       // Then add them as a participant to the enchere
       const enchere = encheres.find(e => e.id === enchereId);
-      
+
       // Use provided local_number if available, otherwise generate the next available one
       let localNumber;
       if (participantData.local_number) {
@@ -220,9 +225,9 @@ export const AuctionProvider = ({ children }) => {
           localNumber++;
         }
       }
-      
+
       await apiService.addParticipant(enchereId, client.id, localNumber, participantData.notes);
-      
+
       // Reload the specific enchere
       await loadEncheres();
     } catch (error) {
@@ -260,19 +265,7 @@ export const AuctionProvider = ({ children }) => {
         notes: bundleData.notes  // Add notes
       });
       
-      // If there's an image file, upload it
-      if (bundleData.imageFile) {
-        try {
-          await apiService.uploadImage(lot.id, {
-            file: bundleData.imageFile,
-            name: bundleData.name || 'Bundle Image',
-            description: bundleData.description || ''
-          });
-        } catch (imageError) {
-          console.error('Failed to upload image:', imageError);
-          // Continue anyway - the bundle was created successfully
-        }
-      }
+      // Image uploads are not supported in the lightweight backend; ignore imageFile
       
       await loadEncheres(); // Reload all encheres
       return lot;
@@ -296,19 +289,7 @@ export const AuctionProvider = ({ children }) => {
         notes: bundleData.notes
       });
       
-      // If there's an image file, upload it
-      if (bundleData.imageFile) {
-        try {
-          await apiService.uploadImage(bundleData.id, {
-            file: bundleData.imageFile,
-            name: bundleData.name || 'Bundle Image',
-            description: bundleData.description || ''
-          });
-        } catch (imageError) {
-          console.error('Failed to upload image:', imageError);
-          // Continue anyway - the bundle was updated successfully
-        }
-      }
+      // Image uploads are not supported in the lightweight backend; ignore imageFile
       
       await loadEncheres(); // Reload all encheres
       return true;

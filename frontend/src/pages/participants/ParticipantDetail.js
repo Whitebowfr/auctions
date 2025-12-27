@@ -100,7 +100,7 @@ const ParticipantDetail = () => {
   return (
     <Box className={styles.container}>
       <Button 
-        onClick={() => navigate(`/auction/${auction.id}/participants`)} 
+        onClick={() => navigate(`/auction/${auction.id}`)} 
         className={styles.backButton}
         startIcon={<ArrowBack />}
       >

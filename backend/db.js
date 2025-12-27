@@ -1,188 +1,108 @@
-const mariadb = require('mariadb');
+const fs = require('fs');
+const path = require('path');
 
-// Database configuration
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'node',
-  password: process.env.DB_PASSWORD || 'devpassword',
-  database: process.env.DB_NAME || 'encheres_project',
-  port: process.env.DB_PORT || 3306,
-  connectionLimit: 10,
-  acquireTimeout: 60000,
-  timeout: 60000
+// Simple JSON file-based DB for offline use
+const DATA_DIR = path.join(__dirname, 'data');
+const DATA_FILE = path.join(DATA_DIR, 'db.json');
+
+// Ensure data dir exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+// Default structure
+const DEFAULT_DB = {
+  clients: [],
+  encheres: [],
+  lots: [],
+  participation: []
 };
 
-// Create connection pool
-const pool = mariadb.createPool(dbConfig);
+// Load or create DB file
+const loadData = () => {
+  if (!fs.existsSync(DATA_FILE)) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(DEFAULT_DB, null, 2));
+    return JSON.parse(JSON.stringify(DEFAULT_DB));
+  }
 
-// Test connection
-const testConnection = async () => {
-  let conn;
   try {
-    conn = await pool.getConnection();
-    console.log('✅ MariaDB connected successfully');
-  } catch (error) {
-    console.error('❌ MariaDB connection failed:', error.message);
-    process.exit(1);
-  } finally {
-    if (conn) conn.release();
+    const raw = fs.readFileSync(DATA_FILE, 'utf8');
+    return JSON.parse(raw || JSON.stringify(DEFAULT_DB));
+  } catch (e) {
+    console.error('Failed to read DB file, recreating:', e.message);
+    fs.writeFileSync(DATA_FILE, JSON.stringify(DEFAULT_DB, null, 2));
+    return JSON.parse(JSON.stringify(DEFAULT_DB));
   }
 };
 
-// Generic query function
-const query = async (sql, params = []) => {
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    const results = await conn.query(sql, params);
-    return results;
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
-  } finally {
-    if (conn) conn.release();
-  }
+const saveData = (data) => {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 };
 
-// GET request function (for SELECT queries)
-const get_request = async (sql, params = []) => {
-  return await query(sql, params);
+// Utility to get next id for a table
+const nextId = (items) => {
+  if (!items || items.length === 0) return 1;
+  return Math.max(...items.map(i => i.id || 0)) + 1;
 };
 
-// POST request function (for INSERT queries)
-const post_request = async (sql, params = []) => {
-  const result = await query(sql, params);
-  return {
-    insertId: result.insertId ? Number(result.insertId) : null,
-    affectedRows: result.affectedRows || 0
-  };
+// Core API
+const getAll = (table) => {
+  const db = loadData();
+  return db[table] || [];
 };
 
-// PUT request function (for UPDATE queries)
-const put_request = async (sql, params = []) => {
-  const result = await query(sql, params);
-  return {
-    affectedRows: result.affectedRows || 0
-  };
+const getById = (table, id) => {
+  const items = getAll(table);
+  return items.find(i => i.id === Number(id));
 };
 
-// DELETE request function
-const delete_request = async (sql, params = []) => {
-  const result = await query(sql, params);
-  return {
-    affectedRows: result.affectedRows || 0
-  };
+const findBy = (table, field, value) => {
+  const items = getAll(table);
+  return items.filter(i => i[field] == value);
 };
 
-// Transaction helper
-const transaction = async (queries) => {
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    await conn.beginTransaction();
-    
-    const results = [];
-    for (const { sql, params } of queries) {
-      const result = await conn.query(sql, params);
-      results.push(result);
-    }
-    
-    await conn.commit();
-    return results;
-  } catch (error) {
-    if (conn) await conn.rollback();
-    throw error;
-  } finally {
-    if (conn) conn.release();
-  }
+const insert = (table, obj) => {
+  const db = loadData();
+  const items = db[table] || [];
+  const id = nextId(items);
+  const now = new Date().toISOString();
+  const record = { id, ...obj, created_at: now };
+  items.push(record);
+  db[table] = items;
+  saveData(db);
+  return record;
 };
 
-// Initialize database with tables
-const initializeDatabase = async () => {
-  const createTables = [
-    `CREATE TABLE IF NOT EXISTS client (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      name VARCHAR(255) NOT NULL,
-      surname VARCHAR(255) DEFAULT '',
-      email VARCHAR(255) UNIQUE,
-      phone VARCHAR(50) DEFAULT '',
-      address TEXT DEFAULT '',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
-    
-    `CREATE TABLE IF NOT EXISTS encheres (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      name VARCHAR(255) NOT NULL,
-      date DATE,
-      address TEXT DEFAULT '',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
-    
-    `CREATE TABLE IF NOT EXISTS lots (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      enchere_id INT NOT NULL,
-      name VARCHAR(255) DEFAULT '',
-      description TEXT DEFAULT '',
-      category VARCHAR(100) DEFAULT '',
-      starting_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-      sold_price DECIMAL(10,2) NULL,
-      sold_to INT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (enchere_id) REFERENCES encheres(id) ON DELETE CASCADE,
-      FOREIGN KEY (sold_to) REFERENCES client(id) ON DELETE SET NULL
-    )`,
-    
-    `CREATE TABLE IF NOT EXISTS images (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      lot_id INT NOT NULL,
-      name VARCHAR(255) DEFAULT '',
-      description TEXT DEFAULT '',
-      file_path VARCHAR(500),
-      file_size INT DEFAULT 0,
-      mime_type VARCHAR(100) DEFAULT '',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (lot_id) REFERENCES lots(id) ON DELETE CASCADE
-    )`,
-    
-    `CREATE TABLE IF NOT EXISTS participation (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      enchere_id INT NOT NULL,
-      client_id INT NOT NULL,
-      local_number VARCHAR(10) DEFAULT '',
-      registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (enchere_id) REFERENCES encheres(id) ON DELETE CASCADE,
-      FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE,
-      UNIQUE KEY unique_participation (enchere_id, client_id)
-    )`
-  ];
-
-  try {
-    for (const sql of createTables) {
-      await query(sql);
-    }
-    console.log('✅ Database tables initialized successfully');
-  } catch (error) {
-    console.error('❌ Failed to initialize database tables:', error);
-    throw error;
-  }
+const update = (table, id, updates) => {
+  const db = loadData();
+  const items = db[table] || [];
+  const idx = items.findIndex(i => i.id === Number(id));
+  if (idx === -1) return null;
+  items[idx] = { ...items[idx], ...updates };
+  db[table] = items;
+  saveData(db);
+  return items[idx];
 };
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('\n🔄 Closing database connections...');
-  await pool.end();
-  console.log('✅ Database connections closed');
-  process.exit(0);
-});
+const remove = (table, id) => {
+  const db = loadData();
+  const items = db[table] || [];
+  const idx = items.findIndex(i => i.id === Number(id));
+  if (idx === -1) return false;
+  items.splice(idx, 1);
+  db[table] = items;
+  saveData(db);
+  return true;
+};
 
 module.exports = {
-  pool,
-  query,
-  get_request,
-  post_request,
-  put_request,
-  delete_request,
-  transaction,
-  testConnection,
-  initializeDatabase
+  loadData,
+  saveData,
+  getAll,
+  getById,
+  findBy,
+  insert,
+  update,
+  remove,
+  DATA_FILE
 };

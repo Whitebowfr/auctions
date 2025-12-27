@@ -134,27 +134,10 @@ class ApiService {
 
   // Images endpoints - fix these
   async uploadImage(bundleId, imageData) {
-    const formData = new FormData();
-    formData.append('image', imageData.file); // The multer field name is 'image'
-    formData.append('name', imageData.name);
-    formData.append('description', imageData.description);
-
-    return this.request(`/lots/${bundleId}/images`, {
-      method: 'POST',
-      body: formData,
-      headers: {} // Remove Content-Type header to let browser set it for FormData
-    });
+    // Image uploads removed in lightweight backend; no-op
+    return Promise.resolve(null);
   }
 
-  async getImages(bundleId) {
-    return this.request(`/lots/${bundleId}/images`);
-  }
-
-  async deleteImage(imageId) {
-    return this.request(`/images/${imageId}`, {
-      method: 'DELETE',
-    });
-  }
 
   // Participation endpoints - fix these
   async getParticipants(auctionId) {
