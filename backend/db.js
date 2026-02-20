@@ -5,6 +5,8 @@ const path = require('path');
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'db.json');
 
+const DB_VERSION = 1.0;
+
 // Ensure data dir exists
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -12,6 +14,7 @@ if (!fs.existsSync(DATA_DIR)) {
 
 // Default structure
 const DEFAULT_DB = {
+  version: DB_VERSION,
   clients: [],
   encheres: [],
   lots: [],
@@ -27,7 +30,21 @@ const loadData = () => {
 
   try {
     const raw = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(raw || JSON.stringify(DEFAULT_DB));
+    let json = JSON.parse(raw || JSON.stringify(DEFAULT_DB));
+
+    // If not explicitly marked as test data, always reset to DEFAULT_DB
+    // This ensures that non-test runs start from a clean baseline.
+    if (json.version == undefined) {
+      json = JSON.parse(JSON.stringify(DEFAULT_DB));
+      console.log("La base de donnée a étée réinitialisée.")
+      fs.writeFileSync(DATA_FILE, JSON.stringify(json, null, 2));
+    }
+
+    if (json.version != DB_VERSION) {
+      console.log(`Attention : la version de la base de donnée (${json.version}) ne correspond pas à la version du serveur (${DB_VERSION}).`);
+    }
+
+    return json;
   } catch (e) {
     console.error('Failed to read DB file, recreating:', e.message);
     fs.writeFileSync(DATA_FILE, JSON.stringify(DEFAULT_DB, null, 2));

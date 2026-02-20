@@ -45,7 +45,7 @@ app.get('*', function (req, res) {
 const startServer = async () => {
   try {
     app.listen(PORT, () => {
-      console.log(`🚀 API is running on ${URL}, port ${PORT}`);
+      console.log(`Le logiciel est lancé sur l'URL suivante : ${URL}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
