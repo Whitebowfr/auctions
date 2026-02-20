@@ -9,6 +9,60 @@ const getAllEncheres = async (req, res) => {
 };
 
 /**
+ * Get all encheres with their participants, lots, and sales (aggregated view)
+ */
+const getAllEncheresWithDetails = async (req, res) => {
+  const encheres = db.getAll('encheres').sort((a,b) => new Date(b.date) - new Date(a.date));
+  const lots = db.getAll('lots');
+  const participations = db.getAll('participation');
+  const clients = db.getAll('clients');
+
+  const result = encheres.map((enchere) => {
+    const enchereLots = lots.filter(l => l.enchere_id === Number(enchere.id));
+    const enchereParticipations = participations.filter(p => p.enchere_id === Number(enchere.id));
+
+    const participants = enchereParticipations.map(p => {
+      const client = clients.find(c => c.id === p.client_id) || {};
+      return {
+        id: client.id,
+        participation_id: p.id,
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        address: client.address,
+        local_number: p.local_number,
+        registered_at: p.registered_at
+      };
+    });
+
+    const sales = enchereLots
+      .filter(l => l.sold_to)
+      .map(l => {
+        const participation = enchereParticipations.find(p => p.client_id === l.sold_to) || {};
+        const client = clients.find(c => c.id === l.sold_to) || {};
+        return {
+          bundleId: l.id,
+          bundleName: l.name,
+          starting_price: l.starting_price,
+          finalPrice: l.sold_price,
+          participantId: client.id,
+          participantName: client.name,
+          bidderNumber: participation.local_number || ''
+        };
+      });
+
+    return {
+      ...enchere,
+      bundles: enchereLots,
+      participants,
+      sales
+    };
+  });
+
+  res.json(result);
+};
+
+/**
  * Get a single enchere by ID with all related data
  */
 const getEnchereById = async (req, res) => {
@@ -102,6 +156,7 @@ const deleteEnchere = async (req, res) => {
 
 module.exports = {
   getAllEncheres,
+  getAllEncheresWithDetails,
   getEnchereById,
   createEnchere,
   updateEnchere,

@@ -35,61 +35,52 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const encheresList = await apiService.getAuctions();
-      
-      // Load participants and lots for each enchere
-      const encheresWithDetails = await Promise.all(
-        encheresList.map(async (enchere) => {
+
+      const encheresList = await apiService.getAuctionsWithDetails();
+
+      const encheresWithDetails = encheresList.map((enchere) => {
+        // Parse metadata if it exists
+        let managementFeeRate = 11.9; // Default value
+        if (enchere.metadata) {
           try {
-            // Parse metadata if it exists
-            let managementFeeRate = 11.8; // Default value
-            if (enchere.metadata) {
-              try {
-                const metadata = JSON.parse(enchere.metadata);
-                if (metadata.managementFeeRate) {
-                  managementFeeRate = parseFloat(metadata.managementFeeRate);
-                }
-              } catch (e) {
-                console.error('Failed to parse metadata:', e);
-              }
+            const metadata = JSON.parse(enchere.metadata);
+            if (metadata.managementFeeRate) {
+              managementFeeRate = parseFloat(metadata.managementFeeRate);
             }
-            
-            const [participants, lots] = await Promise.all([
-              apiService.getParticipants(enchere.id),
-              apiService.getBundles(enchere.id)
-            ]);
-            
-            return {
-              ...enchere,
-              managementFeeRate,
-              participants,
-              bundles: lots, // Map lots to bundles for frontend compatibility
-              sales: lots.filter(lot => lot.sold_to !== null).map(lot => ({
-                id: `sale_${lot.id}`,
-                bundleId: lot.id,
-                bundleName: lot.name || `Lot #${lot.id}`,
-                participantId: lot.sold_to,
-                participantName: participants.find(p => p.id === lot.sold_to)?.name || 'Unknown',
-                bidderNumber: participants.find(p => p.id === lot.sold_to)?.local_number || '000',
-                startingPrice: parseFloat(lot.starting_price),
-                finalPrice: parseFloat(lot.sold_price),
-                profit: parseFloat(lot.sold_price) - parseFloat(lot.starting_price),
-                date: new Date().toLocaleDateString(), // You might want to add a sale_date field to your DB
-                notes: ''
-              }))
-            };
-          } catch (error) {
-            console.error(`Error loading details for enchere ${enchere.id}:`, error);
-            return {
-              ...enchere,
-              participants: [],
-              bundles: [],
-              sales: []
-            };
+          } catch (e) {
+            console.error('Failed to parse metadata:', e);
           }
-        })
-      );
-      
+        }
+
+        const participants = enchere.participants || [];
+        const lots = enchere.bundles || enchere.lots || [];
+
+        return {
+          ...enchere,
+          managementFeeRate,
+          participants,
+          bundles: lots,
+          sales: lots
+            .filter(lot => lot.sold_to !== null)
+            .map(lot => ({
+              id: `sale_${lot.id}`,
+              bundleId: lot.id,
+              bundleName: lot.name || `Lot #${lot.id}`,
+              participantId: lot.sold_to,
+              participantName:
+                participants.find(p => p.id === lot.sold_to)?.name || 'Unknown',
+              bidderNumber:
+                participants.find(p => p.id === lot.sold_to)?.local_number || '000',
+              startingPrice: parseFloat(lot.starting_price),
+              finalPrice: parseFloat(lot.sold_price),
+              profit:
+                parseFloat(lot.sold_price) - parseFloat(lot.starting_price),
+              date: new Date().toLocaleDateString(),
+              notes: ''
+            }))
+        };
+      });
+
       setEncheres(encheresWithDetails);
     } catch (error) {
       handleError(error, 'Loading encheres');
@@ -112,6 +103,19 @@ export const AuctionProvider = ({ children }) => {
       return newEnchere;
     } catch (error) {
       handleError(error, 'Adding enchere');
+      throw error;
+    }
+  };
+
+  const deleteEnchere = async (id) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await apiService.deleteAuction(id);
+      await loadEncheres();
+    } catch (error) {
+      handleError(error, 'Deleting enchere');
       throw error;
     }
   };
@@ -161,10 +165,19 @@ export const AuctionProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      // Check if client exists by email
-      const existingClient = clients.find(c => 
-        c.email.toLowerCase() === clientData.email.toLowerCase()
-      );
+      let existingClient = null;
+
+      // Prefer lookup by id if present
+      if (clientData.id) {
+        existingClient = clients.find(c => c.id === clientData.id) || null;
+      }
+
+      // Fallback: lookup by email (case-insensitive)
+      if (!existingClient && clientData.email) {
+        existingClient = clients.find(c => 
+          c.email && c.email.toLowerCase() === clientData.email.toLowerCase()
+        ) || null;
+      }
       
       let client;
       if (existingClient) {
@@ -198,14 +211,9 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      // If an existing client id is provided, skip client creation/update
-      let client;
-      if (participantData.id) {
-        client = { id: participantData.id };
-      } else {
-        // First, create or update the client
-        client = await addOrUpdateClient(participantData);
-      }
+
+      // Always create or update the client first so edits (email, phone, address) are persisted
+      const client = await addOrUpdateClient(participantData);
 
       // Then add them as a participant to the enchere
       const enchere = encheres.find(e => e.id === enchereId);
@@ -258,6 +266,7 @@ export const AuctionProvider = ({ children }) => {
       
       // First create the lot
       const lot = await apiService.createBundle(enchereId, {
+        number: bundleData.number,
         name: bundleData.name,
         description: bundleData.description,
         category: bundleData.category,
@@ -275,6 +284,19 @@ export const AuctionProvider = ({ children }) => {
     }
   };
 
+  const deleteBundle = async (bundleId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await apiService.deleteBundle(bundleId);
+      await loadEncheres();
+    } catch (error) {
+      handleError(error, 'Deleting bundle');
+      throw error;
+    }
+  };
+
   const updateBundle = async (bundleData) => {
     try {
       setLoading(true);
@@ -282,6 +304,7 @@ export const AuctionProvider = ({ children }) => {
       
       // Update the lot
       await apiService.updateBundle(bundleData.id, {
+        number: bundleData.number,
         name: bundleData.name,
         description: bundleData.description,
         category: bundleData.category,
@@ -337,13 +360,26 @@ export const AuctionProvider = ({ children }) => {
     }
   };
 
-  const updateClient = async (enchereId, clientId, notes) => {
+  // Update a global client (buyers directory / ClientDetail)
+  const updateClient = async (clientId, data) => {
     try {
-      await apiService.updateParticipantNotes(enchereId, clientId, notes);
-      await loadClients()
+      setLoading(true);
+      setError(null);
+
+      await apiService.updateClient(clientId, {
+        name: data.name,
+        email: data.email,
+        phone: data.phone || '',
+        address: data.address || '',
+        notes: data.notes || ''
+      });
+
+      await loadClients();
     } catch (error) {
-      handleError(error, 'Updating notes');
-      return [];
+      handleError(error, 'Updating client');
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -364,13 +400,15 @@ export const AuctionProvider = ({ children }) => {
       
       // New API-based methods
       loadEncheres,
-      addEnchere,
+  addEnchere,
+  deleteEnchere,
       updateEnchere,
       loadClients,
       addOrUpdateClient,
       addParticipant,
       addBundle,
       updateBundle,
+  deleteBundle,
       addSale,
       getEnchereStats,
       getClientPurchases,

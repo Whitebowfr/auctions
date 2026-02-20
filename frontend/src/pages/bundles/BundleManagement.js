@@ -9,7 +9,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuction } from '../../context/AuctionContext';
 import styles from './BundleManagement.module.css';
 import BundleCard from '../../components/bundles/BundleCard';
-import AddBundleDialog from '../../components/bundles/AddBundleDialog';
 import SellBundleDialog from '../../components/bundles/SellBundleDialog';
 // image handling removed for lightweight backend
 import { processBulkBundleImport } from '../../utils/bundleUtils';
@@ -20,20 +19,7 @@ const BundleManagement = () => {
   const { auctions, addBundle, addSale, updateBundle } = useAuction(); // Add updateBundle
   
   const auction = auctions.find(a => a.id === parseInt(id));
-  const [openDialog, setOpenDialog] = useState(false);
-  const [formData, setFormData] = useState({
-    id: null,
-    name: '',
-    description: '',
-    starting_price: '',
-    category: '',
-    notes: '',
-    imageFile: null,
-    imagePreview: ''
-  });
-
-  // Add isEditMode state
-  const [isEditMode, setIsEditMode] = useState(false);
+  // Legacy add/edit dialog removed; lots are now managed inline in AuctionDetail
 
   // Add this state for the sell dialog
   const [sellDialog, setSellDialog] = useState(false);
@@ -58,83 +44,6 @@ const BundleManagement = () => {
   if (!auction) {
     return <Alert severity="error">Vente non trouvée.</Alert>;
   }
-
-  // Handle Edit Bundle
-  const handleEditBundle = (bundle) => {
-    // Set form data with bundle values (image fields removed)
-    setFormData({
-      id: bundle.id,
-      name: bundle.name || '',
-      description: bundle.description || '',
-      starting_price: bundle.starting_price || '',
-      category: bundle.category || '',
-      notes: bundle.notes || '',
-      imageFile: null,
-      imagePreview: ''
-    });
-    
-    // Set edit mode and open dialog
-    setIsEditMode(true);
-    setOpenDialog(true);
-  };
-
-  const handleSubmit = async () => {
-    // Different handling for add vs edit
-    if (isEditMode) {
-      // Update existing bundle
-      const bundleData = {
-        id: formData.id,
-        name: formData.name,
-        description: formData.description,
-        startingPrice: parseFloat(formData.starting_price) || 0,
-        category: formData.category,
-        notes: formData.notes,
-        imageFile: formData.imageFile
-      };
-      
-      try {
-        await updateBundle(bundleData);
-        
-        // Clean up form and close dialog
-        resetForm();
-        setOpenDialog(false);
-        setIsEditMode(false);
-      } catch (error) {
-        console.error('Failed to update bundle:', error);
-      }
-    } else {
-      // Add new bundle
-      const bundleData = {
-        name: formData.name,
-        description: formData.description,
-        startingPrice: parseFloat(formData.starting_price) || 0,
-        category: formData.category,
-        notes: formData.notes,
-        imageFile: formData.imageFile
-      };
-      
-      try {
-        await addBundle(auction.id, bundleData);
-        resetForm();
-        setOpenDialog(false);
-      } catch (error) {
-        console.error('Failed to add bundle:', error);
-      }
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      id: null,
-      name: '',
-      description: '',
-      starting_price: '',
-      category: '',
-      notes: '',
-      imageFile: null,
-      imagePreview: ''
-    });
-  };
 
   const handleImageUpload = (event) => {
     // image uploads removed
@@ -196,7 +105,6 @@ const BundleManagement = () => {
       
       // Reset form and close dialog
       setBulkText('');
-      setOpenDialog(false);
       setIsLoading(false);
       
       // Refresh the page to show new bundles
@@ -207,9 +115,27 @@ const BundleManagement = () => {
     }
   };
 
-  // Sort bundles into available and sold
-  const availableBundles = auction.bundles.filter(b => !b.sold_to).sort((a, b) => a.id - b.id);
-  const soldBundles = auction.bundles.filter(b => b.sold_to).sort((a, b) => a.id - b.id);
+  // Sort bundles into available and sold using custom lot number (supports 9bis, 9ter)
+  const parseLotNumber = (value) => {
+    if (value === null || value === undefined) return { base: 0, suffixOrder: 0 };
+    const str = String(value).trim();
+    const match = str.match(/^(\d+)([a-zA-Z]*)$/);
+    if (!match) return { base: 0, suffixOrder: 0 };
+    const base = parseInt(match[1], 10);
+    const suffix = match[2].toLowerCase();
+    const map = { 'bis': 1, 'ter': 2, 'quater': 3 };
+    return { base, suffixOrder: map[suffix] || 0 };
+  };
+
+  const lotComparator = (a, b) => {
+    const aParsed = parseLotNumber(a.number ?? a.id);
+    const bParsed = parseLotNumber(b.number ?? b.id);
+    if (aParsed.base !== bParsed.base) return aParsed.base - bParsed.base;
+    return aParsed.suffixOrder - bParsed.suffixOrder;
+  };
+
+  const availableBundles = auction.bundles.filter(b => !b.sold_to).sort(lotComparator);
+  const soldBundles = auction.bundles.filter(b => b.sold_to).sort(lotComparator);
 
   // Add this for bundle deletion
   const handleDeleteBundle = (bundleId) => {
@@ -273,17 +199,7 @@ const BundleManagement = () => {
         <Typography variant="h4" className={styles.title}>
           📦 Lots - {auction.name}
         </Typography>
-        <Button 
-          variant="contained" 
-          onClick={() => {
-            resetForm();
-            setIsEditMode(false);
-            setOpenDialog(true);
-          }}
-          className={styles.addButton}
-        >
-          ➕ Ajouter un lot
-        </Button>
+        {/* Lots are now added from the AuctionDetail view; keep only navigation and stats here */}
       </Box>
 
       <Alert severity="info" className={styles.infoAlert}>
@@ -314,7 +230,7 @@ const BundleManagement = () => {
                 bundle={bundle}
                 isSold={false}
                 onSell={handleSellBundle}
-                onEdit={handleEditBundle}
+                onEdit={() => {}}
                 onDelete={handleDeleteBundle}
               />
             ))}
@@ -337,32 +253,13 @@ const BundleManagement = () => {
                 bundle={bundle}
                 isSold={true}
                 onViewSale={handleViewSale}
-                onEdit={handleEditBundle}
+                onEdit={() => {}}
                 onDelete={handleDeleteBundle}
               />
             ))}
           </Box>
         </>
       )}
-
-      {/* Add/Edit Bundle Dialog */}
-      <AddBundleDialog
-        open={openDialog}
-        onClose={() => {
-          setOpenDialog(false);
-          setIsEditMode(false);
-          resetForm();
-        }}
-        formData={formData}
-        setFormData={setFormData}
-        handleSubmit={handleSubmit}
-        handleBulkImport={handleBulkImport}
-        /* image upload removed */
-        existingCategories={existingCategories}
-        bulkText={bulkText}
-        setBulkText={setBulkText}
-        isEditMode={isEditMode}
-      />
 
       {/* Sell Bundle Dialog */}
       <SellBundleDialog

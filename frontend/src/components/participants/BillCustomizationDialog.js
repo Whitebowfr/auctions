@@ -26,7 +26,10 @@ const BillCustomizationDialog = ({
     includeNotes: true,
     paid: false,
     footer: `${auction?.name || 'Vente aux enchères'} - Le ${new Date().toLocaleDateString("fr-FR")}`,
-    name: `${participant?.name}`
+    name: `${participant?.name}`,
+    email: participant?.email || '',
+    address: participant?.address || '',
+    phone: participant?.phone || ''
   });
 
   const [logoFile, setLogoFile] = useState(null);
@@ -98,6 +101,16 @@ const BillCustomizationDialog = ({
           </Grid>
           
           <Grid sx={{xs: 12, sm: 6}}>
+            <TextField
+              fullWidth
+              label="Email affiché"
+              value={customizations.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              className={styles.modernTextField}
+            />
+          </Grid>
+          
+          <Grid sx={{xs: 12, sm: 6}}>
             <InputLabel sx={{ mb: 1 }}>Logo (optionnel)</InputLabel>
             <Box>
               <input
@@ -124,6 +137,29 @@ const BillCustomizationDialog = ({
               label="Pied de page"
               value={customizations.footer}
               onChange={(e) => handleChange('footer', e.target.value)}
+              className={styles.modernTextField}
+            />
+          </Grid>
+
+          <Grid sx={{xs: 12}}>
+            <TextField
+              fullWidth
+              label="Adresse affichée"
+              value={customizations.address}
+              onChange={(e) => handleChange('address', e.target.value)}
+              multiline
+              minRows={2}
+              maxRows={4}
+              className={styles.modernTextField}
+            />
+          </Grid>
+
+          <Grid sx={{xs: 12, sm: 6}}>
+            <TextField
+              fullWidth
+              label="Téléphone affiché"
+              value={customizations.phone}
+              onChange={(e) => handleChange('phone', e.target.value)}
               className={styles.modernTextField}
             />
           </Grid>

@@ -16,11 +16,16 @@ import {
   Button,
   Chip,
   Avatar,
-  Pagination
+  Pagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Search, Email, Phone } from '@mui/icons-material';
 import { useAuction } from '../../context/AuctionContext';
+import BulkImportForm from '../../components/participants/BulkImportForm';
 import tableStyles from '../../components/ModernTable.module.css';
 import styles from './ClientsDirectory.module.css';
 import { formatAsPhoneNumber } from '../../utils/formatters';
@@ -31,6 +36,8 @@ const ClientsDirectory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [bulkText, setBulkText] = useState('');
 
   // Filter clients based on search term
   const filteredClients = globalParticipants.filter(client => 
@@ -78,34 +85,45 @@ const ClientsDirectory = () => {
     <Box className={styles.container}>
       <Box className={styles.header}>
         <Typography variant="h4" className={styles.title}>
-          Répertoire des clients
+          Répertoire des acheteurs
         </Typography>
-        <TextField
-          placeholder="Rechercher un client..."
-          variant="outlined"
-          className={styles.searchField}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          slotProps={{
-            input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            )}
-          }}
-        />
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <TextField
+            placeholder="Rechercher un acheteur..."
+            variant="outlined"
+            className={styles.searchField}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search />
+                  </InputAdornment>
+                )
+              }
+            }}
+          />
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+            onClick={() => setImportDialogOpen(true)}
+          >
+            Import CSV
+          </Button>
+        </Box>
       </Box>
 
       <Card className={styles.statsCard}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            Vue d'ensemble
+            Vue d'ensemble des acheteurs
           </Typography>
           <Box className={styles.statsContainer}>
             <Box className={styles.statItem}>
               <Typography variant="h4">{globalParticipants.length}</Typography>
-              <Typography variant="body2">Clients au total</Typography>
+              <Typography variant="body2">Acheteurs au total</Typography>
             </Box>
             <Box className={styles.statItem}>
               <Typography variant="h4">
@@ -117,21 +135,21 @@ const ClientsDirectory = () => {
               <Typography variant="h4">
                 {auctions.reduce((sum, auction) => sum + auction.sales.length, 0)}
               </Typography>
-              <Typography variant="body2">Achats</Typography>
+              <Typography variant="body2">Lots adjugés</Typography>
             </Box>
           </Box>
         </CardContent>
       </Card>
 
-      <TableContainer component={Paper} className={tableStyles.tableContainer}>
+      <TableContainer component={Paper} className={tableStyles.tableContainer} sx={{ maxWidth: '100%' }}>
         <Table>
           <TableHead className={tableStyles.tableHeader}>
             <TableRow>
-              <TableCell className={tableStyles.tableHeaderCell}>Client</TableCell>
+              <TableCell className={tableStyles.tableHeaderCell}>Acheteur</TableCell>
               <TableCell className={tableStyles.tableHeaderCell}>Contact</TableCell>
               <TableCell className={tableStyles.tableHeaderCell}>Participations</TableCell>
-              <TableCell className={tableStyles.tableHeaderCell}>Achats</TableCell>
-              <TableCell className={tableStyles.tableHeaderCell}>Total dépensé</TableCell>
+              <TableCell className={tableStyles.tableHeaderCell}>Lots adjugés</TableCell>
+              <TableCell className={tableStyles.tableHeaderCell}>Total adjudications</TableCell>
               <TableCell className={tableStyles.tableHeaderCell}>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -234,6 +252,31 @@ const ClientsDirectory = () => {
           className={styles.pagination}
         />
       </Box>
+
+      {/* Import CSV dialog for bulk adding buyers (reuses participants bulk form) */}
+      <Dialog
+        open={importDialogOpen}
+        onClose={() => setImportDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        className={tableStyles.modernDialog}
+      >
+        <DialogTitle>Import CSV des acheteurs</DialogTitle>
+        <DialogContent>
+          <BulkImportForm bulkText={bulkText} setBulkText={setBulkText} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setImportDialogOpen(false)}>Annuler</Button>
+          <Button
+            variant="contained"
+            disabled={!bulkText.trim()}
+            // TODO: plug into a dedicated bulk client import handler
+            onClick={() => setImportDialogOpen(false)}
+          >
+            Importer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

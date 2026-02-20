@@ -41,7 +41,7 @@ const Reports = () => {
   const auction = auctions.find(a => a.id === parseInt(id));
   const [feeSettingsOpen, setFeeSettingsOpen] = useState(false);
   const [managementFeeRate, setManagementFeeRate] = useState(
-    auction?.managementFeeRate || 11.8
+    auction?.managementFeeRate || 11.9
   );
 
   if (!auction) {
@@ -53,7 +53,7 @@ const Reports = () => {
   const totalProfit = totalRevenue - totalStartingValue;
   
   // Calculate management fees
-  const feeRate = auction.managementFeeRate || 11.8;
+  const feeRate = auction.managementFeeRate || 11.9;
   const managementFee = totalRevenue * (feeRate / 100);
   const vatOnFee = managementFee * 0.2; // 20% VAT
   const totalFees = managementFee + vatOnFee;

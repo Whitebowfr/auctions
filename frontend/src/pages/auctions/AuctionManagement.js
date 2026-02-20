@@ -12,8 +12,10 @@ import {
   Card,
   CardContent,
   Chip,
-  CardActions
+  CardActions,
+  IconButton
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useNavigate } from 'react-router-dom';
 import { useAuction } from '../../context/AuctionContext';
@@ -27,7 +29,7 @@ import { formatDate } from '../../utils/formatters';
 
 const AuctionManagement = () => {
   const navigate = useNavigate();
-  const { encheres, addEnchere, loading, error, loadEncheres } = useAuction();
+  const { encheres, addEnchere, deleteEnchere, loading, error, loadEncheres } = useAuction();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -138,6 +140,19 @@ const AuctionManagement = () => {
               >
                 Voir le détail →
               </Button>
+              <IconButton
+                size="small"
+                color="error"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (window.confirm('Supprimer cette vente et toutes les données associées ?')) {
+                    await deleteEnchere(enchere.id);
+                  }
+                }}
+                sx={{ ml: 1 }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
             </CardActions>
           </Card>
         )})}

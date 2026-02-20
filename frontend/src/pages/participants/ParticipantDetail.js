@@ -21,8 +21,6 @@ import {
   Home,
   DateRange,
   ShoppingCart,
-  TrendingUp,
-  TrendingDown,
   Inventory2,
   Edit,
   Receipt,
@@ -60,7 +58,7 @@ const ParticipantDetail = () => {
   
   // Calculate totals using the correct field names
   const totalSpent = participantSales.reduce((sum, sale) => sum + (parseFloat(sale.finalPrice) || 0), 0);
-  const totalOwed = totalSpent + totalSpent * auction.managementFeeRate / 100 * 1.2
+  const totalOwed = totalSpent + totalSpent * auction.managementFeeRate / 100 * 1.2;
   const totalItems = participantSales.length;
   
   // Get bundle details for each purchase
@@ -100,7 +98,7 @@ const ParticipantDetail = () => {
   return (
     <Box className={styles.container}>
       <Button 
-        onClick={() => navigate(`/auction/${auction.id}`)} 
+        onClick={() => navigate(`/auction/${auction.id}?tab=participants`)} 
         className={styles.backButton}
         startIcon={<ArrowBack />}
       >
@@ -199,46 +197,48 @@ const ParticipantDetail = () => {
               {formatCurrency(totalSpent)}
             </Typography>
             <Typography className={styles.summaryLabel}>
-              Total dépensé
+              Total Adjudications
             </Typography>
           </CardContent>
         </Card>
       </Box>
 
       {/* Action Buttons */}
-      <Box className={styles.actionButtons} sx={{ display: 'flex', gap: 2, mt: 2, mb: 3 }}>
+      <Box className={styles.actionButtons} sx={{ display: 'flex', gap: 2, mt: 3, mb: 4 }}>
         <Button
           variant="contained"
           color="primary"
           startIcon={<Receipt />}
           onClick={() => setBillDialog(true)}
           sx={{ 
-            borderRadius: '8px',
+            borderRadius: '999px',
+            px: 4,
+            py: 1.5,
+            fontSize: '1rem',
             textTransform: 'none',
-            fontWeight: 600,
-            boxShadow: '0 4px 6px rgba(37, 99, 235, 0.1)',
+            fontWeight: 700,
+            boxShadow: '0 6px 10px rgba(37, 99, 235, 0.25)',
             '&:hover': {
-              boxShadow: '0 6px 8px rgba(37, 99, 235, 0.2)',
+              boxShadow: '0 10px 18px rgba(37, 99, 235, 0.35)',
               transform: 'translateY(-2px)'
             },
             transition: 'all 0.2s'
           }}
         >
-          Générer une facture
+          Générer la facture
         </Button>
         
         {participantSales.length > 0 && (
           <Button
-            variant="outlined"
+            variant="text"
             color="primary"
             startIcon={<PictureAsPdf />}
             onClick={() => handleGenerateBill({})} // Use default settings
             sx={{ 
-              borderRadius: '8px',
               textTransform: 'none',
-              fontWeight: 600,
+              fontWeight: 500,
               '&:hover': {
-                transform: 'translateY(-2px)'
+                transform: 'translateY(-1px)'
               },
               transition: 'all 0.2s'
             }}
@@ -275,37 +275,13 @@ const ParticipantDetail = () => {
                   <Typography variant="h6" className={styles.bundleName}>
                     {purchase.bundle?.name || `Lot #${purchase.bundleId}`}
                   </Typography>
-                  
-                  <Typography className={styles.bundleDescription}>
-                    {purchase.bundle?.description || 'Pas de description disponible'}
-                  </Typography>
-                  
-                  <Box className={styles.priceInfo} sx={{mt: 1}}>
-                    <Box>
-                      <Typography className={styles.startingPrice}>
-                        Prix de départ : <br/>{formatCurrency(purchase.startingPrice)}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography className={styles.finalPrice}>
-                        Prix final : <br/>{formatCurrency(purchase.finalPrice)}
-                      </Typography>
-                    </Box>
+
+                  <Box sx={{ mt: 2 }}>
+                    <Typography className={styles.finalPrice}>
+                      Montant adjugé : <br />{formatCurrency(purchase.finalPrice)}
+                    </Typography>
                   </Box>
-                  
-                  <Box className={`${styles.profitLoss} ${(parseFloat(purchase.profit) || 0) >= 0 ? styles.profit : styles.loss}`}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {(parseFloat(purchase.profit) || 0) >= 0 ? 
-                        <TrendingUp color="success" /> : 
-                        <TrendingDown color="error" />
-                      }
-                      <Typography>
-                        {(parseFloat(purchase.profit) || 0) >= 0 ? '+' : ''}{formatCurrency(purchase.profit)}
-                        {(parseFloat(purchase.profit) || 0) >= 0 ? ' au-dessus' : ' en-dessous'} du prix de départ
-                      </Typography>
-                    </Box>
-                  </Box>
-                  
+
                   {purchase.notes && (
                     <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic', color: '#64748b' }}>
                       Notes : {purchase.notes}

@@ -176,6 +176,9 @@ const ParticipantForm = ({
                     <TextField
                         fullWidth
                         label="Adresse"
+                        multiline
+                        minRows={2}
+                        maxRows={4}
                         value={participantForm.address}
                         onChange={(e) => handleFormChange('address', e.target.value)}
                         className={dialogStyles.modernTextField}

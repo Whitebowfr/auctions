@@ -59,6 +59,10 @@ class ApiService {
     return this.request('/encheres');
   }
 
+  async getAuctionsWithDetails() {
+    return this.request('/encheres/with-details/all');
+  }
+
   async createAuction(auction) {
     return this.request('/encheres', {
       method: 'POST',
@@ -97,6 +101,7 @@ class ApiService {
     return this.request(`/encheres/${auctionId}/lots`, {
       method: 'POST',
       body: {
+        number: bundle.number,
         name: bundle.name,
         description: bundle.description,
         category: bundle.category,
@@ -110,6 +115,7 @@ class ApiService {
     return this.request(`/lots/${bundleId}`, {
       method: 'PUT',
       body: {
+        number: bundle.number,
         name: bundle.name,
         description: bundle.description,
         category: bundle.category,

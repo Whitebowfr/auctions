@@ -72,7 +72,16 @@ const AddBundleDialog = ({
         {(tabValue === 0 || isEditMode) ? (
           // Single Bundle Form
           <Grid container spacing={3} className={styles.formGrid}>
-            <Grid sx={{xs: 12}}>
+            <Grid sx={{xs: 12, sm: 4}}>
+              <TextField
+                fullWidth
+                label="Numéro du lot (ex: 1, 9bis, 9ter)"
+                value={formData.number || ''}
+                onChange={(e) => setFormData({...formData, number: e.target.value})}
+                className={dialogStyles.modernTextField}
+              />
+            </Grid>
+            <Grid sx={{xs: 12, sm: 8}}>
               <TextField
                 fullWidth
                 label="Nom du lot"

@@ -3,6 +3,7 @@ const router = express.Router();
 const { asyncHandler } = require('../middleware/asyncHandler');
 const {
   getAllEncheres,
+  getAllEncheresWithDetails,
   getEnchereById,
   createEnchere,
   updateEnchere,
@@ -12,6 +13,9 @@ const { getLotsForEnchere, createLot } = require('../controllers/lotController')
 
 // GET /api/encheres
 router.get('/', asyncHandler(getAllEncheres));
+
+// GET /api/encheres/with-details (aggregated view)
+router.get('/with-details/all', asyncHandler(getAllEncheresWithDetails));
 
 // GET /api/encheres/:id
 router.get('/:id', asyncHandler(getEnchereById));

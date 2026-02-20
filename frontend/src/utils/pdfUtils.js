@@ -22,7 +22,10 @@ export const generateParticipantBill = (participant, purchases, auction, customi
     includeNotes: customizations.includeNotes !== undefined ? customizations.includeNotes : true,
     footer: customizations.footer || `${auction.name} - Édité le ${new Date().toLocaleDateString("fr-FR")}`,
     paid: customizations.paid || false,
-    participant: customizations.participantName || participant.name
+    participant: customizations.participantName || customizations.name || participant.name,
+    address: customizations.address || participant.address || '',
+    email: customizations.email || participant.email || '',
+    phone: customizations.phone || participant.phone || ''
   };
 
   // Add logo if provided
@@ -37,15 +40,14 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   doc.setFontSize(11);
   doc.setTextColor('#000000');
   doc.text(`Nom: ${options.participant}`, 130, 35);
-  doc.text(`Email: ${participant.email || 'Non spécifié'}`, 130, 42);
-  doc.text(`Téléphone: ${participant.phone || 'Non spécifié'}`, 130, 49);
-  doc.text(`Numéro d'enchérisseur: #${participant.local_number}`, 130, 56);
-
-  doc.setTextColor('#666666');
-  doc.text(`VENTE DU ${formatDate(auction.date)} à ${auction.address || 'Non spécifié'}`, 14, 77);
+  doc.text(`Email: ${options.email || 'Non spécifié'}`, 130, 42);
+  doc.text(`Adresse: ${options.address || 'Non spécifiée'}`, 130, 49, { maxWidth: 70 });
+  doc.text(`Téléphone: ${options.phone || 'Non spécifié'}`, 130, 63);
+  doc.text(`Numéro d'enchérisseur: #${participant.local_number}`, 130, 70);
 
   doc.setTextColor('#666666');
   doc.text(options.title, 14, 71);
+  doc.text(`VENTE DU ${formatDate(auction.date)} à ${auction.address || 'Non spécifié'}`, 14, 77);
 
   doc.setTextColor('#000000');
 
@@ -53,16 +55,20 @@ export const generateParticipantBill = (participant, purchases, auction, customi
 
   const totalAmount = purchases.reduce((sum, purchase) => sum + parseFloat(purchase.finalPrice || 0), 0);
 
-  let tableBody = purchases.map(purchase => [
-      purchase.bundle?.name || `Lot #${purchase.bundleId}`,
-      purchase.bundle?.description?.substring(0, 30) + (purchase.bundle?.description?.length > 30 ? '...' : '') || 'Pas de description',
+  let tableBody = purchases.map(purchase => {
+    const bundle = purchase.bundle || {};
+    const lotNumber = bundle.number ?? bundle.id ?? purchase.bundleId;
+    return [
+      lotNumber,
+      bundle.name || `Lot sans nom`,
       `${formatCurrency(purchase.finalPrice)}`,
-    ])
+    ];
+  });
 
   // Add purchases table
   doc.autoTable({
     startY: 110,
-    head: [['Lot', 'Description', 'Prix (TTC)']],
+    head: [['N. Lot', 'Description', 'Prix (TTC)']],
     body: tableBody,
     headStyles: {
       fillColor: '#2563eb',

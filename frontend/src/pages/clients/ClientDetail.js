@@ -60,7 +60,7 @@ const ClientDetail = () => {
     return (
       <Box className={styles.container}>
         <Typography variant="h5" color="error">
-          Client non trouvé.
+          Acheteur non trouvé.
         </Typography>
         <Button 
           startIcon={<ArrowBack />} 
@@ -107,7 +107,8 @@ const ClientDetail = () => {
   };
   
   const handleViewAuction = (auctionId) => {
-    navigate(`/auction/${auctionId}/participant/${id}`);
+    // Redirect to the auction detail page, participants tab
+    navigate(`/auction/${auctionId}?tab=participants&clientId=${client.id}`);
   };
 
   const handleOpenEditDialog = () => {
@@ -152,7 +153,7 @@ const ClientDetail = () => {
       </Button>
       
       <Box className={styles.header}>
-        <Box className={styles.clientHeader}>
+  <Box className={styles.clientHeader}>
           <Avatar className={styles.clientAvatar}>
             {client.name.charAt(0).toUpperCase()}
           </Avatar>
@@ -176,7 +177,7 @@ const ClientDetail = () => {
       </Box>
       
       <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={4} lg={3}>
           <Card className={styles.infoCard}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -198,7 +199,14 @@ const ClientDetail = () => {
               <Box className={styles.contactItem}>
                 <LocationOn color="primary" />
                 <Typography>
-                  {client.address || "Pas d'adresse renseignée"}
+                  {client.address
+                    ? client.address.split('\n').map((line, idx) => (
+                        <React.Fragment key={idx}>
+                          {line}
+                          {idx < client.address.split('\n').length - 1 && <br />}
+                        </React.Fragment>
+                      ))
+                    : "Pas d'adresse renseignée"}
                 </Typography>
               </Box>
               
@@ -223,7 +231,7 @@ const ClientDetail = () => {
                     {totalPurchases}
                   </Typography>
                   <Typography variant="body2" className={styles.statLabel}>
-                    Achats totaux
+                    Lots adjugés
                   </Typography>
                 </Box>
                 
@@ -232,16 +240,7 @@ const ClientDetail = () => {
                     {formatCurrency(totalSpent)}
                   </Typography>
                   <Typography variant="body2" className={styles.statLabel}>
-                    Dépense totale
-                  </Typography>
-                </Box>
-                
-                <Box className={styles.statItem}>
-                  <Typography variant="h4" className={styles.statValue}>
-                    {formatCurrency(averagePurchase)}
-                  </Typography>
-                  <Typography variant="body2" className={styles.statLabel}>
-                    Moyenne / achat
+                    Total adjudications
                   </Typography>
                 </Box>
               </Box>
@@ -261,8 +260,8 @@ const ClientDetail = () => {
           </Card>
         </Grid>
         
-        <Grid sx={{xs: 12, md: 8}}>
-          <Paper className={styles.tabsContainer}>
+        <Grid item xs={12} md={8} lg={9}>
+          <Paper className={styles.tabsContainer} sx={{ width: '100%', overflowX: 'auto' }}>
             <Tabs
               value={tabValue}
               onChange={handleTabChange}
@@ -457,10 +456,13 @@ const ClientDetail = () => {
                 helperText={validatePhoneNumber(editForm.phone)}
               />
             </Grid>
-            <Grid sx={{xs: 12, sm: 6}}>
+            <Grid sx={{xs: 12}}>
               <TextField
                 fullWidth
                 label="Adresse"
+                multiline
+                minRows={2}
+                maxRows={4}
                 value={editForm.address}
                 onChange={(e) => handleEditFormChange('address', e.target.value)}
                 className={dialogStyles.modernTextField}
