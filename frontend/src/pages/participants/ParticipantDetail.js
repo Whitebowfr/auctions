@@ -273,7 +273,7 @@ const ParticipantDetail = () => {
               <Card key={purchase.id} className={styles.purchaseCard}>
                 <CardContent className={styles.purchaseCardContent}>
                   <Typography variant="h6" className={styles.bundleName}>
-                    {purchase.bundle?.name || `Lot #${purchase.bundleId}`}
+                    Lot N. {purchase.bundle?.number || "?"} - {purchase.bundle?.name || `Lot #${purchase.bundleId}`}
                   </Typography>
 
                   <Box sx={{ mt: 2 }}>
@@ -300,7 +300,7 @@ const ParticipantDetail = () => {
               {formatCurrency(totalOwed)}
             </Typography>
             <Typography className={styles.summaryLabel}>
-              (Dont Honoraires : `${formatCurrency(totalSpent*auction.managementFeeRate/100*1.2)} TTC`)
+              (Dont Honoraires : {formatCurrency(totalSpent*auction.managementFeeRate/100*1.2)} TTC)
             </Typography>
           </Paper>
         </>

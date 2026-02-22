@@ -34,15 +34,15 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   }
 
   doc.setFontSize(11)
-  doc.text('S.C.P R. GRANIER - L. DAVID \n Commissaires de Justice associés \n 66, rue de la République \n BP 52 \n 47202 MARMANDE Cedex \n\n Tél : 05 53 64 12 59 \n Fax : 05 53 64 07 15 \n etude@huisser47.fr \n CDC 40031 000011 43474Z 67', 45, 12, { align: "center"})
+  doc.text('S.C.P R. GRANIER - L. DAVID \n Commissaires de Justice associés \n 66, rue de la République \n BP 52 \n 47202 MARMANDE Cedex \n\n Tél : 05 53 64 12 59 \n Fax : 05 53 64 07 15 \n etude@huissier47.fr \n CDC 40031 000011 43474Z 67', 45, 12, { align: "center"})
 
 
   doc.setFontSize(11);
   doc.setTextColor('#000000');
-  doc.text(`Nom: ${options.participant}`, 130, 35);
-  doc.text(`Email: ${options.email || 'Non spécifié'}`, 130, 42);
-  doc.text(`Adresse: ${options.address || 'Non spécifiée'}`, 130, 49, { maxWidth: 70 });
-  doc.text(`Téléphone: ${options.phone || 'Non spécifié'}`, 130, 63);
+  doc.text(`${options.participant}`, 130, 35);
+  doc.text(`${options.email || 'Non spécifié'}`, 130, 42);
+  doc.text(`${options.address || 'Non spécifiée'}`, 130, 49, { maxWidth: 70 });
+  doc.text(`${options.phone || 'Non spécifié'}`, 130, 63);
   doc.text(`Numéro d'enchérisseur: #${participant.local_number}`, 130, 70);
 
   doc.setTextColor('#666666');
@@ -51,7 +51,7 @@ export const generateParticipantBill = (participant, purchases, auction, customi
 
   doc.setTextColor('#000000');
 
-  doc.text('\t\t Madame, monsieur, \n\n \t\t Je vous prie de trouver ci-dessous, le détail des achats que vous avez effectués lors de la vente \n référencée en marge, à savoir :', 10, 90)
+  doc.text('\t\t Madame, Monsieur, \n\n \t\t Je vous prie de trouver ci-dessous, le détail des achats que vous avez effectués lors de la vente \n référencée en marge, à savoir :', 10, 90)
 
   const totalAmount = purchases.reduce((sum, purchase) => sum + parseFloat(purchase.finalPrice || 0), 0);
 
