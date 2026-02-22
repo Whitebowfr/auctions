@@ -44,3 +44,5 @@
 - ~~Achat moyens a retirer~~
 - ~~Ajout bouton import en masse sur la page client (CSV)~~
 - Meilleur tableau récapitulatif (plus large)
+
+- Bouton ajouter ne marche plus
