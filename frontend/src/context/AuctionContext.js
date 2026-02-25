@@ -206,6 +206,20 @@ export const AuctionProvider = ({ children }) => {
     }
   };
 
+  const deleteClient = async (clientId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await apiService.deleteClient(clientId);
+      await loadClients();
+    } catch (error) {
+      handleError(error, 'Deleting client');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Participants operations
   const addParticipant = async (enchereId, participantData) => {
     try {

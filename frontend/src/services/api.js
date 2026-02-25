@@ -50,6 +50,12 @@ class ApiService {
     });
   }
 
+  async deleteClient(id) {
+    return this.request(`/clients/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   async getClient(id) {
     return this.request(`/clients/${id}`);
   }

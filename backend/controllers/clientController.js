@@ -23,7 +23,7 @@ const getClientById = async (req, res) => {
  */
 const createClient = async (req, res) => {
   const { name, email, phone, address } = req.body;
-  if (!name || !email) return res.status(400).json({ message: 'Name and email are required' });
+  if (!name) return res.status(400).json({ message: 'Name is required' });
 
   const existing = db.getAll('clients').find(c => (c.email || '').toLowerCase() === (email || '').toLowerCase());
   if (existing) return res.status(409).json({ message: 'Client with this email already exists' });

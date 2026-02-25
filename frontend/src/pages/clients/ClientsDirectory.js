@@ -23,7 +23,7 @@ import {
   DialogActions
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Search, Email, Phone } from '@mui/icons-material';
+import { Search, Email, Phone, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useAuction } from '../../context/AuctionContext';
 import BulkImportForm from '../../components/participants/BulkImportForm';
 import tableStyles from '../../components/ModernTable.module.css';
@@ -32,12 +32,21 @@ import { formatAsPhoneNumber } from '../../utils/formatters';
 
 const ClientsDirectory = () => {
   const navigate = useNavigate();
-  const { clients: globalParticipants, auctions } = useAuction();
+  const { clients: globalParticipants, auctions, addOrUpdateClient, deleteClient } = useAuction();
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [bulkText, setBulkText] = useState('');
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [newClientForm, setNewClientForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: ''
+  });
+
+  const [deletingClient, setDeletingClient] = useState(null);
 
   // Filter clients based on search term
   const filteredClients = globalParticipants.filter(client => 
@@ -81,6 +90,21 @@ const ClientsDirectory = () => {
     navigate(`/clients/${client.id}`);
   };
 
+  const handleNewClientChange = (field, value) => {
+    setNewClientForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleCreateClient = async () => {
+    if (!newClientForm.name?.trim()) return;
+    try {
+      await addOrUpdateClient(newClientForm);
+      setNewClientForm({ name: '', email: '', phone: '', address: '' });
+      setAddDialogOpen(false);
+    } catch (e) {
+      // error handled in context
+    }
+  };
+
   return (
     <Box className={styles.container}>
       <Box className={styles.header}>
@@ -111,6 +135,15 @@ const ClientsDirectory = () => {
             onClick={() => setImportDialogOpen(true)}
           >
             Import CSV
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => setAddDialogOpen(true)}
+          >
+            Nouvel acheteur
           </Button>
         </Box>
       </Box>
@@ -218,14 +251,33 @@ const ClientsDirectory = () => {
                 </TableCell>
                 
                 <TableCell className={tableStyles.tableCell}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => handleViewClient(client)}
-                    className={styles.viewButton}
-                  >
-                    Voir le profil
-                  </Button>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleViewClient(client)}
+                      className={styles.viewButton}
+                    >
+                      Voir le profil
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={async () => {
+                        if (window.confirm(`Supprimer l'acheteur "${client.name}" ?`)) {
+                          try {
+                            await deleteClient(client.id);
+                          } catch (e) {
+                            // handled in context
+                          }
+                        }
+                      }}
+                    >
+                      Supprimer
+                    </Button>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
@@ -253,7 +305,7 @@ const ClientsDirectory = () => {
         />
       </Box>
 
-      {/* Import CSV dialog for bulk adding buyers (reuses participants bulk form) */}
+  {/* Import CSV dialog for bulk adding buyers (reuses participants bulk form) */}
       <Dialog
         open={importDialogOpen}
         onClose={() => setImportDialogOpen(false)}
@@ -277,6 +329,61 @@ const ClientsDirectory = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Add new client dialog */}
+      <Dialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Nouvel acheteur</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <TextField
+              label="Nom"
+              fullWidth
+              required
+              value={newClientForm.name}
+              onChange={(e) => handleNewClientChange('name', e.target.value)}
+            />
+            <TextField
+              label="Email"
+              fullWidth
+              type="email"
+              value={newClientForm.email}
+              onChange={(e) => handleNewClientChange('email', e.target.value)}
+            />
+            <TextField
+              label="Téléphone"
+              fullWidth
+              value={newClientForm.phone}
+              onChange={(e) => handleNewClientChange('phone', e.target.value)}
+            />
+            <TextField
+              label="Adresse"
+              fullWidth
+              multiline
+              minRows={2}
+              maxRows={4}
+              value={newClientForm.address}
+              onChange={(e) => handleNewClientChange('address', e.target.value)}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddDialogOpen(false)}>Annuler</Button>
+          <Button
+            variant="contained"
+            onClick={handleCreateClient}
+            disabled={!newClientForm.name.trim()}
+          >
+            Enregistrer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Native confirm used for delete; no extra dialog required */}
     </Box>
   );
 };
