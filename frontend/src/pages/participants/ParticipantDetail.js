@@ -31,12 +31,13 @@ import { useAuction } from '../../context/AuctionContext';
 import styles from './ParticipantDetail.module.css';
 import { formatCurrency } from '../../utils/formatters';
 import BillCustomizationDialog from '../../components/participants/BillCustomizationDialog';
-import { generateParticipantBill, downloadPDF } from '../../utils/pdfUtils';
+import { generateParticipantBill, downloadPDF, generateAndDownloadBill } from '../../utils/pdfUtils';
+import { setParticipationPaymentStatus } from '../../utils/paymentStatus';
 
 const ParticipantDetail = () => {
   const { auctionId, participantId } = useParams();
   const navigate = useNavigate();
-  const { auctions, updateClient } = useAuction();
+  const { auctions, updateClient, loadEncheres } = useAuction();
   
   const auction = auctions.find(a => a.id === parseInt(auctionId));
   const participant = auction?.participants.find(p => p.id === parseInt(participantId));
@@ -82,17 +83,47 @@ const ParticipantDetail = () => {
     }
   };
 
-  const handleGenerateBill = (customizations) => {
-    // Generate PDF bill
-    const doc = generateParticipantBill(
-      participant, 
-      purchaseDetails, 
-      auction, 
+  // const handleGenerateBill = (customizations) => {
+  //   // Generate PDF bill
+  //   const doc = generateParticipantBill(
+  //     participant, 
+  //     purchaseDetails, 
+  //     auction, 
+  //     customizations
+  //   );
+    
+  //   // Download the PDF
+  //   downloadPDF(doc, `facture-${participant.name.replace(/\s+/g, '-').toLowerCase()}-${auction.id}.pdf`);
+  // };
+
+  const handleGenerateBill = async (customizations) => {
+    console.log(participant)
+    const participationId = participant.participation_id;
+    if (!participationId) {
+      // fallback: no participation_id available, just download without marking
+      const doc = generateParticipantBill(participant, purchaseDetails, auction, customizations);
+      downloadPDF(doc, `facture-${participant.name.replace(/\s+/g, '-').toLowerCase()}-${auction.id}.pdf`);
+      return;
+    }
+    await generateAndDownloadBill(
+      participant,
+      participationId,
+      purchaseDetails,
+      auction,
       customizations
     );
-    
-    // Download the PDF
-    downloadPDF(doc, `facture-${participant.name.replace(/\s+/g, '-').toLowerCase()}-${auction.id}.pdf`);
+    await loadEncheres();
+  };
+
+  const handleResetPaymentStatus = async () => {
+    const participationId = participant.participation_id;
+    if (!participationId) return;
+    try {
+      await setParticipationPaymentStatus(participationId, null);
+      await loadEncheres();
+    } catch (e) {
+      console.error('[ParticipantDetail] Failed to reset payment status:', e);
+    }
   };
 
   return (
@@ -233,7 +264,7 @@ const ParticipantDetail = () => {
             variant="text"
             color="primary"
             startIcon={<PictureAsPdf />}
-            onClick={() => handleGenerateBill({})} // Use default settings
+            onClick={() => handleGenerateBill({})}
             sx={{ 
               textTransform: 'none',
               fontWeight: 500,
@@ -244,6 +275,22 @@ const ParticipantDetail = () => {
             }}
           >
             Télécharger facture rapide
+          </Button>
+        )}
+
+        {participant.paid !== null && participant.paid !== undefined && (
+          <Button
+            variant="outlined"
+            color="warning"
+            onClick={handleResetPaymentStatus}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 500,
+              borderRadius: '999px',
+              px: 3,
+            }}
+          >
+            Réinitialiser statut facture
           </Button>
         )}
       </Box>

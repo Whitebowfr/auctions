@@ -52,7 +52,10 @@ export const AuctionProvider = ({ children }) => {
           }
         }
 
-        const participants = enchere.participants || [];
+        const participants = (enchere.participants || []).map(p => ({
+          ...p,
+          paid: p.paid !== undefined ? p.paid : null
+        }));
         const lots = enchere.bundles || enchere.lots || [];
 
         return {

@@ -32,7 +32,7 @@ import { formatAsPhoneNumber } from '../../utils/formatters';
 
 const ClientsDirectory = () => {
   const navigate = useNavigate();
-  const { clients: globalParticipants, auctions, addOrUpdateClient, deleteClient } = useAuction();
+  const { clients: globalParticipants, auctions, addOrUpdateClient } = useAuction();
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
@@ -46,25 +46,23 @@ const ClientsDirectory = () => {
     address: ''
   });
 
-  const [deletingClient, setDeletingClient] = useState(null);
-
   // Filter clients based on search term
   const filteredClients = globalParticipants.filter(client => 
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.phone && client.phone.includes(searchTerm))
   );
 
   // Calculate client participation statistics
   const clientStats = filteredClients.map(client => {
     const participations = auctions.filter(auction => 
-      auction.participants.some(p => p.email.toLowerCase() === client.email.toLowerCase())
+      auction.participants.some(p => p.name.toLowerCase() === client.name.toLowerCase())
     );
     
     const purchases = auctions.flatMap(auction => 
       auction.sales.filter(sale => {
         const participant = auction.participants.find(p => p.id === sale.participantId);
-        return participant && participant.email.toLowerCase() === client.email.toLowerCase();
+        return participant && participant.name.toLowerCase() === client.name.toLowerCase();
       })
     );
     
@@ -97,11 +95,45 @@ const ClientsDirectory = () => {
   const handleCreateClient = async () => {
     if (!newClientForm.name?.trim()) return;
     try {
-      await addOrUpdateClient(newClientForm);
+      // Normalize optional fields so empty email never causes issues
+      const payload = {
+        ...newClientForm,
+        email: newClientForm.email?.trim() || '',
+        phone: newClientForm.phone?.trim() || '',
+        address: newClientForm.address?.trim() || ''
+      };
+
+      await addOrUpdateClient(payload);
       setNewClientForm({ name: '', email: '', phone: '', address: '' });
       setAddDialogOpen(false);
     } catch (e) {
       // error handled in context
+    }
+  };
+
+  const handleDeleteClient = async (client) => {
+    console.log('[ClientsDirectory] delete clicked for client:', client.id, client.name);
+    if (!window.confirm(`Supprimer l'acheteur "${client.name}" ?`)) {
+      console.log('[ClientsDirectory] delete canceled by user');
+      return;
+    }
+
+    try {
+      const url = `${process.env.REACT_APP_API_URL || 'http://localhost:8080/api'}/clients/${client.id}`;
+      console.log('[ClientsDirectory] calling DELETE', url);
+      const res = await fetch(url, { method: 'DELETE' });
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        console.error('[ClientsDirectory] delete client failed', res.status, body);
+        return;
+      }
+
+      console.log('[ClientsDirectory] client deleted successfully:', client.id);
+
+      // Refresh the current page so the client list and stats are up-to-date
+      navigate(0);
+    } catch (e) {
+      console.error('[ClientsDirectory] network error while deleting client', e);
     }
   };
 
@@ -209,7 +241,7 @@ const ClientsDirectory = () => {
                 
                 <TableCell className={tableStyles.tableCell}>
                   <Box className={styles.contactInfo}>
-                    {/* Fix: Change the nested structure to avoid div inside p */}
+                    {/* email can be empty or undefined; render placeholder */}
                     <Box className={styles.contactItem}>
                       <Email fontSize="small" color="action" />
                       <Typography component="span" variant="body2">
@@ -265,15 +297,7 @@ const ClientsDirectory = () => {
                       size="small"
                       color="error"
                       startIcon={<DeleteIcon />}
-                      onClick={async () => {
-                        if (window.confirm(`Supprimer l'acheteur "${client.name}" ?`)) {
-                          try {
-                            await deleteClient(client.id);
-                          } catch (e) {
-                            // handled in context
-                          }
-                        }
-                      }}
+                      onClick={() => handleDeleteClient(client)}
                     >
                       Supprimer
                     </Button>

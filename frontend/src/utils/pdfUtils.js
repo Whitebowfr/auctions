@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { formatCurrency, formatDate } from './formatters';
-import { applyPlugin } from 'jspdf-autotable'
+import { applyPlugin } from 'jspdf-autotable';
+import { setParticipationPaymentStatus } from './paymentStatus'
 
 /**
  * Generate a PDF bill for a participant
@@ -320,4 +321,37 @@ export const generateSalesRecap = (auction, sales, allBundles) => {
   }
   
   return doc;
+};
+
+/**
+ * Generate, download the bill PDF and mark the participation as billed (paid: false).
+ * Use this instead of calling generateParticipantBill + downloadPDF manually.
+ *
+ * @param {Object} participant   - participant object (must have .id for the DB record)
+ * @param {number} participationId - the participation table row id
+ * @param {Array}  purchases
+ * @param {Object} auction
+ * @param {Object} customizations
+ * @returns {Promise<void>}
+ */
+export const generateAndDownloadBill = async (
+  participant,
+  participationId,
+  purchases,
+  auction,
+  customizations = {}
+) => {
+  const doc = generateParticipantBill(participant, purchases, auction, customizations);
+  const filename = `facture_${participant.name.replace(/\s+/g, '_')}_${auction.name.replace(/\s+/g, '_')}.pdf`;
+  downloadPDF(doc, filename);
+
+  const paidStatus = customizations.paid === true ? true : false;
+
+
+  // Mark participation as billed but not yet paid
+  try {
+    await setParticipationPaymentStatus(participationId, paidStatus);
+  } catch (e) {
+    console.error('[pdfUtils] Failed to mark participation as billed:', e);
+  }
 };

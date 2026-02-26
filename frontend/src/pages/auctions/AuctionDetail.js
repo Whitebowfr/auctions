@@ -16,7 +16,7 @@ import {
   Tab,
   Autocomplete,
   Stack
-  , Dialog, DialogTitle, DialogContent, DialogActions
+  , Dialog, DialogTitle, DialogContent, DialogActions, Chip
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
@@ -434,6 +434,16 @@ const AuctionDetail = () => {
                           </li>
                         )}
                     />
+                    {(() => {
+                      const buyerId = bundleBuyers[b.id] ?? b.sold_to;
+                      if (!buyerId) return null;
+                      const buyer = auction.participants.find(p => p.id === buyerId);
+                      console.log(buyer, buyerId)
+                      if (!buyer || buyer.paid === null || buyer.paid === undefined) return null;
+                      return buyer.paid === true
+                        ? <Chip label="Payé" color="success" size="small" sx={{ ml: 1 }} />
+                        : <Chip label="Facture envoyée" color="warning" size="small" sx={{ ml: 1 }} />;
+                    })()}
                   </TableCell>
                     <TableCell>
                       {isEditing ? (
@@ -555,6 +565,7 @@ const AuctionDetail = () => {
                 <TableCell>Nom</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Téléphone</TableCell>
+                <TableCell>Facture</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -570,6 +581,13 @@ const AuctionDetail = () => {
                   <TableCell>{p.name}</TableCell>
                   <TableCell>{p.email || '-'}</TableCell>
                   <TableCell>{p.phone || '-'}</TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    {p.paid === null || p.paid === undefined ? null : (
+                      p.paid === true
+                        ? <Chip label="Payé" color="success" size="small" />
+                        : <Chip label="Facture envoyée" color="warning" size="small" />
+                    )}
+                  </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Button size="small" onClick={() => navigate(`/auction/${auction.id}/participants/${p.id}`)}>Voir</Button>
                     <IconButton

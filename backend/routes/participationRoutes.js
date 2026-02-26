@@ -5,7 +5,8 @@ const {
   getParticipants,
   addParticipant,
   updateParticipant,
-  removeParticipant
+  removeParticipant,
+  updatePaymentStatus
 } = require('../controllers/participationController');
 
 // GET /api/encheres/:enchereId/participants
@@ -19,5 +20,7 @@ router.put('/encheres/:enchereId/participants/:clientId', asyncHandler(updatePar
 
 // DELETE /api/encheres/:enchereId/participants/:clientId
 router.delete('/encheres/:enchereId/participants/:clientId', asyncHandler(removeParticipant));
+
+router.patch('/participation/:id/payment', updatePaymentStatus);
 
 module.exports = router;

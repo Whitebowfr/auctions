@@ -55,9 +55,25 @@ const updateClient = async (req, res) => {
  */
 const deleteClient = async (req, res) => {
   const { id } = req.params;
-  const ok = db.remove('clients', id);
-  if (!ok) return res.status(404).json({ message: 'Client not found' });
-  res.json({ message: 'Client deleted successfully' });
+  const numericId = Number(id);
+
+  // Ensure client exists
+  const client = db.getById('clients', numericId);
+  if (!client) return res.status(404).json({ message: 'Client not found' });
+
+  // Remove all participations linked to this client
+  const participations = db.getAll('participation');
+  const toRemove = participations.filter(p => p.client_id === numericId);
+
+  toRemove.forEach(p => {
+    db.remove('participation', p.id);
+  });
+
+  // Finally, remove the client itself
+  const ok = db.remove('clients', numericId);
+  if (!ok) return res.status(500).json({ message: 'Failed to delete client' });
+
+  res.json({ message: 'Client and related participations deleted successfully' });
 };
 
 module.exports = {

@@ -103,18 +103,25 @@ const ParticipantForm = ({
                 selectOnFocus
                 clearOnBlur
                 handleHomeEndKeys
-                renderOption={(props, option) => (
-                    <li {...props}>
-                        {option.isAddOption ? (
-                            <strong>{option.name}</strong>
-                        ) : (
-                            <>
-                                {option.name} 
-                                {option.email && <span style={{color: '#666', marginLeft: 8}}>({option.email})</span>}
-                            </>
-                        )}
-                    </li>
-                )}
+                renderOption={(props, option) => {
+                    const { key, ...rest } = props;
+                    return (
+                        <li key={key} {...rest}>
+                            {option.isAddOption ? (
+                                <strong>{option.name}</strong>
+                            ) : (
+                                <>
+                                    {option.name} 
+                                    {option.email && (
+                                        <span style={{color: '#666', marginLeft: 8}}>
+                                            ({option.email})
+                                        </span>
+                                    )}
+                                </>
+                            )}
+                        </li>
+                    );
+                }}
                 freeSolo
                 renderInput={(params) => (
                     <TextField
@@ -168,8 +175,6 @@ const ParticipantForm = ({
                         value={participantForm.phone}
                         onChange={(e) => handleFormChange('phone', e.target.value)}
                         className={dialogStyles.modernTextField}
-                        error={validatePhoneNumber(participantForm.phone) !== ''}
-                        helperText={validatePhoneNumber(participantForm.phone)} 
                     />
                 </Grid>
                 <Grid item xs={12}>

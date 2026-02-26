@@ -31,7 +31,9 @@ const getAllEncheresWithDetails = async (req, res) => {
         phone: client.phone,
         address: client.address,
         local_number: p.local_number,
-        registered_at: p.registered_at
+        registered_at: p.registered_at,
+        paid: p.paid !== undefined ? p.paid : null  // <-- add this
+
       };
     });
 
@@ -87,7 +89,8 @@ const getEnchereById = async (req, res) => {
       phone: client.phone,
       address: client.address,
       local_number: p.local_number,
-      registered_at: p.registered_at
+      registered_at: p.registered_at,
+      paid: p.paid !== undefined ? p.paid : null
     };
   });
 

@@ -19,6 +19,10 @@ const DEFAULT_DB = {
   encheres: [],
   lots: [],
   participation: []
+  // participation records now carry: { ..., paid: null | true | false }
+  // null / missing = no bill generated yet
+  // false = bill generated, not yet paid
+  // true  = bill generated and paid
 };
 
 // Load or create DB file

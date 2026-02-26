@@ -8,6 +8,9 @@ const {
   updateClient, 
   deleteClient 
 } = require('../controllers/clientController');
+const {
+  deleteClientWithParticipations,
+} = require('../controllers/participationController');
 
 // GET /api/clients
 router.get('/', asyncHandler(getAllClients));
