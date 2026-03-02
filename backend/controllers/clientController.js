@@ -25,8 +25,8 @@ const createClient = async (req, res) => {
   const { name, email, phone, address } = req.body;
   if (!name) return res.status(400).json({ message: 'Name is required' });
 
-  const existing = db.getAll('clients').find(c => (c.email || '').toLowerCase() === (email || '').toLowerCase());
-  if (existing) return res.status(409).json({ message: 'Client with this email already exists' });
+  const existing = db.getAll('clients').find(c => (c.name || '').toLowerCase() === (name || '').toLowerCase());
+  if (existing) return res.status(409).json({ message: 'Client with this name already exists' });
 
   const record = db.insert('clients', { name, email, phone: phone || '', address: address || '' });
   res.status(201).json(record);
