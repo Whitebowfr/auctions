@@ -65,6 +65,9 @@ const AuctionDetail = () => {
   const [editingBundleId, setEditingBundleId] = useState(null);
   const [editFields, setEditFields] = useState({ number: '', name: '' });
 
+  // Filter participants with no purchases
+  const [filterNoBuys, setFilterNoBuys] = useState(false);
+
   useEffect(() => {
     if (!auction) return;
 
@@ -558,6 +561,18 @@ const AuctionDetail = () => {
             </Box>
           </Box>
 
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+            <Button
+              variant={filterNoBuys ? 'contained' : 'outlined'}
+              size="small"
+              color="warning"
+              onClick={() => setFilterNoBuys(prev => !prev)}
+              sx={{ textTransform: 'none', borderRadius: '999px' }}
+            >
+              {filterNoBuys ? 'Afficher tous' : 'Acheteurs uniquement'}
+            </Button>
+          </Box>
+
           <Table>
             <TableHead>
               <TableRow>
@@ -570,7 +585,9 @@ const AuctionDetail = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {auction.participants.map((p) => (
+              {auction.participants
+                .filter(p => !filterNoBuys || auction.sales.some(s => s.participantId === p.id))
+                .map((p) => (
                 <TableRow
                   key={p.id}
                   hover
