@@ -20,7 +20,8 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   const options = {
     title: customizations.title || `Facture - ${auction.name}`,
     logo: customizations.logo || null,
-    includeNotes: customizations.includeNotes !== undefined ? customizations.includeNotes : true,
+    includeNotes: customizations.includeNotes !== undefined ? customizations.includeNotes : false,
+    fraisEnSus: customizations.fraisEnSus !== undefined ? parseFloat(customizations.fraisEnSus) : 0,
     footer: customizations.footer || `${auction.name} - Édité le ${new Date().toLocaleDateString("fr-FR")}`,
     paid: customizations.paid || false,
     participant: customizations.participantName || customizations.name || participant.name,
@@ -90,6 +91,8 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   doc.setFontSize(12);
   doc.setTextColor('#000000')
   const frais = totalAmount*auction.managementFeeRate/100
+  const fraisensus = options.fraisEnSus || 0
+  const tva_fraisensus = fraisensus * 0.2
   const tva_frais = frais * 0.2
   doc.autoTable({
     startY: doc.lastAutoTable.finalY + 20,
@@ -98,13 +101,21 @@ export const generateParticipantBill = (participant, purchases, auction, customi
     body: [["TVA (20%)", `${formatCurrency(tva_frais)}`]],
     styles: { cellPadding: 1 }
   })
-
+  if (fraisensus > 0) {
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 5,
+    tableWidth: "wrap",
+    head: [[`Frais en sus`, `${formatCurrency(fraisensus)}`]],
+     styles: { cellPadding: 1 },
+    body: [["TVA (20%)", `${formatCurrency(tva_fraisensus)}`]],
+  })
+  }
+  // compute subtotal 2 as a number to ensure correct arithmetic and reuse it for the final total
+  const sousTotal2 = frais + tva_frais + fraisensus + tva_fraisensus;
   doc.setFontSize(12);
-  doc.text(`Sous-total 2: ${formatCurrency(frais + tva_frais)}` , 130, doc.lastAutoTable.finalY + 5);
+  doc.text(`Sous-total 2: ${formatCurrency(sousTotal2)}` , 130, doc.lastAutoTable.finalY + 5);
   
-  const finalAmount = totalAmount + frais + tva_frais
-  // Calculate total
-  
+  const finalAmount = totalAmount + sousTotal2;
   // Add total
   const finalY = doc.lastAutoTable.finalY + 15;
   doc.setFontSize(14);

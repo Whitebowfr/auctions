@@ -23,17 +23,15 @@ const BillCustomizationDialog = ({
 }) => {
   const [customizations, setCustomizations] = useState({
     title: `Facture - ${participant?.name || 'Client'}`,
-    includeNotes: true,
+    includeNotes: false,
     paid: false,
     footer: `${auction?.name || 'Vente aux enchères'} - Le ${new Date().toLocaleDateString("fr-FR")}`,
     name: `${participant?.name}`,
     email: participant?.email || '',
     address: participant?.address || '',
-    phone: participant?.phone || ''
+    phone: participant?.phone || '',
+    fraisEnSus: 0,
   });
-
-  const [logoFile, setLogoFile] = useState(null);
-  const [logoPreview, setLogoPreview] = useState('');
 
   const handleChange = (field, value) => {
     setCustomizations({
@@ -42,28 +40,8 @@ const BillCustomizationDialog = ({
     });
   };
 
-  const handleLogoUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setLogoFile(file);
-      setLogoPreview(URL.createObjectURL(file));
-    }
-  };
-
   const handleGenerate = () => {
-    // Convert logo to base64 if one is provided
-    if (logoFile) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        onGenerate({
-          ...customizations,
-          logo: e.target.result
-        });
-      };
-      reader.readAsDataURL(logoFile);
-    } else {
-      onGenerate(customizations);
-    }
+    onGenerate(customizations);
     onClose();
   };
 
@@ -110,27 +88,6 @@ const BillCustomizationDialog = ({
             />
           </Grid>
           
-          <Grid sx={{xs: 12, sm: 6}}>
-            <InputLabel sx={{ mb: 1 }}>Logo (optionnel)</InputLabel>
-            <Box>
-              <input
-                accept="image/*"
-                type="file"
-                onChange={handleLogoUpload}
-                style={{ width: '100%' }}
-              />
-              {logoPreview && (
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-start' }}>
-                  <img 
-                    src={logoPreview} 
-                    alt="Logo Preview" 
-                    style={{ maxWidth: 150, maxHeight: 60, objectFit: 'contain' }}
-                  />
-                </Box>
-              )}
-            </Box>
-          </Grid>
-          
           <Grid sx={{xs: 12}}>
             <TextField
               fullWidth
@@ -163,17 +120,21 @@ const BillCustomizationDialog = ({
               className={styles.modernTextField}
             />
           </Grid>
-          
+
           <Grid sx={{xs: 12, sm: 6}}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={customizations.includeNotes}
-                  onChange={(e) => handleChange('includeNotes', e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Inclure les notes"
+            <TextField
+              fullWidth
+              label="Frais en sus"
+              value={customizations.fraisEnSus}
+              onChange={(e) => handleChange('fraisEnSus', e.target.value)}
+              className={styles.modernTextField}
+              type="number"
+              slotProps={{
+                input: {
+                  endAdornment: <Box component="span" sx={{ ml: 1 }}>€</Box>
+                }
+              }}
+              placeholder='Hors TVA'
             />
           </Grid>
           
