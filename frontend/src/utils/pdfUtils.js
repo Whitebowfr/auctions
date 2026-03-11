@@ -366,3 +366,322 @@ export const generateAndDownloadBill = async (
     console.error('[pdfUtils] Failed to mark participation as billed:', e);
   }
 };
+
+// ...existing code...
+
+/**
+ * Generate a closing report PDF for an auction
+ * @param {Object} auction - The auction object
+ * @param {Array} sales - The auction sales
+ * @param {Object} options - Customization options
+ * @param {string} options.bodyText - Free text for the first page
+ * @param {string} options.address - Address to display on the first page
+ * @param {string} options.auctioneerName - Auctioneer name shown in the left column
+ * @param {string} options.clientName - Client name shown in the right column (e.g. "A LA DEMANDE DE ...")
+ * @param {string} options.agissantEnVertu - Shown after clientName in the right column (e.g. "AGISSANT EN VERTU DE ...")
+ * @param {string|null} options.logo - Base64 image for the logo shown in the left column
+ * @returns {jsPDF} - The generated PDF document
+ */
+export const generateClosingReport = (auction, sales, options = {}) => {
+  applyPlugin(jsPDF);
+  const doc = new jsPDF();
+
+  // ── Layout constants ─────────────────────────────────────────────────────
+  const pageW = doc.internal.pageSize.width;   // 210 mm (A4)
+  const margin = 10;
+  const leftColW = Math.round(pageW * 0.20);   // ~42 mm  (20 %)
+  const dividerX = margin + leftColW;           // ~52 mm
+  const rightColX = dividerX + 5;              // 5 mm gutter
+  const rightColW = pageW - rightColX - margin; // ~143 mm
+
+  // ── PAGE 1 : two-column header ───────────────────────────────────────────
+
+  // ── Left column : logo + auctioneer name ────────────────────────────────
+  let leftY = 15;
+
+  if (options.logo) {
+    // Draw logo centred in the left column
+    const logoW = leftColW - 4;
+    const logoH = 20;
+    doc.addImage(options.logo, 'JPEG', margin + 2, leftY, logoW, logoH);
+    leftY += logoH + 4;
+  }
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#1e3a5f');
+  doc.text("SCP R. GRANIER - L. DAVID", 3, leftY);
+  leftY += 10;
+  doc.setFontSize(7);
+  const leftCenterX = leftColW / 2 + 4;
+  doc.text(`Commissaires de Justice associés 
+66, rue de la République 
+B.P. 52 
+47202 MARMANDE Cedex 
+Tél : 05 53 64 12 59 
+Fax : 05 53 64 07 15
+E-mail : etude@huissier47.fr
+Paiement sécurisé 24/7 sur : 
+www.huissier47.fr
+IBAN
+FR45 4003 1000 0100 0014 3474 Z67
+CDCGFRPPXXXX
+SIRET 31281503800046 
+COMPETENCE 47 - 46 - 32
+COMPETENCE NATIONALE POUR LES CONSTATS`, leftCenterX, leftY, { maxWidth: leftColW - 4, align: 'center' });
+  const colLineBottom = 80;
+  doc.setDrawColor('#CBD5E1');
+  doc.setLineWidth(0.4);
+  doc.line(dividerX, 10, dividerX, colLineBottom);
+
+  // ── Right column : auction info + address + body text ───────────────────
+  let rightY = 15;
+
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#1e293b');
+  const titleX = rightColX + rightColW / 2;
+  doc.setFont('helvetica', 'bold');
+  doc.text('PROCÈS VERBAL DE VENTE', titleX, rightY, { align: 'center' });
+  rightY += 7;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor('#64748b');
+  (() => {
+    const d = new Date(auction.date);
+    if (isNaN(d)) {
+      doc.text("L'AN INCONNU, le jour inconnu.", rightColX, rightY);
+      return;
+    }
+
+    const month = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(d); // "juin"
+    const day = d.getDate();
+
+    // Day words for 1..31 (use "premier" for 1)
+    const dayWords = [
+      null,
+      'premier',
+      'deux',
+      'trois',
+      'quatre',
+      'cinq',
+      'six',
+      'sept',
+      'huit',
+      'neuf',
+      'dix',
+      'onze',
+      'douze',
+      'treize',
+      'quatorze',
+      'quinze',
+      'seize',
+      'dix-sept',
+      'dix-huit',
+      'dix-neuf',
+      'vingt',
+      'vingt et un',
+      'vingt-deux',
+      'vingt-trois',
+      'vingt-quatre',
+      'vingt-cinq',
+      'vingt-six',
+      'vingt-sept',
+      'vingt-huit',
+      'vingt-neuf',
+      'trente',
+      'trente et un'
+    ];
+    const dayWord = dayWords[day] || String(day);
+
+    // Helper to convert 1..99 to french words (simple, sufficient for years)
+    const under100 = (n) => {
+      const units = [
+        'zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf',
+        'dix','onze','douze','treize','quatorze','quinze','seize'
+      ];
+      const tens = {
+        20: 'vingt',
+        30: 'trente',
+        40: 'quarante',
+        50: 'cinquante',
+        60: 'soixante',
+        80: 'quatre-vingt'
+      };
+      if (n < 17) return units[n];
+      if (n < 20) return 'dix-' + units[n - 10];
+      if (n < 70) {
+        const t = Math.floor(n / 10) * 10;
+        const u = n % 10;
+        if (u === 0) return tens[t];
+        if (u === 1 && t !== 80) return `${tens[t]} et un`;
+        return `${tens[t]}-${units[u]}`;
+      }
+      if (n < 80) {
+        // 70..79 => soixante + 10..19
+        return `soixante-${under100(n - 60)}`;
+      }
+      // 80..99
+      if (n < 100) {
+        if (n === 80) return 'quatre-vingt';
+        return `quatre-vingt-${under100(n - 80)}`;
+      }
+      return String(n);
+    };
+
+    // Convert year (supports typical auction years like 2000-2099; reasonable fallback for others)
+    const year = d.getFullYear();
+    const yearToWords = (y) => {
+      if (y === 2000) return 'deux mille';
+      if (y > 2000 && y < 2100) {
+        const rem = y - 2000;
+        return rem === 0 ? 'deux mille' : `deux mille ${under100(rem)}`;
+      }
+      // generic thousand handler (basic)
+      const thousands = Math.floor(y / 1000);
+      const rem = y % 1000;
+      const thousandsWord = thousands === 1 ? 'mille' : `${under100(thousands)} mille`;
+      if (rem === 0) return thousandsWord;
+      if (rem < 100) return `${thousandsWord} ${under100(rem)}`;
+      // handle hundreds simply
+      const hundreds = Math.floor(rem / 100);
+      const rest = rem % 100;
+      const hundredsWord = hundreds === 1 ? 'cent' : `${under100(hundreds)} cent`;
+      return rest === 0 ? `${thousandsWord} ${hundredsWord}` : `${thousandsWord} ${hundredsWord} ${under100(rest)}`;
+    };
+
+    const yearWords = yearToWords(year).toUpperCase(); // "DEUX MILLE VINGT CINQ"
+
+    doc.text(`L'AN ${yearWords}, le ${dayWord} ${month}.`, rightColX, rightY);
+  })();
+
+  rightY += 6;
+  doc.text(`Je soussigné(e), ${options.auctioneerName || "Nom de l'officier de justice"}`, rightColX, rightY);
+  rightY += 5;
+  doc.setFont('helvetica', 'bold');
+  doc.text("A LA DEMANDE DE", rightColX, rightY);
+  rightY += 5;
+  doc.setFont('helvetica', 'normal');
+  let splitName = doc.splitTextToSize(options.clientName || "Nom du client", rightColW);
+  doc.text(splitName, rightColX, rightY);
+  rightY += splitName.length * 5 + 5;
+  doc.text("Élisant domicile en mon étude,", rightColX, rightY);
+  rightY += 5;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text("AGISSANT EN VERTU", rightColX, rightY);
+  rightY += 5;
+  doc.setFont('helvetica', 'normal');
+  let splitAgissant = doc.splitTextToSize(options.agissantEnVertu || "Non spécifié", rightColW);
+  doc.text(splitAgissant, rightColX, rightY);
+  rightY += splitAgissant.length * 5 + 5;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text("ME SUIS TRANSPORTÉ EN CE JOUR", rightColX, rightY);
+  rightY += 5;
+  doc.setFont('helvetica', 'normal');
+  let splitAdress = doc.splitTextToSize(options.fullAddress || auction.address || "Adresse de la vente non spécifiée", rightColW);
+  doc.text(splitAdress, rightColX, rightY);
+  rightY += 10;
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text("ET, LA ÉTANT", rightColX, rightY);
+  rightY += 5;
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Après avoir procédé aux publicités prescrites par la Loi, et annoncé la vente pour ce jour le nombre légal d'acquéreurs potentiels étant présent, j'ai annoncé l'ouverture de la vente aux enchères publiques et rappelé les conditions générales de vente, dont notamment :
+    
+    - Adjudication au plus offrant, après trois criées ; frais légaux en sus du prix d'adjudication.
+    
+    - Biens vendus dans l'état où ils se trouvent, sans aucune réserve ni recours contre le vendeur ou l'officier vendeur, la responsabilité de ces derniers ne pourra être recherchée notamment sur l'éventuelle défaillance ou non-conformité des biens vendus (véhicules ou machines notamment), sur la péremption ou la mauvaise conservation des biens vendus (produits consommables notamment), les biens ayant été exposés au public préalablement.
+    
+    
+    - Revent immédiate à défaut de paiement au comptant.
+    
+    - Enlèvement immédiatement après la dernière adjudication, adjudication qui transfère aussitôt la garde et la responsabilité du bien adjugé à l'adjudicataire.
+    
+    - L'enlèvement est fait sous l'entière responsabilité de l'acquéreur ou de ses préposés, lequel prendre toute disposition utile pour s'assurer des qualificatons adéquate (machines sous tension, permis spécifiques...), et des assurances nécessaires (véhicules notamment). Il en va de même lors des visites préalables.
+    
+    - Pour tout paiement en espèces, le plafond est fixé à mille euros.
+    
+    - En cas de vente d'un bien immatriculé, il est précisé lors de la vente, toute éventuelle difficulté pour une nouvelle immatriculation (carte grise perdue, gage ou opposition inscrit, problème de titulaire...).`, rightColX, rightY, { maxWidth: rightColW });
+
+  rightY += 120;
+  doc.setFont('helvetica', 'bold');
+  doc.text("PUIS J'AI ADJUGÉ AINSI", rightColX, rightY);
+
+  // Footer page 1
+  doc.setFontSize(9);
+  doc.setTextColor('#94A3B8');
+  doc.text(
+    `${auction.name} - Édité le ${new Date().toLocaleDateString('fr-FR')}`,
+    margin,
+    doc.internal.pageSize.height - 10
+  );
+  doc.text('Page 1', pageW - 25, doc.internal.pageSize.height - 10);
+  doc.setTextColor('#000000');
+
+  // ──────────────────── PAGE 2 : Sales table ────────────────────────────────
+  doc.addPage();
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+
+  doc.autoTable({
+    startY: 38,
+    head: [['Descriptif', 'Prix (€)', 'Adjudicateur']],
+    body: sales.map(sale => {
+      const lotNumberRaw = sale.bundle?.number ?? sale.bundleId ?? sale.bundle?.id ?? '';
+      const lotNumber = lotNumberRaw !== '' ? String(lotNumberRaw).padStart(2, '0') : '00';
+      const lotName = sale.bundleName || sale.bundle?.name || 'Non spécifié';
+      const price = formatCurrency(sale.finalPrice);
+      const participantName = sale.participantName || sale.participant?.name || 'Inconnu';
+      const participantAddress = sale.participantAddress || sale.participant?.address || sale.address || '';
+      return [
+        `${lotNumber} - ${lotName}`,
+        price,
+        `A ${participantName}, ${participantAddress}`
+      ];
+    }),
+    headStyles: {
+      fillColor: '#2563eb',
+      textColor: '#FFFFFF',
+      fontStyle: 'bold'
+    },
+    alternateRowStyles: {
+      fillColor: '#F8FAFC'
+    },
+    didDrawPage: (data) => {
+      if (data.pageNumber > 1) {
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Récapitulatif des adjudications - ${auction.name} (suite)`, 14, 20);
+      }
+    }
+  });
+
+  doc.setFontSize(12);
+  doc.text(`J'ai remis à chaque acquéreur une facture détaillée laissant apparaître: le montant de l'adjudication, le montant des frais, et le montant de la T.V.A.
+    
+Et, de tout ce que dessus, j'ai dressé le présent procès verbal, conformément aux articles R221-37 à R221-39 du Code des procédures civiles d'exécution.`, 14, doc.lastAutoTable.finalY + 10, { maxWidth: pageW - 3 * margin });
+
+  // Footer on all pages of page 2+
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 2; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(10);
+    doc.setTextColor('#94A3B8');
+    doc.text(
+      `${auction.name} - Généré le ${new Date().toLocaleDateString('fr-FR')}`,
+      14,
+      doc.internal.pageSize.height - 10
+    );
+    doc.text(
+      `Page ${i} sur ${pageCount}`,
+      doc.internal.pageSize.width - 35,
+      doc.internal.pageSize.height - 10
+    );
+    doc.setTextColor('#000000');
+  }
+
+  return doc;
+};
