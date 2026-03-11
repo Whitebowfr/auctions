@@ -27,7 +27,8 @@ import dialogStyles from '../../components/ModernDialog.module.css';
 import cardStyles from '../../components/ModernCard.module.css';
 import { getAuctionTimeStatus } from '../../utils/utils';
 import { formatDate } from '../../utils/formatters';
-import { generateClosingReport, downloadPDF } from '../../utils/pdfUtils';
+import { generateClosingReport, downloadDocx } from '../../utils/pdfUtils';
+import { Packer } from 'docx';
 
 const AuctionManagement = () => {
   const navigate = useNavigate();
@@ -74,7 +75,10 @@ const AuctionManagement = () => {
       bundle: reportEnchere.bundles?.find(b => b.id === s.bundleId) || null
     }));
     const doc = generateClosingReport(reportEnchere, enriched, reportOptions);
-    downloadPDF(doc, `pv-vente-${reportEnchere.name.replace(/\s+/g, '-').toLowerCase()}.pdf`);
+    const filename = `pv-vente-${reportEnchere.name.replace(/\s+/g, '-').toLowerCase()}.docx`;
+    Packer.toBlob(doc).then(blob => {
+      downloadDocx(blob, filename);
+    });
     setReportDialogOpen(false);
   };
   // ─────────────────────────────────────────────────────────────────────────
