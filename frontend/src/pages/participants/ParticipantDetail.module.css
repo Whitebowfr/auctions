@@ -118,34 +118,35 @@
 
 .purchaseGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
+  /* allow more cards per row by reducing the min width */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .purchaseCard {
   background: white;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  border: 1px solid #e6eef7;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
   overflow: hidden;
 }
 
 .purchaseCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
 }
 
 .purchaseCardContent {
-  padding: 24px;
+  padding: 12px;
 }
 
 .bundleName {
   font-weight: 600 !important;
-  font-size: 1.25rem !important;
+  font-size: 1.05rem !important;
   color: #0f172a;
-  margin-bottom: 8px !important;
+  margin-bottom: 6px !important;
 }
 
 .bundleDescription {
@@ -159,10 +160,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding: 10px;
   background: #f8fafc;
-  border-radius: 12px;
-  margin-bottom: 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
 }
 
 .startingPrice {
@@ -172,7 +173,7 @@
 
 .finalPrice {
   font-weight: 600;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: #059669;
 }
 

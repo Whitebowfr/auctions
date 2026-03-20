@@ -6,7 +6,8 @@ const {
   addParticipant,
   updateParticipant,
   removeParticipant,
-  updatePaymentStatus
+  updatePaymentStatus,
+  deleteParticipationById
 } = require('../controllers/participationController');
 
 // GET /api/encheres/:enchereId/participants
@@ -20,6 +21,9 @@ router.put('/encheres/:enchereId/participants/:clientId', asyncHandler(updatePar
 
 // DELETE /api/encheres/:enchereId/participants/:clientId
 router.delete('/encheres/:enchereId/participants/:clientId', asyncHandler(removeParticipant));
+
+// Delete a participation by its internal id (optionally force to bypass lots check)
+router.delete('/participation/:id', asyncHandler(deleteParticipationById));
 
 router.patch('/participation/:id/payment', updatePaymentStatus);
 

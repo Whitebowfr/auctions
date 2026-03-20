@@ -7,10 +7,6 @@ import { AuctionProvider } from './context/AuctionContext';
 import Header from './components/layout/Header';
 import AuctionManagement from './pages/auctions/AuctionManagement';
 import AuctionDetail from './pages/auctions/AuctionDetail';
-// Participant list page removed - participants are managed inline in AuctionDetail
-import BundleManagement from './pages/bundles/BundleManagement';
-import SalesTracking from './pages/SalesTracking';
-import Reports from './pages/Reports';
 import ParticipantDetail from './pages/participants/ParticipantDetail';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -35,10 +31,6 @@ function App() {
               <Route path="/" element={<AuctionManagement />} />
               <Route path="/auctions" element={<AuctionManagement />} />
               <Route path="/auction/:id" element={<AuctionDetail />} />
-              {/* Participant listing page removed; use AuctionDetail participants tab instead */}
-              <Route path="/auction/:id/bundles" element={<BundleManagement />} />
-              <Route path="/auction/:id/sales" element={<SalesTracking />} />
-              <Route path="/auction/:id/reports" element={<Reports />} />
               <Route path="/auction/:auctionId/participants/:participantId" element={<ParticipantDetail />} />
               <Route path="/clients" element={<ClientsDirectory />} />
               <Route path="/clients/:id" element={<ClientDetail />} />

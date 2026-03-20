@@ -85,7 +85,19 @@ const findBy = (table, field, value) => {
 const insert = (table, obj) => {
   const db = loadData();
   const items = db[table] || [];
-  const id = nextId(items);
+  // Allow caller to provide an explicit id (useful for migrations / transfers).
+  // If provided id conflicts with an existing record, fall back to nextId.
+  let id;
+  if (obj && obj.id !== undefined && obj.id !== null) {
+    const requested = Number(obj.id);
+    if (!items.some(i => i.id === requested)) {
+      id = requested;
+    } else {
+      id = nextId(items);
+    }
+  } else {
+    id = nextId(items);
+  }
   const now = new Date().toISOString();
   const record = { id, ...obj, created_at: now };
   items.push(record);

@@ -99,16 +99,28 @@ const ParticipantDetail = () => {
   const handleGenerateBill = async (customizations) => {
     console.log(participant)
     const participationId = participant.participation_id;
+    // If the dialog passed selectedSaleIds, filter the purchaseDetails accordingly
+    let filteredPurchases = purchaseDetails;
+    if (customizations && Array.isArray(customizations.selectedSaleIds)) {
+      filteredPurchases = purchaseDetails.filter(pd => customizations.selectedSaleIds.includes(pd.bundleId));
+      if (filteredPurchases.length === 0) {
+        // No purchases selected — warn the user and abort
+        window.alert('Veuillez sélectionner au moins un lot à inclure dans la facture.');
+        return;
+      }
+    }
+
     if (!participationId) {
       // fallback: no participation_id available, just download without marking
-      const doc = generateParticipantBill(participant, purchaseDetails, auction, customizations);
+      const doc = generateParticipantBill(participant, filteredPurchases, auction, customizations);
       downloadPDF(doc, `facture-${participant.name.replace(/\s+/g, '-').toLowerCase()}-${auction.id}.pdf`);
       return;
     }
+
     await generateAndDownloadBill(
       participant,
       participationId,
-      purchaseDetails,
+      filteredPurchases,
       auction,
       customizations
     );

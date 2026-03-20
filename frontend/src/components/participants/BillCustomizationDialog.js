@@ -10,7 +10,15 @@ import {
   Switch,
   Grid,
   Box,
-  InputLabel
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
+  Paper,
+  Typography
 } from '@mui/material';
 import styles from '../ModernDialog.module.css';
 
@@ -33,6 +41,22 @@ const BillCustomizationDialog = ({
     fraisEnSus: 0,
   });
 
+  const [purchases, setPurchases] = useState([]);
+  const [selected, setSelected] = useState({});
+
+  // Initialize purchases and selection when dialog opens / participant or auction changes
+  React.useEffect(() => {
+    if (!open || !participant || !auction) return;
+    const participantSales = (auction.sales || []).filter(sale => sale.participantId === participant.id);
+    // Map to include bundle details if available
+    const detailed = participantSales.map(sale => ({ ...sale, bundle: (auction.bundles || []).find(b => b.bundleId === sale.bundleId) }));
+    setPurchases(detailed);
+    // default select all
+    const sel = {};
+    detailed.forEach(s => { sel[s.bundleId] = true; });
+    setSelected(sel);
+  }, [open, participant, auction]);
+
   const handleChange = (field, value) => {
     setCustomizations({
       ...customizations,
@@ -41,7 +65,9 @@ const BillCustomizationDialog = ({
   };
 
   const handleGenerate = () => {
-    onGenerate(customizations);
+    // include selected sale ids in customizations so caller can filter purchases
+    const selectedSaleIds = Object.keys(selected).filter(k => selected[k]).map(k => parseInt(k));
+    onGenerate({ ...customizations, selectedSaleIds });
     onClose();
   };
 
@@ -150,6 +176,48 @@ const BillCustomizationDialog = ({
               label="Marqué comme payé"
             />
           </Grid>
+
+          {/* Purchases selection table */}
+          <Grid sx={{xs: 12}}>
+            <Box sx={{ mt: 2, mb: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Sélectionnez les lots à inclure dans la facture</Typography>
+            </Box>
+            <TableContainer component={Paper} sx={{ maxHeight: 260 }}>
+              <Table stickyHeader size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell padding="checkbox"></TableCell>
+                    <TableCell>N. Lot</TableCell>
+                    <TableCell>Nom</TableCell>
+                    <TableCell align="right">Prix (TTC)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {purchases.map((p) => (
+                    <TableRow key={p.bundleId} hover>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          color="primary"
+                          checked={!!selected[p.bundleId]}
+                          onChange={(e) => setSelected({ ...selected, [p.bundleId]: e.target.checked })}
+                        />
+                      </TableCell>
+                      <TableCell>{p.bundleId}</TableCell>
+                      <TableCell>{p.bundleName || `Lot #${p.bundleId}`}</TableCell>
+                      <TableCell align="right">{p.finalPrice ? `${p.finalPrice} €` : '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                  {purchases.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">Aucun achat pour ce participant sur cette vente.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+
+          
         </Grid>
       </DialogContent>
       <DialogActions className={styles.dialogActions}>

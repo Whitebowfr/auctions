@@ -30,7 +30,7 @@ const getParticipants = async (req, res) => {
  */
 const addParticipant = async (req, res) => {
   const { enchereId } = req.params;
-  const { clientId, localNumber } = req.body;
+  const { clientId, localNumber, participationId } = req.body;
   if (!clientId) return res.status(400).json({ message: 'Client ID is required' });
 
   const enchere = db.getById('encheres', enchereId);
@@ -42,7 +42,10 @@ const addParticipant = async (req, res) => {
   const existing = db.getAll('participation').find(p => p.enchere_id === Number(enchereId) && p.client_id === Number(clientId));
   if (existing) return res.status(409).json({ message: 'Client is already a participant' });
 
-  const record = db.insert('participation', { enchere_id: Number(enchereId), client_id: Number(clientId), local_number: localNumber || '' });
+  // Allow providing an explicit participation ID for transfer operations
+  const insertObj = { enchere_id: Number(enchereId), client_id: Number(clientId), local_number: localNumber || '' };
+  if (participationId !== undefined && participationId !== null) insertObj.id = Number(participationId);
+  const record = db.insert('participation', insertObj);
   const response = {
     id: client.id,
     participation_id: record.id,
@@ -172,6 +175,30 @@ const getParticipationById = (req, res) => {
 };
 
 /**
+ * DELETE /api/participation/:id
+ * Optional query param: ?force=true to bypass "lotsBought" protection
+ */
+const deleteParticipationById = (req, res) => {
+  const { id } = req.params;
+  const force = req.query.force === 'true' || req.query.force === true;
+
+  const participation = db.getById('participation', id);
+  if (!participation) return res.status(404).json({ message: 'Participation not found' });
+
+  const clientId = participation.client_id;
+  const enchereId = participation.enchere_id;
+
+  const lotsBought = db.getAll('lots').filter(l => l.enchere_id === Number(enchereId) && l.sold_to === Number(clientId)).length;
+
+  if (lotsBought > 0 && !force) {
+    return res.status(400).json({ message: 'Cannot remove participant who has purchased lots', lotsBought });
+  }
+
+  db.remove('participation', participation.id);
+  res.json({ message: 'Participation removed successfully' });
+};
+
+/**
  * PATCH /api/participation/:id/payment
  * body: { paid: true | false | null }
  * null  = reset (no bill generated)
@@ -198,5 +225,6 @@ module.exports = {
   deleteClientWithParticipations,
   updatePaymentStatus,
   getAllParticipations,
-  getParticipationById
+  getParticipationById,
+  deleteParticipationById
 };

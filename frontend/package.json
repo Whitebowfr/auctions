@@ -10,6 +10,7 @@
     "@mui/x-date-pickers": "^8.9.2",
     "dayjs": "^1.11.13",
     "docx": "^9.6.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "react": "^18.0.0",
@@ -41,5 +42,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1"
   }
 }

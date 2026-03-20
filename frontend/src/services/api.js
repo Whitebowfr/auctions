@@ -156,10 +156,12 @@ class ApiService {
     return this.request(`/encheres/${auctionId}/participants`);
   }
 
-  async addParticipant(auctionId, clientId, localNumber = null, notes = '') {
+  async addParticipant(auctionId, clientId, localNumber = null, notes = '', participationId = null) {
+    const body = { clientId, localNumber, notes };
+    if (participationId !== null && participationId !== undefined) body.participationId = participationId;
     return this.request(`/encheres/${auctionId}/participants`, {
       method: 'POST',
-      body: { clientId, localNumber, notes },
+      body,
     });
   }
 
@@ -173,6 +175,13 @@ class ApiService {
   async removeParticipant(auctionId, clientId) {
     return this.request(`/encheres/${auctionId}/participants/${clientId}`, {
       method: 'DELETE',
+    });
+  }
+
+  async deleteParticipation(participationId, force = false) {
+    const qs = force ? '?force=true' : '';
+    return this.request(`/participation/${participationId}${qs}`, {
+      method: 'DELETE'
     });
   }
 

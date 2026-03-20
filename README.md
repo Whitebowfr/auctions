@@ -46,3 +46,9 @@
 - Meilleur tableau récapitulatif (plus large)
 
 - Bouton ajouter ne marche plus
+
+- Fleche retour du navigateur marche pas
+- ~~Cartes trop grandes~~
+- Sur la page clientdetail, on arrive en bas de la page
+- ~~Possibilité de copier / coller la liste d'acheteurs entre différentes ventes~~
+- ~~Sur le bouton générer, mettre une table avec les lots a cocher~~

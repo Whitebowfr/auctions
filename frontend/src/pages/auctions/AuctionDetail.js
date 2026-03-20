@@ -5,6 +5,7 @@ import {
   Button,
   Paper,
   Alert,
+  MenuItem,
   Table,
   TableHead,
   TableRow,
@@ -22,16 +23,16 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import SaveIcon from '@mui/icons-material/Save';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuction } from '../../context/AuctionContext';
 import ParticipantForm from '../../components/participants/ParticipantForm';
+import { apiService } from '../../services/api';
 
 const AuctionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { auctions, setCurrentEnchere, addBundle, updateBundle, deleteBundle, addParticipant, deleteParticipant, addSale, clients } = useAuction();
+  const { auctions, setCurrentEnchere, addBundle, updateBundle, deleteBundle, addParticipant, deleteParticipant, addSale, clients, loadEncheres } = useAuction();
   const auction = auctions.find(a => a.id === parseInt(id));
 
   // Determine initial tab from query param (?tab=participants) or default to 0 (Lots)
@@ -54,12 +55,13 @@ const AuctionDetail = () => {
   const [newBundleNumber, setNewBundleNumber] = useState('');
 
   // Participant form state (show inline)
-  const [openParticipantDialog, setOpenParticipantDialog] = useState(false);
   const [participantForm, setParticipantForm] = useState({ name: '', email: '', phone: '', address: '', notes: '', local_number: '' });
   const [selectedParticipant, setSelectedParticipant] = useState(null);
-  const [isNewParticipant, setIsNewParticipant] = useState(true);
 
   const [submitting, setSubmitting] = useState(false);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [transferTargetId, setTransferTargetId] = useState(null);
+  const [transfering, setTransfering] = useState(false);
 
   // Inline bundle edit state (number + name)
   const [editingBundleId, setEditingBundleId] = useState(null);
@@ -441,7 +443,6 @@ const AuctionDetail = () => {
                       const buyerId = bundleBuyers[b.id] ?? b.sold_to;
                       if (!buyerId) return null;
                       const buyer = auction.participants.find(p => p.id === buyerId);
-                      console.log(buyer, buyerId)
                       if (!buyer || buyer.paid === null || buyer.paid === undefined) return null;
                       return buyer.paid === true
                         ? <Chip label="Payé" color="success" size="small" sx={{ ml: 1 }} />
@@ -548,7 +549,6 @@ const AuctionDetail = () => {
                   participantForm={participantForm}
                   handleFormChange={handleFormChange}
                   selectedParticipant={selectedParticipant}
-                  isNewParticipant={isNewParticipant}
                   availableParticipants={clients.filter(c => !auction.participants.some(p => p.id === c.id))}
                   handleParticipantSelect={handleParticipantSelect}
                   auctionParticipants={auction.participants}
@@ -570,6 +570,14 @@ const AuctionDetail = () => {
               sx={{ textTransform: 'none', borderRadius: '999px' }}
             >
               {filterNoBuys ? 'Afficher tous' : 'Acheteurs uniquement'}
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              sx={{ ml: 2, textTransform: 'none', borderRadius: '999px' }}
+              onClick={() => setTransferDialogOpen(true)}
+            >
+              Dupliquer les participants
             </Button>
           </Box>
 
@@ -626,6 +634,98 @@ const AuctionDetail = () => {
           </Table>
         </Paper>
       )}
+      
+      {/* Transfer dialog */}
+      <Dialog open={transferDialogOpen} onClose={() => setTransferDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Dupliquer les participants</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>Sélectionnez la vente de destination. Les participants existants seront remplacés.</Typography>
+          <TextField
+            select
+            label="Vente de destination"
+            fullWidth
+            value={transferTargetId ?? ''}
+            onChange={(e) => {
+              const parsed = parseInt(e.target.value, 10);
+              setTransferTargetId(Number.isFinite(parsed) ? parsed : null);
+            }}
+          >
+            <MenuItem value="">-- Sélectionnez une vente --</MenuItem>
+            {auctions.filter(a => a.id !== auction.id).map(a => (
+              <MenuItem key={a.id} value={a.id}>{a.name} — {new Date(a.date).toLocaleDateString()}</MenuItem>
+            ))}
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTransferDialogOpen(false)}>Annuler</Button>
+          <Button
+            variant="contained"
+            disabled={!transferTargetId || transfering || transferTargetId === auction.id}
+            onClick={async () => {
+              if (!transferTargetId) return;
+              if (transferTargetId === auction.id) {
+                window.alert('La vente de destination ne peut pas être la même que la vente source.');
+                return;
+              }
+              // Double-check the target exists
+              const targetAuction = auctions.find(a => a.id === transferTargetId);
+              if (!targetAuction) {
+                window.alert('Vente de destination invalide.');
+                return;
+              }
+
+              try {
+                setTransfering(true);
+                // Fetch source and target participants
+                const source = await apiService.getParticipants(auction.id);
+                const target = await apiService.getParticipants(transferTargetId);
+
+                if (target && target.length > 0) {
+                  const ok = window.confirm(`La vente de destination (${targetAuction.name}) contient déjà ${target.length} participant(s). Ils seront remplacés. Continuer ?`);
+                  if (!ok) {
+                    setTransfering(false);
+                    return;
+                  }
+                  // Remove existing participants from target using participation_id (force deletion)
+                  for (const p of target) {
+                    try {
+                      if (p.participation_id) {
+                        await apiService.deleteParticipation(p.participation_id, true);
+                      } else {
+                        // Fallback: remove by client id
+                        await apiService.removeParticipant(transferTargetId, p.id);
+                      }
+                    } catch (e) {
+                      console.error('Failed to remove participant', p, e);
+                    }
+                  }
+                }
+
+                // Add all source participants to target, preserving participation ids when possible
+                for (const p of source) {
+                  try {
+                    // p.id is client id; preserve local_number and participation_id
+                    await apiService.addParticipant(transferTargetId, p.id, p.local_number || null, '', p.participation_id || null);
+                  } catch (e) {
+                    console.error('Failed to add participant', p, e);
+                  }
+                }
+
+                // reload auctions to reflect changes
+                await loadEncheres();
+                setTransferDialogOpen(false);
+              } catch (e) {
+                console.error('Transfer failed', e);
+                window.alert('Échec du transfert. Voir la console pour détails.');
+              } finally {
+                setTransfering(false);
+              }
+            }}
+          >
+            Dupliquer
+          </Button>
+        </DialogActions>
+      </Dialog>
       
     </Box>
   );
