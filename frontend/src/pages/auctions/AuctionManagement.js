@@ -48,9 +48,9 @@ const AuctionManagement = () => {
   const [reportOptions, setReportOptions] = useState({
     bodyText: '',
     address: '',
-    auctioneerName: '',
+    auctioneerName: 'Me R. GRANIER ou Me L. DAVID, Commissaire de Justice Associé(e) à la SCP R. GRANIER - L. DAVID, près le Tribunal Judiciaire d\'AGEN, demeurant 66 rue de la République 47200 MARMANDE',
     clientName: '',
-    agissantEnVertu: `D'un jugement rendu par le Tribunal de commerce d'AGEN en date du 18.09.2024, nous commetant aux fins de procéder à la vente aux enchères publiques de l'actif de la société.`
+    agissantEnVertu: `D'un jugement rendu par le Tribunal de commerce d'AGEN en date du 18.09.2024, nous commetant aux fins de procéder à la vente aux enchères publiques de l'actif de la société ci-dessous.`
   });
 
   const handleOpenReport = (e, enchere) => {

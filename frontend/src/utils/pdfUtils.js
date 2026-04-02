@@ -588,14 +588,14 @@ export const generateClosingReport = (auction, sales, options = {}) => {
     para(normal(frenchDate + '.', 20), { spaceAfter: 80 }),
     para([
       normal('Je soussigné(e), ', 20),
-      bold(options.auctioneerName || "Nom de l'officier de justice", 20),
+      normal(options.auctioneerName || "Nom de l'officier de justice", 20),
     ], { spaceAfter: 120 }),
 
     // A LA DEMANDE DE
     para(bold('A LA DEMANDE DE', 20), { spaceAfter: 60 }),
     ...(options.clientName || 'Nom du client')
       .split('\n')
-      .map(line => para(normal(line, 20), { spaceAfter: 20, align: AlignmentType.JUSTIFIED })),
+      .map(line => para(normal(line, 20), { spaceAfter: 120, align: AlignmentType.JUSTIFIED })),
     para(normal('Élisant domicile en mon étude,', 20), { spaceAfter: 120 }),
 
     // AGISSANT EN VERTU
@@ -606,7 +606,7 @@ export const generateClosingReport = (auction, sales, options = {}) => {
     para(normal(''), { spaceAfter: 120 }),
 
     // ME SUIS TRANSPORTÉ
-    para(bold('ME SUIS TRANSPORTÉ EN CE JOUR', 20), { spaceAfter: 60 }),
+    para(bold('ME SUIS TRANSPORTÉ CE JOUR À', 20), { spaceAfter: 60 }),
     ...(options.address || auction.address || 'Adresse de la vente non spécifiée')
       .split('\n')
       .map(line => para(normal(line, 20), { spaceAfter: 20, align: AlignmentType.JUSTIFIED })),
@@ -698,7 +698,7 @@ export const generateClosingReport = (auction, sales, options = {}) => {
       const lotName      = sale.bundleName || sale.bundle?.name || 'Non spécifié';
       const price        = formatCurrency(sale.finalPrice);
       const buyer        = sale.participantName || sale.participant?.name || 'Inconnu';
-      const buyerAddr    = sale.participantAddress || sale.participant?.address || sale.address || '';
+      const buyerAddr    = auction.participants.find(x => x.id == sale.participantId).address || sale.participant?.address || sale.address || '';
       const shade        = idx % 2 === 1;
       return new TableRow({
         children: [
@@ -716,6 +716,7 @@ export const generateClosingReport = (auction, sales, options = {}) => {
   });
 
   const closingText = `J'ai remis à chaque acquéreur une facture détaillée laissant apparaître : le montant de l'adjudication, le montant des frais, et le montant de la T.V.A.\n\nEt, de tout ce que dessus, j'ai dressé le présent procès verbal, conformément aux articles R221-37 à R221-39 du Code des procédures civiles d'exécution.`;
+
 
   // ── Assemble document ────────────────────────────────────────────────────
   const doc = new Document({
@@ -758,7 +759,7 @@ export const generateClosingReport = (auction, sales, options = {}) => {
           para(
             [
               normal(`Lots vendus : ${sales.length}   |   `, 20),
-              bold(`Revenu total : ${formatCurrency(sales.reduce((s, x) => s + parseFloat(x.finalPrice || 0), 0))}`, 20),
+              bold(`Produit total : ${formatCurrency(sales.reduce((s, x) => s + parseFloat(x.finalPrice || 0), 0))}`, 20),
             ],
             { spaceAfter: 200 }
           ),
@@ -770,6 +771,8 @@ export const generateClosingReport = (auction, sales, options = {}) => {
           ...closingText.split('\n').map(line =>
             para(normal(line, 20), { spaceBefore: line ? 160 : 0, spaceAfter: 80 })
           ),
+
+          para(normal("☐ Me R. GRANIER                                                                             ☐ Me L. DAVID"), {align: AlignmentType.CENTER, spaceBefore: 600})
         ],
         footers: {
           default: new Footer({
