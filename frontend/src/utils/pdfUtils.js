@@ -59,14 +59,14 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   doc.setFontSize(11);
   doc.setTextColor('#000000');
   doc.text(`${options.participant}`, 130, 35);
-  doc.text(`${options.email || 'Non spécifié'}`, 130, 42);
-  doc.text(`${options.address || 'Non spécifiée'}`, 130, 49, { maxWidth: 70 });
-  doc.text(`${options.phone || 'Non spécifié'}`, 130, 63);
+  if (options.email) doc.text(`${options.email}`, 130, 42);
+  if (options.address) doc.text(`${options.address}`, 130, 49, { maxWidth: 70 });
+  if (options.phone) doc.text(`${options.phone}`, 130, 63);
   doc.text(`Numéro d'enchérisseur: #${participant.local_number}`, 130, 70);
 
   doc.setTextColor('#666666');
   doc.text(options.title, 14, 71);
-  doc.text(`VENTE DU ${formatDate(auction.date)} à ${auction.address || 'Non spécifié'}`, 14, 77);
+  doc.text(`VENTE DU ${formatDate(auction.date)} ${auction.address ? " à " + auction.address : ""}`, 14, 77);
 
   doc.setTextColor('#000000');
 
@@ -208,7 +208,7 @@ export const generateBundlesSheet = (auction, bundles) => {
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   doc.text(`Date: ${formatDate(auction.date)}`, 14, 30);
-  doc.text(`Lieu: ${auction.address || 'Non spécifié'}`, 14, 37);
+  if (auction.address) doc.text(`Lieu: ${auction.address}`, 14, 37);
   doc.text(`Lots: ${bundles.length}`, 14, 44);
   
   // Create the table
@@ -268,7 +268,7 @@ export const generateSalesRecap = (auction, sales, allBundles) => {
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   doc.text(`Date: ${formatDate(auction.date)}`, 14, 30);
-  doc.text(`Lieu: ${auction.address || 'Non spécifié'}`, 14, 37);
+  if (auction.address) doc.text(`Lieu: ${auction.address}`, 14, 37);
   
   // Add summary
   doc.setFont('helvetica', 'bold');
