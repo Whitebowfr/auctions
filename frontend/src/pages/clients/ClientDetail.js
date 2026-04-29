@@ -492,7 +492,7 @@ const ClientDetail = () => {
             onClick={handleSaveClient}
             variant="contained"
             className={dialogStyles.primaryButton}
-            disabled={!editForm.name || validatePhoneNumber(editForm.phone) !== ""}
+            disabled={!editForm.name}
           >
             Enregistrer les modifications
           </Button>
