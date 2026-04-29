@@ -38,15 +38,12 @@ const createClient = async (req, res) => {
 const updateClient = async (req, res) => {
   const { id } = req.params;
   const { name, email, phone, address } = req.body;
-  if (!name || !email) return res.status(400).json({ message: 'Name and email are required' });
+  if (!name) return res.status(400).json({ message: 'Name is required' });
 
   const existing = db.getById('clients', id);
   if (!existing) return res.status(404).json({ message: 'Client not found' });
 
-  const emailTaken = db.getAll('clients').find(c => c.email === email && c.id !== Number(id));
-  if (emailTaken) return res.status(409).json({ message: 'Email is already taken by another client' });
-
-  const updated = db.update('clients', id, { name, email, phone: phone || '', address: address || '' });
+  const updated = db.update('clients', id, { name, email: email || '', phone: phone || '', address: address || '' });
   res.json(updated);
 };
 
