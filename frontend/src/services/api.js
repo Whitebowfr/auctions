@@ -18,12 +18,12 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         const error = await response.json().catch(() => ({ message: 'Network error' }));
         throw new Error(error.message || `HTTP error! status: ${response.status}`);
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error(`API Error (${endpoint}):`, error);
@@ -61,12 +61,12 @@ class ApiService {
   }
 
   // Auction endpoints - fix these to match your server
-  async getAuctions() { // Renamed to avoid duplicate
+  async getAuctionsList() { // Renamed to avoid duplicate
     return this.request('/encheres');
   }
 
-  async getAuctionsWithDetails() {
-    return this.request('/encheres/with-details/all');
+  async getAllAuctions() {
+    return this.request('/encheres/all');
   }
 
   async createAuction(auction) {

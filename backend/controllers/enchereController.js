@@ -3,16 +3,16 @@ const db = require('../db');
 /**
  * Get all encheres (auctions)
  */
-const getAllEncheres = async (req, res) => {
-  const encheres = db.getAll('encheres').sort((a,b) => new Date(b.date) - new Date(a.date));
+const getEncheresList = async (req, res) => {
+  const encheres = db.getAll('encheres').sort((a, b) => new Date(b.date) - new Date(a.date));
   res.json(encheres);
 };
 
 /**
  * Get all encheres with their participants, lots, and sales (aggregated view)
  */
-const getAllEncheresWithDetails = async (req, res) => {
-  const encheres = db.getAll('encheres').sort((a,b) => new Date(b.date) - new Date(a.date));
+const getAllEncheres = async (req, res) => {
+  const encheres = db.getAll('encheres').sort((a, b) => new Date(b.date) - new Date(a.date));
   const lots = db.getAll('lots');
   const participations = db.getAll('participation');
   const clients = db.getAll('clients');
@@ -69,13 +69,13 @@ const getAllEncheresWithDetails = async (req, res) => {
  */
 const getEnchereById = async (req, res) => {
   const { id } = req.params;
-  
+
   // Get basic enchere data
   const enchere = db.getById('encheres', id);
   if (!enchere) return res.status(404).json({ message: 'Enchere not found' });
 
   // Bundles
-  enchere.bundles = db.getAll('lots').filter(l => l.enchere_id === Number(id)).sort((a,b) => a.id - b.id);
+  enchere.bundles = db.getAll('lots').filter(l => l.enchere_id === Number(id)).sort((a, b) => a.id - b.id);
 
   // Participants (join participation + clients)
   const participations = db.getAll('participation').filter(p => p.enchere_id === Number(id));
@@ -158,8 +158,8 @@ const deleteEnchere = async (req, res) => {
 };
 
 module.exports = {
+  getEncheresList,
   getAllEncheres,
-  getAllEncheresWithDetails,
   getEnchereById,
   createEnchere,
   updateEnchere,

@@ -29,16 +29,24 @@ export const AuctionProvider = ({ children }) => {
     setError(error.message || 'An error occurred');
     setLoading(false);
   };
-  
+
+  const loadSpecificEnchere = async (id) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+    }
+  }
+
   // Encheres (Auctions) operations
   const loadEncheres = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const encheresList = await apiService.getAuctionsWithDetails();
+      const encheresList = await apiService.getAllAuctions();
 
-      const encheresWithDetails = encheresList.map((enchere) => {
+      const encheres = encheresList.map((enchere) => {
         // Parse metadata if it exists
         let managementFeeRate = 11.9; // Default value
         if (enchere.metadata) {
@@ -84,7 +92,7 @@ export const AuctionProvider = ({ children }) => {
         };
       });
 
-      setEncheres(encheresWithDetails);
+      setEncheres(encheres);
     } catch (error) {
       handleError(error, 'Loading encheres');
     } finally {
@@ -101,7 +109,7 @@ export const AuctionProvider = ({ children }) => {
         date: enchereData.date,
         address: enchereData.location // Map location to address
       });
-      
+
       await loadEncheres(); // Reload all encheres
       return newEnchere;
     } catch (error) {
@@ -127,23 +135,23 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Create a data object with just the fields API expects
       const updateData = {
         name: updates.name,
         date: updates.date,
         address: updates.location || updates.address
       };
-      
+
       // If we have a management fee rate, add it to metadata field
       if (updates.managementFeeRate !== undefined) {
         updateData.metadata = JSON.stringify({
           managementFeeRate: parseFloat(updates.managementFeeRate)
         });
       }
-      
+
       const updatedEnchere = await apiService.updateAuction(id, updateData);
-      
+
       await loadEncheres(); // Reload all encheres
       return updatedEnchere;
     } catch (error) {
@@ -167,7 +175,7 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       let existingClient = null;
 
       // Prefer lookup by id if present
@@ -177,11 +185,11 @@ export const AuctionProvider = ({ children }) => {
 
       // Fallback: lookup by email (case-insensitive)
       if (!existingClient && clientData.email) {
-        existingClient = clients.find(c => 
+        existingClient = clients.find(c =>
           c.email && c.email.toLowerCase() === clientData.email.toLowerCase()
         ) || null;
       }
-      
+
       let client;
       if (existingClient) {
         // Update existing client
@@ -200,7 +208,7 @@ export const AuctionProvider = ({ children }) => {
           address: clientData.address || ''
         });
       }
-      
+
       await loadClients(); // Reload clients
       return client;
     } catch (error) {
@@ -241,10 +249,10 @@ export const AuctionProvider = ({ children }) => {
         localNumber = participantData.local_number;
       } else {
         // Find next available local number
-        const usedNumbers = enchere ? enchere.participants.map(p => 
+        const usedNumbers = enchere ? enchere.participants.map(p =>
           parseInt(p.local_number)
         ).filter(num => !isNaN(num)) : [];
-        
+
         localNumber = 1;
         while (usedNumbers.includes(localNumber)) {
           localNumber++;
@@ -265,9 +273,9 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-            
+
       await apiService.removeParticipant(enchereId, participantId);
-      
+
       await loadEncheres();
     } catch (error) {
       handleError(error, 'Adding participant');
@@ -280,7 +288,7 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // First create the lot
       const lot = await apiService.createBundle(enchereId, {
         number: bundleData.number,
@@ -290,9 +298,9 @@ export const AuctionProvider = ({ children }) => {
         startingPrice: bundleData.startingPrice,
         notes: bundleData.notes  // Add notes
       });
-      
+
       // Image uploads are not supported in the lightweight backend; ignore imageFile
-      
+
       await loadEncheres(); // Reload all encheres
       return lot;
     } catch (error) {
@@ -318,7 +326,7 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Update the lot
       await apiService.updateBundle(bundleData.id, {
         number: bundleData.number,
@@ -328,9 +336,9 @@ export const AuctionProvider = ({ children }) => {
         startingPrice: bundleData.startingPrice,
         notes: bundleData.notes
       });
-      
+
       // Image uploads are not supported in the lightweight backend; ignore imageFile
-      
+
       await loadEncheres(); // Reload all encheres
       return true;
     } catch (error) {
@@ -344,13 +352,13 @@ export const AuctionProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       await apiService.sellBundle(
         saleData.bundleId,
         saleData.participantId,
         saleData.finalPrice
       );
-      
+
       await loadEncheres(); // Reload all encheres
     } catch (error) {
       handleError(error, 'Recording sale');
@@ -414,23 +422,23 @@ export const AuctionProvider = ({ children }) => {
       clients,
       loading,
       error,
-      
+
       // New API-based methods
       loadEncheres,
-  addEnchere,
-  deleteEnchere,
+      addEnchere,
+      deleteEnchere,
       updateEnchere,
       loadClients,
       addOrUpdateClient,
       addParticipant,
       addBundle,
       updateBundle,
-  deleteBundle,
+      deleteBundle,
       addSale,
       getEnchereStats,
       getClientPurchases,
       updateClient,
-      
+
       // Compatibility aliases for existing frontend
       auctions,
       currentAuction: currentEnchere,
