@@ -38,7 +38,7 @@ const ParticipantDetail = () => {
   const { auctionId, participantId } = useParams();
   const navigate = useNavigate();
   const { auctions, updateClient, loadEncheres } = useAuction();
-  
+
   const auction = auctions.find(a => a.id === parseInt(auctionId));
   const participant = auction?.participants.find(p => p.id === parseInt(participantId));
 
@@ -56,12 +56,12 @@ const ParticipantDetail = () => {
 
   // Get all sales for this participant in this auction
   const participantSales = auction.sales.filter(sale => sale.participantId === participant.id);
-  
+
   // Calculate totals using the correct field names
   const totalSpent = participantSales.reduce((sum, sale) => sum + (parseFloat(sale.finalPrice) || 0), 0);
   const totalOwed = totalSpent + totalSpent * auction.managementFeeRate / 100 * 1.2;
   const totalItems = participantSales.length;
-  
+
   // Get bundle details for each purchase
   const purchaseDetails = participantSales.map(sale => {
     const bundle = auction.bundles.find(b => b.id === sale.bundleId);
@@ -91,13 +91,13 @@ const ParticipantDetail = () => {
   //     auction, 
   //     customizations
   //   );
-    
+
   //   // Download the PDF
   //   downloadPDF(doc, `facture-${participant.name.replace(/\s+/g, '-').toLowerCase()}-${auction.id}.pdf`);
   // };
 
   const handleGenerateBill = async (customizations) => {
-    console.log(participant)
+    console.log(participant, customizations)
     const participationId = participant.participation_id;
     // If the dialog passed selectedSaleIds, filter the purchaseDetails accordingly
     let filteredPurchases = purchaseDetails;
@@ -140,24 +140,24 @@ const ParticipantDetail = () => {
 
   return (
     <Box className={styles.container}>
-      <Button 
-        onClick={() => navigate(`/auction/${auction.id}?tab=participants`)} 
+      <Button
+        onClick={() => navigate(`/auction/${auction.id}?tab=participants`)}
         className={styles.backButton}
         startIcon={<ArrowBack />}
       >
         Retourner à la liste des participants
       </Button>
-      
+
       <Box className={styles.header}>
         <Paper className={styles.participantInfo}>
           <Typography variant="h3" className={styles.participantName}>
             {participant.name}
           </Typography>
-          
+
           <Box className={styles.bidderNumber}>
             Numéro #{participant.local_number}
           </Box>
-          
+
           <Box className={styles.contactInfo}>
             <Box className={styles.contactItem}>
               <Email color="action" />
@@ -178,9 +178,9 @@ const ParticipantDetail = () => {
           </Box>
 
           {participant.global_id && (
-            <Chip 
-              label="Ancien participant" 
-              color="success" 
+            <Chip
+              label="Ancien participant"
+              color="success"
               sx={{ fontWeight: 600 }}
             />
           )}
@@ -195,8 +195,8 @@ const ParticipantDetail = () => {
           <Typography variant="body2" sx={{ color: '#475569', fontStyle: 'italic' }}>
             {participant.notes}
           </Typography>
-          <Button 
-            size="small" 
+          <Button
+            size="small"
             onClick={() => {
               setEditedNotes(participant.notes);
               setNotesDialog(true);
@@ -207,8 +207,8 @@ const ParticipantDetail = () => {
           </Button>
         </Box>
       ) : (
-        <Button 
-          variant="outlined" 
+        <Button
+          variant="outlined"
           size="small"
           onClick={() => {
             setEditedNotes('');
@@ -222,7 +222,7 @@ const ParticipantDetail = () => {
       )}
 
       {/* Summary Statistics */}
-      <Box className={styles.summaryGrid} sx={{mt: 2}}>
+      <Box className={styles.summaryGrid} sx={{ mt: 2 }}>
         <Card className={styles.summaryCard}>
           <CardContent className={styles.summaryCardContent}>
             <Typography variant="h3" className={styles.summaryNumber} color="primary">
@@ -233,7 +233,7 @@ const ParticipantDetail = () => {
             </Typography>
           </CardContent>
         </Card>
-        
+
         <Card className={styles.summaryCard}>
           <CardContent className={styles.summaryCardContent}>
             <Typography variant="h3" className={styles.summaryNumber} color="success.main">
@@ -253,7 +253,7 @@ const ParticipantDetail = () => {
           color="primary"
           startIcon={<Receipt />}
           onClick={() => setBillDialog(true)}
-          sx={{ 
+          sx={{
             borderRadius: '999px',
             px: 4,
             py: 1.5,
@@ -270,14 +270,14 @@ const ParticipantDetail = () => {
         >
           Générer la facture
         </Button>
-        
-        {participantSales.length > 0 && (
+
+        {/*participantSales.length > 0 && (
           <Button
             variant="text"
             color="primary"
             startIcon={<PictureAsPdf />}
             onClick={() => handleGenerateBill({})}
-            sx={{ 
+            sx={{
               textTransform: 'none',
               fontWeight: 500,
               '&:hover': {
@@ -288,7 +288,7 @@ const ParticipantDetail = () => {
           >
             Télécharger facture rapide
           </Button>
-        )}
+        )*/}
 
         {participant.paid !== null && participant.paid !== undefined && (
           <Button
@@ -309,7 +309,7 @@ const ParticipantDetail = () => {
 
       {/* Purchases Section */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <ShoppingCart color="primary" style={{transform: "translateY(-.5rem)"}}/>
+        <ShoppingCart color="primary" style={{ transform: "translateY(-.5rem)" }} />
         <Typography variant="h4" className={styles.sectionTitle}>
           Achats (sur cette vente)
         </Typography>
@@ -359,7 +359,7 @@ const ParticipantDetail = () => {
               {formatCurrency(totalOwed)}
             </Typography>
             <Typography className={styles.summaryLabel}>
-              (Dont Honoraires : {formatCurrency(totalSpent*auction.managementFeeRate/100*1.2)} TTC)
+              (Dont Honoraires : {formatCurrency(totalSpent * auction.managementFeeRate / 100 * 1.2)} TTC)
             </Typography>
           </Paper>
         </>

@@ -13,12 +13,20 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
  */
 const PaymentStatusChip = ({ paid, onClick }) => {
   if (paid === null || paid === undefined) return null;
-
-  return paid ? (
+  let chipText;
+  switch (paid) {
+    case 0: chipText = 'Non payé'; break;
+    case 1: chipText = 'Payé'; break;
+    case 2: chipText = 'Payé par carte'; break;
+    case 3: chipText = 'Payé par chèque'; break;
+    case 4: chipText = 'Payé en espèces'; break;
+    default: chipText = 'Payé'; break;
+  }
+  return paid > 0 ? (
     <Tooltip title={onClick ? 'Cliquer pour marquer comme non payé' : ''}>
       <Chip
         icon={<CheckCircleIcon />}
-        label="Payé"
+        label={chipText}
         color="success"
         size="small"
         onClick={onClick}

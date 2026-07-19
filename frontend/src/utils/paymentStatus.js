@@ -12,7 +12,7 @@ export const setParticipationPaymentStatus = async (participationId, paid) => {
   const res = await fetch(`${API}/participation/${participationId}/payment`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ paid: paid ?? null })
+    body: JSON.stringify({ paid })
   });
   if (!res.ok) throw new Error(`Failed to update payment status: ${res.status}`);
   return res.json();

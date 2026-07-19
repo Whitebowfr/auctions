@@ -17,7 +17,7 @@ import {
   Tab,
   Autocomplete,
   Stack
-  , Dialog, DialogTitle, DialogContent, DialogActions, Chip
+  , Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
@@ -27,7 +27,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuction } from '../../context/AuctionContext';
 import ParticipantForm from '../../components/participants/ParticipantForm';
 import { apiService } from '../../services/api';
-
+import PaymentStatusChip from '../../components/PaymentStatusChip';
 const AuctionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -88,7 +88,7 @@ const AuctionDetail = () => {
       <Alert severity="error">Vente non trouvée. Veuillez retourner à la liste des ventes.</Alert>
     );
   }
-  
+
 
   const getNextBundleNumber = () => {
     if (!auction || !auction.bundles || auction.bundles.length === 0) {
@@ -145,8 +145,8 @@ const AuctionDetail = () => {
   const startEditingBundle = (bundle) => {
     setEditingBundleId(bundle.id);
     setEditFields({
-	      // Pre-fill with existing display value: prefer custom number, fallback to id
-	      number: bundle.number ?? String(bundle.id),
+      // Pre-fill with existing display value: prefer custom number, fallback to id
+      number: bundle.number ?? String(bundle.id),
       name: bundle.name || ''
     });
   };
@@ -328,7 +328,7 @@ const AuctionDetail = () => {
                 <TableCell>Prix d'Adjudication</TableCell>
                 <TableCell>Total avec frais</TableCell>
                 <TableCell>Acheteur</TableCell>
-                  <TableCell>Actions</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -353,143 +353,141 @@ const AuctionDetail = () => {
                 .map((b) => {
                   const isEditing = editingBundleId === b.id;
                   return (
-                <TableRow key={b.id}>
-                  <TableCell>
-                    {isEditing ? (
-                      <TextField
-                        fullWidth
-                        size="small"
-                        value={editFields.number}
-                        placeholder={String(b.id)}
-                        onChange={(e) => setEditFields(prev => ({ ...prev, number: e.target.value }))}
-                      />
-                    ) : (
-                      b.number ?? b.id
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {isEditing ? (
-                      <TextField
-                        fullWidth
-                        size="small"
-                        value={editFields.name}
-                        placeholder={`Lot ${b.number ?? b.id}`}
-                        onChange={(e) => setEditFields(prev => ({ ...prev, name: e.target.value }))}
-                      />
-                    ) : (
-                      b.name || ''
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      type="number"
-                      size="small"
-                        placeholder={''}
-                      value={bundlePrices[b.id] ?? ''}
-                      onChange={(e) => handlePriceChange(b.id, e.target.value)}
-                      onBlur={() => handlePriceBlur(b.id)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {(() => {
-                      const raw = bundlePrices[b.id];
-                      const priceNum = raw ? parseFloat(raw) : null;
-                      if (!priceNum || Number.isNaN(priceNum)) return '';
-                      const commissionRate = 0.119; // 11.9%
-                      const vatRate = 0.20; // 20% on the commission
-                      const commission = priceNum * commissionRate;
-                      const vat = commission * vatRate;
-                      const total = priceNum + commission + vat;
-                      return total.toFixed(2);
-                    })()}
-                  </TableCell>
-                  <TableCell>
-                    <Autocomplete
-                      options={auction.participants}
-                        getOptionLabel={(opt) => {
-                          if (!opt) return '';
-                          const num = opt.local_number ? String(opt.local_number) : '';
-                          return num ? `${num} - ${opt.name}` : opt.name;
-                        }}
-                        filterOptions={(options, state) => {
-                          const input = state.inputValue.trim().toLowerCase();
-                          if (!input) return options;
-                          return options.filter((opt) => {
-                            if (!opt) return false;
-                            const nameMatch = opt.name && opt.name.toLowerCase().includes(input);
-                            const localNumStr = opt.local_number != null ? String(opt.local_number) : '';
-                            const localMatch = localNumStr && localNumStr.toLowerCase().includes(input);
-                            return nameMatch || localMatch;
-                          });
-                        }}
-                        value={auction.participants.find(p => p.id === bundleBuyers[b.id]) || null}
-                        onChange={(e, value) => handleBuyerSelect(b.id, value)}
-                        renderInput={(params) => (
-                          <TextField {...params} size="small" placeholder="Sélectionner un acheteur" />
+                    <TableRow key={b.id}>
+                      <TableCell>
+                        {isEditing ? (
+                          <TextField
+                            fullWidth
+                            size="small"
+                            value={editFields.number}
+                            placeholder={String(b.id)}
+                            onChange={(e) => setEditFields(prev => ({ ...prev, number: e.target.value }))}
+                          />
+                        ) : (
+                          b.number ?? b.id
                         )}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        sx={{ minWidth: 200 }}
-                        renderOption={(props, option) => (
-                          <li {...props}>
-                            <Box sx={{ display: 'inline-block', bgcolor: '#1976d2', color: '#fff', px: 1, py: '2px', borderRadius: 1, mr: 1, fontSize: '0.8rem' }}>
-                              {option.local_number || '-'}
-                            </Box>
-                            <span>{option.name}</span>
-                            {option.email && <span style={{color: '#666', marginLeft: 8}}>({option.email})</span>}
-                          </li>
+                      </TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                          <TextField
+                            fullWidth
+                            size="small"
+                            value={editFields.name}
+                            placeholder={`Lot ${b.number ?? b.id}`}
+                            onChange={(e) => setEditFields(prev => ({ ...prev, name: e.target.value }))}
+                          />
+                        ) : (
+                          b.name || ''
                         )}
-                    />
-                    {(() => {
-                      const buyerId = bundleBuyers[b.id] ?? b.sold_to;
-                      if (!buyerId) return null;
-                      const buyer = auction.participants.find(p => p.id === buyerId);
-                      if (!buyer || buyer.paid === null || buyer.paid === undefined) return null;
-                      return buyer.paid === true
-                        ? <Chip label="Payé" color="success" size="small" sx={{ ml: 1 }} />
-                        : <Chip label="Facture envoyée" color="warning" size="small" sx={{ ml: 1 }} />;
-                    })()}
-                  </TableCell>
-                    <TableCell>
-                      {isEditing ? (
-                        <>
-                          <IconButton
-                            size="small"
-                            onClick={() => saveEditingBundle(b)}
-                          >
-                            <CheckIcon />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => cancelEditingBundle()}
-                          >
-                            ✕
-                          </IconButton>
-                        </>
-                      ) : (
-                        <>
-                          <IconButton
-                            size="small"
-                            onClick={() => startEditingBundle(b)}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={async () => {
-                              if (window.confirm('Supprimer ce lot ?')) {
-                                await deleteBundle(b.id);
-                              }
-                            }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </>
-                      )}
-                    </TableCell>
-                </TableRow>
-              );
-              })}
+                      </TableCell>
+                      <TableCell>
+                        <TextField
+                          type="number"
+                          size="small"
+                          placeholder={''}
+                          value={bundlePrices[b.id] ?? ''}
+                          onChange={(e) => handlePriceChange(b.id, e.target.value)}
+                          onBlur={() => handlePriceBlur(b.id)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const raw = bundlePrices[b.id];
+                          const priceNum = raw ? parseFloat(raw) : null;
+                          if (!priceNum || Number.isNaN(priceNum)) return '';
+                          const commissionRate = 0.119; // 11.9%
+                          const vatRate = 0.20; // 20% on the commission
+                          const commission = priceNum * commissionRate;
+                          const vat = commission * vatRate;
+                          const total = priceNum + commission + vat;
+                          return total.toFixed(2);
+                        })()}
+                      </TableCell>
+                      <TableCell>
+                        <Autocomplete
+                          options={auction.participants}
+                          getOptionLabel={(opt) => {
+                            if (!opt) return '';
+                            const num = opt.local_number ? String(opt.local_number) : '';
+                            return num ? `${num} - ${opt.name}` : opt.name;
+                          }}
+                          filterOptions={(options, state) => {
+                            const input = state.inputValue.trim().toLowerCase();
+                            if (!input) return options;
+                            return options.filter((opt) => {
+                              if (!opt) return false;
+                              const nameMatch = opt.name && opt.name.toLowerCase().includes(input);
+                              const localNumStr = opt.local_number != null ? String(opt.local_number) : '';
+                              const localMatch = localNumStr && localNumStr.toLowerCase().includes(input);
+                              return nameMatch || localMatch;
+                            });
+                          }}
+                          value={auction.participants.find(p => p.id === bundleBuyers[b.id]) || null}
+                          onChange={(e, value) => handleBuyerSelect(b.id, value)}
+                          renderInput={(params) => (
+                            <TextField {...params} size="small" placeholder="Sélectionner un acheteur" />
+                          )}
+                          isOptionEqualToValue={(option, value) => option.id === value.id}
+                          sx={{ minWidth: 200 }}
+                          renderOption={(props, option) => (
+                            <li {...props}>
+                              <Box sx={{ display: 'inline-block', bgcolor: '#1976d2', color: '#fff', px: 1, py: '2px', borderRadius: 1, mr: 1, fontSize: '0.8rem' }}>
+                                {option.local_number || '-'}
+                              </Box>
+                              <span>{option.name}</span>
+                              {option.email && <span style={{ color: '#666', marginLeft: 8 }}>({option.email})</span>}
+                            </li>
+                          )}
+                        />
+                        {(() => {
+                          const buyerId = bundleBuyers[b.id] ?? b.sold_to;
+                          if (!buyerId) return null;
+                          const buyer = auction.participants.find(p => p.id === buyerId);
+                          if (!buyer || buyer.paid === null || buyer.paid === undefined) return null;
+                          return PaymentStatusChip({ paid: buyer.paid });
+                        })()}
+                      </TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                          <>
+                            <IconButton
+                              size="small"
+                              onClick={() => saveEditingBundle(b)}
+                            >
+                              <CheckIcon />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => cancelEditingBundle()}
+                            >
+                              ✕
+                            </IconButton>
+                          </>
+                        ) : (
+                          <>
+                            <IconButton
+                              size="small"
+                              onClick={() => startEditingBundle(b)}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={async () => {
+                                if (window.confirm('Supprimer ce lot ?')) {
+                                  await deleteBundle(b.id);
+                                }
+                              }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
 
               {/* Inline add row */}
               <TableRow>
@@ -538,7 +536,7 @@ const AuctionDetail = () => {
         </Paper>
       )}
 
-        {tabIndex === 1 && (
+      {tabIndex === 1 && (
         <Paper sx={{ p: 2 }}>
           <Box sx={{ mb: 2 }}>
             <Typography variant="h6" sx={{ mb: 1 }}>Participants</Typography>
@@ -596,45 +594,41 @@ const AuctionDetail = () => {
               {auction.participants
                 .filter(p => !filterNoBuys || auction.sales.some(s => s.participantId === p.id))
                 .map((p) => (
-                <TableRow
-                  key={p.id}
-                  hover
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/auction/${auction.id}/participants/${p.id}`)}
-                >
-                  <TableCell>{p.local_number || '-'}</TableCell>
-                  <TableCell>{p.name}</TableCell>
-                  <TableCell>{p.email || '-'}</TableCell>
-                  <TableCell>{p.phone || '-'}</TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    {p.paid === null || p.paid === undefined ? null : (
-                      p.paid === true
-                        ? <Chip label="Payé" color="success" size="small" />
-                        : <Chip label="Facture envoyée" color="warning" size="small" />
-                    )}
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Button size="small" onClick={() => navigate(`/auction/${auction.id}/participants/${p.id}`)}>Voir</Button>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={async () => {
-                        if (window.confirm('Retirer ce participant de cette vente ?')) {
-                          await deleteParticipant(auction.id, p.id);
-                        }
-                      }}
-                      sx={{ ml: 1 }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+                  <TableRow
+                    key={p.id}
+                    hover
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/auction/${auction.id}/participants/${p.id}`)}
+                  >
+                    <TableCell>{p.local_number || '-'}</TableCell>
+                    <TableCell>{p.name}</TableCell>
+                    <TableCell>{p.email || '-'}</TableCell>
+                    <TableCell>{p.phone || '-'}</TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      {p.paid === null || p.paid === undefined ? null : PaymentStatusChip({ paid: p.paid })}
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Button size="small" onClick={() => navigate(`/auction/${auction.id}/participants/${p.id}`)}>Voir</Button>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={async () => {
+                          if (window.confirm('Retirer ce participant de cette vente ?')) {
+                            await deleteParticipant(auction.id, p.id);
+                          }
+                        }}
+                        sx={{ ml: 1 }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </Paper>
       )}
-      
+
       {/* Transfer dialog */}
       <Dialog open={transferDialogOpen} onClose={() => setTransferDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Dupliquer les participants</DialogTitle>
@@ -726,7 +720,7 @@ const AuctionDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
     </Box>
   );
 };

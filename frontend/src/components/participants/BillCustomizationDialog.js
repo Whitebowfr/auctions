@@ -8,6 +8,8 @@ import {
   TextField,
   FormControlLabel,
   Switch,
+  Select,
+  MenuItem,
   Grid,
   Box,
   Table,
@@ -21,18 +23,19 @@ import {
   Typography
 } from '@mui/material';
 import styles from '../ModernDialog.module.css';
+import PaymentSelector from '../PaymentSelector';
 
-const BillCustomizationDialog = ({ 
-  open, 
-  onClose, 
-  onGenerate, 
-  participant, 
-  auction 
+const BillCustomizationDialog = ({
+  open,
+  onClose,
+  onGenerate,
+  participant,
+  auction
 }) => {
   const [customizations, setCustomizations] = useState({
     title: `Facture - ${participant?.name || 'Client'}`,
     includeNotes: false,
-    paid: false,
+    paid: 0,
     footer: `${auction?.name || 'Vente aux enchères'} - Le ${new Date().toLocaleDateString("fr-FR")}`,
     name: `${participant?.name}`,
     email: participant?.email || '',
@@ -58,6 +61,7 @@ const BillCustomizationDialog = ({
   }, [open, participant, auction]);
 
   const handleChange = (field, value) => {
+    console.log(field, value, customizations)
     setCustomizations({
       ...customizations,
       [field]: value
@@ -72,10 +76,10 @@ const BillCustomizationDialog = ({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="md" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
       fullWidth
       className={styles.modernDialog}
     >
@@ -84,7 +88,7 @@ const BillCustomizationDialog = ({
       </DialogTitle>
       <DialogContent className={styles.dialogContent}>
         <Grid container spacing={3} sx={{ mt: 0.5 }}>
-          <Grid sx={{xs: 12}}>
+          <Grid sx={{ xs: 12 }}>
             <TextField
               fullWidth
               label="Titre de la facture"
@@ -93,8 +97,8 @@ const BillCustomizationDialog = ({
               className={styles.modernTextField}
             />
           </Grid>
-          
-          <Grid sx={{xs: 12, sm: 6}}>
+
+          <Grid sx={{ xs: 12, sm: 6 }}>
             <TextField
               fullWidth
               label="Nom affiché"
@@ -103,8 +107,8 @@ const BillCustomizationDialog = ({
               className={styles.modernTextField}
             />
           </Grid>
-          
-          <Grid sx={{xs: 12, sm: 6}}>
+
+          <Grid sx={{ xs: 12, sm: 6 }}>
             <TextField
               fullWidth
               label="Email affiché"
@@ -113,8 +117,8 @@ const BillCustomizationDialog = ({
               className={styles.modernTextField}
             />
           </Grid>
-          
-          <Grid sx={{xs: 12}}>
+
+          <Grid sx={{ xs: 12 }}>
             <TextField
               fullWidth
               label="Pied de page"
@@ -124,7 +128,7 @@ const BillCustomizationDialog = ({
             />
           </Grid>
 
-          <Grid sx={{xs: 12}}>
+          <Grid sx={{ xs: 12 }}>
             <TextField
               fullWidth
               label="Adresse affichée"
@@ -137,7 +141,7 @@ const BillCustomizationDialog = ({
             />
           </Grid>
 
-          <Grid sx={{xs: 12, sm: 6}}>
+          <Grid sx={{ xs: 12, sm: 6 }}>
             <TextField
               fullWidth
               label="Téléphone affiché"
@@ -147,7 +151,7 @@ const BillCustomizationDialog = ({
             />
           </Grid>
 
-          <Grid sx={{xs: 12, sm: 6}}>
+          <Grid sx={{ xs: 12, sm: 6 }}>
             <TextField
               fullWidth
               label="Frais en sus"
@@ -163,22 +167,27 @@ const BillCustomizationDialog = ({
               placeholder='Hors TVA'
             />
           </Grid>
-          
-          <Grid sx={{xs: 12, sm: 6}}>
+
+          <Grid sx={{ xs: 12, sm: 6 }}>
             <FormControlLabel
               control={
                 <Switch
                   checked={customizations.paid}
-                  onChange={(e) => handleChange('paid', e.target.checked)}
+                  onChange={(e) => handleChange('paid', e.target.checked ? 1 : 0)}
                   color="success"
                 />
               }
               label="Marqué comme payé"
             />
+            {
+              customizations.paid >= 1 ?
+                <PaymentSelector value={customizations.paid} onChange={(value) => handleChange('paid', value)} />
+                : null
+            }
           </Grid>
 
           {/* Purchases selection table */}
-          <Grid sx={{xs: 12}}>
+          <Grid sx={{ xs: 12 }}>
             <Box sx={{ mt: 2, mb: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Sélectionnez les lots à inclure dans la facture</Typography>
             </Box>
@@ -217,18 +226,18 @@ const BillCustomizationDialog = ({
             </TableContainer>
           </Grid>
 
-          
+
         </Grid>
       </DialogContent>
       <DialogActions className={styles.dialogActions}>
-        <Button 
+        <Button
           onClick={onClose}
           className={styles.secondaryButton}
         >
           Annuler
         </Button>
-        <Button 
-          onClick={handleGenerate} 
+        <Button
+          onClick={handleGenerate}
           variant="contained"
           className={styles.primaryButton}
         >

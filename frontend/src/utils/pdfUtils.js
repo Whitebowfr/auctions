@@ -32,7 +32,7 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   // Create a new PDF document
   applyPlugin(jsPDF)
   const doc = new jsPDF();
-  
+
   // Default values merged with customizations
   const options = {
     title: customizations.title || `Facture - ${auction.name}`,
@@ -40,7 +40,7 @@ export const generateParticipantBill = (participant, purchases, auction, customi
     includeNotes: customizations.includeNotes !== undefined ? customizations.includeNotes : false,
     fraisEnSus: customizations.fraisEnSus !== undefined ? parseFloat(customizations.fraisEnSus) : 0,
     footer: customizations.footer || `${auction.name} - Édité le ${new Date().toLocaleDateString("fr-FR")}`,
-    paid: customizations.paid || false,
+    paid: customizations.paid || 0,
     participant: customizations.participantName || customizations.name || participant.name,
     address: customizations.address || participant.address || '',
     email: customizations.email || participant.email || '',
@@ -53,7 +53,7 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   }
 
   doc.setFontSize(11)
-  doc.text('S.C.P R. GRANIER - L. DAVID \n Commissaires de Justice associés \n 66, rue de la République \n BP 52 \n 47202 MARMANDE Cedex \n\n Tél : 05 53 64 12 59 \n Fax : 05 53 64 07 15 \n etude@huissier47.fr \n CDC 40031 000011 43474Z 67', 45, 12, { align: "center"})
+  doc.text('S.C.P R. GRANIER - L. DAVID \n Commissaires de Justice associés \n 66, rue de la République \n BP 52 \n 47202 MARMANDE Cedex \n\n Tél : 05 53 64 12 59 \n Fax : 05 53 64 07 15 \n etude@huissier47.fr \n CDC 40031 000011 43474Z 67', 45, 12, { align: "center" })
 
 
   doc.setFontSize(11);
@@ -100,14 +100,14 @@ export const generateParticipantBill = (participant, purchases, auction, customi
     margin: { top: 105 }
   });
   doc.setFontSize(12);
-  doc.text(`Sous-total 1: ${formatCurrency(totalAmount)}` , 130, doc.lastAutoTable.finalY + 5);
+  doc.text(`Sous-total 1: ${formatCurrency(totalAmount)}`, 130, doc.lastAutoTable.finalY + 5);
   doc.setFontSize(10);
   doc.setTextColor('#666666');
-  doc.text(`(Dont TVA 20%: ${formatCurrency(totalAmount*0.2)})` , 130, doc.lastAutoTable.finalY + 10);
-  
+  doc.text(`(Dont TVA 20%: ${formatCurrency(totalAmount * 0.2)})`, 130, doc.lastAutoTable.finalY + 10);
+
   doc.setFontSize(12);
   doc.setTextColor('#000000')
-  const frais = totalAmount*auction.managementFeeRate/100
+  const frais = totalAmount * auction.managementFeeRate / 100
   const fraisensus = options.fraisEnSus || 0
   const tva_fraisensus = fraisensus * 0.2
   const tva_frais = frais * 0.2
@@ -119,19 +119,19 @@ export const generateParticipantBill = (participant, purchases, auction, customi
     styles: { cellPadding: 1 }
   })
   if (fraisensus > 0) {
-  doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 5,
-    tableWidth: "wrap",
-    head: [[`Frais en sus`, `${formatCurrency(fraisensus)}`]],
-     styles: { cellPadding: 1 },
-    body: [["TVA (20%)", `${formatCurrency(tva_fraisensus)}`]],
-  })
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 5,
+      tableWidth: "wrap",
+      head: [[`Frais en sus`, `${formatCurrency(fraisensus)}`]],
+      styles: { cellPadding: 1 },
+      body: [["TVA (20%)", `${formatCurrency(tva_fraisensus)}`]],
+    })
   }
   // compute subtotal 2 as a number to ensure correct arithmetic and reuse it for the final total
   const sousTotal2 = frais + tva_frais + fraisensus + tva_fraisensus;
   doc.setFontSize(12);
-  doc.text(`Sous-total 2: ${formatCurrency(sousTotal2)}` , 130, doc.lastAutoTable.finalY + 5);
-  
+  doc.text(`Sous-total 2: ${formatCurrency(sousTotal2)}`, 130, doc.lastAutoTable.finalY + 5);
+
   const finalAmount = totalAmount + sousTotal2;
   // Add total
   const finalY = doc.lastAutoTable.finalY + 15;
@@ -142,7 +142,7 @@ export const generateParticipantBill = (participant, purchases, auction, customi
   doc.text(`${formatCurrency(finalAmount)}`, 150, finalY);
 
   // Add payment status
-  if (options.paid) {
+  if (options.paid > 0) {
     doc.setFillColor('#059669');
     doc.rect(130, finalY + 5, 65, 10, 'F');
     doc.setTextColor('#FFFFFF');
@@ -164,7 +164,7 @@ export const generateParticipantBill = (participant, purchases, auction, customi
     doc.text('Notes:', 14, finalY + 25);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    
+
     // Split notes into multiple lines if needed
     const splitNotes = doc.splitTextToSize(participant.notes, 180);
     doc.text(splitNotes, 14, finalY + 32);
@@ -199,18 +199,18 @@ export const generateBundlesSheet = (auction, bundles) => {
   // Create a new PDF document
   applyPlugin(jsPDF)
   const doc = new jsPDF();
-  
+
   // Add header
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.text(`Liste des lots - ${auction.name}`, 14, 20);
-  
+
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   doc.text(`Date: ${formatDate(auction.date)}`, 14, 30);
   if (auction.address) doc.text(`Lieu: ${auction.address}`, 14, 37);
   doc.text(`Lots: ${bundles.length}`, 14, 44);
-  
+
   // Create the table
   doc.autoTable({
     startY: 55,
@@ -237,14 +237,14 @@ export const generateBundlesSheet = (auction, bundles) => {
     },
     margin: { top: 55 }
   });
-  
+
   // Add footer
   const pageCount = doc.internal.getNumberOfPages();
   doc.setFontSize(10);
   doc.setTextColor('#94A3B8');
   doc.text(`${auction.name} - Préparé le ${new Date().toLocaleDateString("fr-FR")}`, 14, doc.internal.pageSize.height - 10);
   doc.text(`Page ${pageCount}`, doc.internal.pageSize.width - 25, doc.internal.pageSize.height - 10);
-  
+
   return doc;
 };
 
@@ -259,27 +259,27 @@ export const generateSalesRecap = (auction, sales, allBundles) => {
   // Create a new PDF document
   applyPlugin(jsPDF)
   const doc = new jsPDF();
-  
+
   // Add header
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.text(`Récapitulatif des ventes - ${auction.name}`, 14, 20);
-  
+
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   doc.text(`Date: ${formatDate(auction.date)}`, 14, 30);
   if (auction.address) doc.text(`Lieu: ${auction.address}`, 14, 37);
-  
+
   // Add summary
   doc.setFont('helvetica', 'bold');
   doc.text('Résumé:', 14, 47);
   doc.setFont('helvetica', 'normal');
-  
+
   const totalRevenue = sales.reduce((sum, sale) => sum + parseFloat(sale.finalPrice), 0);
-  
+
   doc.text(`Nombre de lots vendus: ${sales.length} sur ${allBundles.length}`, 14, 54);
   doc.text(`Revenu total: ${formatCurrency(totalRevenue)}`, 14, 61);
-  
+
   // Create the table for sold items
   doc.autoTable({
     startY: 78,
@@ -307,18 +307,18 @@ export const generateSalesRecap = (auction, sales, allBundles) => {
       }
     }
   });
-  
+
   // Get unsold bundles
   const soldBundleIds = sales.map(sale => sale.bundleId);
   const unsoldBundles = allBundles.filter(bundle => !soldBundleIds.includes(bundle.id));
-  
+
   if (unsoldBundles.length > 0) {
     // Add unsold bundles section
     doc.addPage();
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     doc.text('Lots non vendus', 14, 20);
-    
+
     doc.autoTable({
       startY: 30,
       head: [['Nom du lot', 'Prix de départ', 'Catégorie']],
@@ -337,7 +337,7 @@ export const generateSalesRecap = (auction, sales, allBundles) => {
       }
     });
   }
-  
+
   // Add footer on all pages
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
@@ -347,7 +347,7 @@ export const generateSalesRecap = (auction, sales, allBundles) => {
     doc.text(`${auction.name} - Généré le ${new Date().toLocaleDateString("fr-FR")}`, 14, doc.internal.pageSize.height - 10);
     doc.text(`Page ${i} sur ${pageCount}`, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 10);
   }
-  
+
   return doc;
 };
 
@@ -373,12 +373,9 @@ export const generateAndDownloadBill = async (
   const filename = `facture_${participant.name.replace(/\s+/g, '_')}_${auction.name.replace(/\s+/g, '_')}.pdf`;
   downloadPDF(doc, filename);
 
-  const paidStatus = customizations.paid === true ? true : false;
-
-
   // Mark participation as billed but not yet paid
   try {
-    await setParticipationPaymentStatus(participationId, paidStatus);
+    await setParticipationPaymentStatus(participationId, customizations.paid);
   } catch (e) {
     console.error('[pdfUtils] Failed to mark participation as billed:', e);
   }
@@ -404,23 +401,23 @@ export const downloadDocx = (blob, filename) => {
 
 /** Invisible border for table cells we don't want visually bordered */
 const noBorder = {
-  top:    { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+  top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
   bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-  left:   { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-  right:  { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+  left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+  right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
 };
 
 /** Thin grey border for the vertical divider cell */
 const rightDividerBorder = {
-  top:    { style: BorderStyle.NONE,   size: 0, color: 'FFFFFF' },
-  bottom: { style: BorderStyle.NONE,   size: 0, color: 'FFFFFF' },
-  left:   { style: BorderStyle.NONE,   size: 0, color: 'FFFFFF' },
-  right:  { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
+  top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+  bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+  left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+  right: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
 };
 
-const bold    = (text, size = 20) => new TextRun({ text, bold: true,  size });
-const normal  = (text, size = 20) => new TextRun({ text, bold: false, size });
-const newline = ()                => new TextRun({ break: 1 });
+const bold = (text, size = 20) => new TextRun({ text, bold: true, size });
+const normal = (text, size = 20) => new TextRun({ text, bold: false, size });
+const newline = () => new TextRun({ break: 1 });
 
 /**
  * Build a Paragraph with optional alignment and spacing
@@ -453,25 +450,27 @@ export const generateClosingReport = (auction, sales, options = {}) => {
     if (isNaN(d)) return "L'AN INCONNU, le jour inconnu";
 
     const month = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(d);
-    const day   = d.getDate();
+    const day = d.getDate();
 
     const dayWords = [
-      null,'premier','deux','trois','quatre','cinq','six','sept','huit','neuf',
-      'dix','onze','douze','treize','quatorze','quinze','seize','dix-sept',
-      'dix-huit','dix-neuf','vingt','vingt et un','vingt-deux','vingt-trois',
-      'vingt-quatre','vingt-cinq','vingt-six','vingt-sept','vingt-huit',
-      'vingt-neuf','trente','trente et un',
+      null, 'premier', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf',
+      'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept',
+      'dix-huit', 'dix-neuf', 'vingt', 'vingt et un', 'vingt-deux', 'vingt-trois',
+      'vingt-quatre', 'vingt-cinq', 'vingt-six', 'vingt-sept', 'vingt-huit',
+      'vingt-neuf', 'trente', 'trente et un',
     ];
 
     const under100 = (n) => {
-      const units = ['zéro','un','deux','trois','quatre','cinq','six','sept',
-        'huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
-      const tens  = { 20:'vingt',30:'trente',40:'quarante',50:'cinquante',
-                      60:'soixante',80:'quatre-vingt' };
+      const units = ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept',
+        'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize'];
+      const tens = {
+        20: 'vingt', 30: 'trente', 40: 'quarante', 50: 'cinquante',
+        60: 'soixante', 80: 'quatre-vingt'
+      };
       if (n < 17) return units[n];
       if (n < 20) return 'dix-' + units[n - 10];
       if (n < 70) {
-        const t = Math.floor(n/10)*10, u = n%10;
+        const t = Math.floor(n / 10) * 10, u = n % 10;
         if (u === 0) return tens[t];
         if (u === 1 && t !== 80) return `${tens[t]} et un`;
         return `${tens[t]}-${units[u]}`;
@@ -488,12 +487,12 @@ export const generateClosingReport = (auction, sales, options = {}) => {
         const r = y - 2000;
         return r === 0 ? 'deux mille' : `deux mille ${under100(r)}`;
       }
-      const th  = Math.floor(y / 1000);
+      const th = Math.floor(y / 1000);
       const rem = y % 1000;
       const thW = th === 1 ? 'mille' : `${under100(th)} mille`;
       if (rem === 0) return thW;
       if (rem < 100) return `${thW} ${under100(rem)}`;
-      const h = Math.floor(rem/100), r2 = rem%100;
+      const h = Math.floor(rem / 100), r2 = rem % 100;
       const hW = h === 1 ? 'cent' : `${under100(h)} cent`;
       return r2 === 0 ? `${thW} ${hW}` : `${thW} ${hW} ${under100(r2)}`;
     };
@@ -540,13 +539,13 @@ export const generateClosingReport = (auction, sales, options = {}) => {
     para(bold('ACTE DE COMMISSAIRE DE JUSTICE', 24), { spaceAfter: 1000, spaceBefore: 1000, align: AlignmentType.CENTER }),
     new Table({
       alignment: AlignmentType.CENTER,
-      width:  { size: 90, type: WidthType.PERCENTAGE },
+      width: { size: 90, type: WidthType.PERCENTAGE },
       layout: 'autofit',
       borders: {
-        top:     { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
-        bottom:  { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
-        left:    { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
-        right:   { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
+        top: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
+        bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
+        left: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
+        right: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
         insideH: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
         insideV: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
       },
@@ -554,8 +553,10 @@ export const generateClosingReport = (auction, sales, options = {}) => {
         new TableRow({
           children: [
             new TableCell({
-              children: [para(bold('COÛT ACTE', 20), { align
-                : AlignmentType.CENTER, spaceAfter: 0 })],
+              children: [para(bold('COÛT ACTE', 20), {
+                align
+                  : AlignmentType.CENTER, spaceAfter: 0
+              })],
               margins: { top: 20, bottom: 20, left: 20, right: 10 },
             }),
           ],
@@ -622,14 +623,14 @@ export const generateClosingReport = (auction, sales, options = {}) => {
   ];
 
   const page1Table = new Table({
-    width:  { size: 100, type: WidthType.PERCENTAGE },
+    width: { size: 100, type: WidthType.PERCENTAGE },
     layout: 'autofit',
     columnWidths: [3000, 7000],
     borders: {
-      top:     { style: BorderStyle.NONE },
-      bottom:  { style: BorderStyle.NONE },
-      left:    { style: BorderStyle.NONE },
-      right:   { style: BorderStyle.NONE },
+      top: { style: BorderStyle.NONE },
+      bottom: { style: BorderStyle.NONE },
+      left: { style: BorderStyle.NONE },
+      right: { style: BorderStyle.NONE },
       insideH: { style: BorderStyle.NONE },
       insideV: { style: BorderStyle.NONE },
     },
@@ -638,19 +639,19 @@ export const generateClosingReport = (auction, sales, options = {}) => {
         children: [
           // ── Left column (30%) ──────────────────────────────────────────
           new TableCell({
-            width:         { size: 0, type: WidthType.AUTO },
-            borders:       rightDividerBorder,
+            width: { size: 0, type: WidthType.AUTO },
+            borders: rightDividerBorder,
             verticalAlign: VerticalAlign.TOP,
-            children:      leftColChildren,
-            margins:       { top: 0, bottom: 0, left: 0, right: 100 },
+            children: leftColChildren,
+            margins: { top: 0, bottom: 0, left: 0, right: 100 },
           }),
           // ── Right column (70%) ─────────────────────────────────────────
           new TableCell({
-            width:         { size: 0, type: WidthType.AUTO },
-            borders:       noBorder,
+            width: { size: 0, type: WidthType.AUTO },
+            borders: noBorder,
             verticalAlign: VerticalAlign.TOP,
-            children:      rightColChildren,
-            margins:       { top: 0, bottom: 0, left: 100, right: 0 },
+            children: rightColChildren,
+            margins: { top: 0, bottom: 0, left: 100, right: 0 },
           }),
         ],
       }),
@@ -659,14 +660,14 @@ export const generateClosingReport = (auction, sales, options = {}) => {
 
   // ── Page 2 — Sales table ─────────────────────────────────────────────────
 
-  const BLUE   = '2563EB';
+  const BLUE = '2563EB';
   const STRIPE = 'F8FAFC';
 
   const cellBorder = {
-    top:    { style: BorderStyle.SINGLE, size: 4, color: 'CBD5E1' },
+    top: { style: BorderStyle.SINGLE, size: 4, color: 'CBD5E1' },
     bottom: { style: BorderStyle.SINGLE, size: 4, color: 'CBD5E1' },
-    left:   { style: BorderStyle.SINGLE, size: 4, color: 'CBD5E1' },
-    right:  { style: BorderStyle.SINGLE, size: 4, color: 'CBD5E1' },
+    left: { style: BorderStyle.SINGLE, size: 4, color: 'CBD5E1' },
+    right: { style: BorderStyle.SINGLE, size: 4, color: 'CBD5E1' },
   };
 
   const headerCell = (text) => new TableCell({
@@ -694,16 +695,16 @@ export const generateClosingReport = (auction, sales, options = {}) => {
     }),
     ...sales.map((sale, idx) => {
       const lotNumberRaw = sale.bundle?.number ?? sale.bundleId ?? sale.bundle?.id ?? '';
-      const lotNumber    = lotNumberRaw !== '' ? String(lotNumberRaw).padStart(2, '0') : '00';
-      const lotName      = sale.bundleName || sale.bundle?.name || 'Non spécifié';
-      const price        = formatCurrency(sale.finalPrice);
-      const buyer        = sale.participantName || sale.participant?.name || 'Inconnu';
-      const buyerAddr    = auction.participants.find(x => x.id == sale.participantId).address || sale.participant?.address || sale.address || '';
-      const shade        = idx % 2 === 1;
+      const lotNumber = lotNumberRaw !== '' ? String(lotNumberRaw).padStart(2, '0') : '00';
+      const lotName = sale.bundleName || sale.bundle?.name || 'Non spécifié';
+      const price = formatCurrency(sale.finalPrice);
+      const buyer = sale.participantName || sale.participant?.name || 'Inconnu';
+      const buyerAddr = auction.participants.find(x => x.id == sale.participantId).address || sale.participant?.address || sale.address || '';
+      const shade = idx % 2 === 1;
       return new TableRow({
         children: [
-          dataCell(`${lotNumber} - ${lotName}`,    shade),
-          dataCell(price,                           shade, AlignmentType.RIGHT),
+          dataCell(`${lotNumber} - ${lotName}`, shade),
+          dataCell(price, shade, AlignmentType.RIGHT),
           dataCell(`À ${buyer}${buyerAddr ? ', ' + buyerAddr : ''}`, shade),
         ],
       });
@@ -711,8 +712,8 @@ export const generateClosingReport = (auction, sales, options = {}) => {
   ];
 
   const salesTable = new Table({
-    width:  { size: 100, type: WidthType.PERCENTAGE },
-    rows:   salesTableRows,
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: salesTableRows,
   });
 
   const closingText = `J'ai remis à chaque acquéreur une facture détaillée laissant apparaître : le montant de l'adjudication, le montant des frais, et le montant de la T.V.A.\n\nEt, de tout ce que dessus, j'ai dressé le présent procès verbal, conformément aux articles R221-37 à R221-39 du Code des procédures civiles d'exécution.`;
@@ -723,7 +724,7 @@ export const generateClosingReport = (auction, sales, options = {}) => {
     styles: {
       default: {
         document: {
-          run:       { font: 'Times New Roman', size: 20 },
+          run: { font: 'Times New Roman', size: 20 },
           paragraph: { spacing: { after: 80 } },
         },
       },
@@ -733,10 +734,10 @@ export const generateClosingReport = (auction, sales, options = {}) => {
         properties: {
           page: {
             margin: {
-              top:    720,  // 1.27 cm
+              top: 720,  // 1.27 cm
               bottom: 720,
-              left:   720,  // 1.27 cm  (default Word is 1800 = ~3.17 cm)
-              right:  720,
+              left: 720,  // 1.27 cm  (default Word is 1800 = ~3.17 cm)
+              right: 720,
             },
           },
         },
@@ -772,7 +773,7 @@ export const generateClosingReport = (auction, sales, options = {}) => {
             para(normal(line, 20), { spaceBefore: line ? 160 : 0, spaceAfter: 80 })
           ),
 
-          para(normal("☐ Me R. GRANIER                                                                             ☐ Me L. DAVID"), {align: AlignmentType.CENTER, spaceBefore: 600})
+          para(normal("☐ Me R. GRANIER                                                                             ☐ Me L. DAVID"), { align: AlignmentType.CENTER, spaceBefore: 600 })
         ],
         footers: {
           default: new Footer({
