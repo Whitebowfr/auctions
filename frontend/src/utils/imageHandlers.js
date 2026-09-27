@@ -1,1 +1,0 @@
-// imageHandlers removed — image support disabled in lightweight backend

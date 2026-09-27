@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "libfvde-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783237399,
+        "narHash": "sha256-13JPyVofDEKI4cAXSYrHPr0uxxyQ0C61926rcQUQfq4=",
+        "owner": "libyal",
+        "repo": "libfvde",
+        "rev": "502edfc64bd7e1615811b877b8d675267f36f2a5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "libyal",
+        "repo": "libfvde",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1754028485,
@@ -18,6 +34,7 @@
     },
     "root": {
       "inputs": {
+        "libfvde-src": "libfvde-src",
         "nixpkgs": "nixpkgs"
       }
     }

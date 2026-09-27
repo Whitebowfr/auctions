@@ -1,2 +1,2 @@
 start "" ./frontend/public/index.html
-cd backend && node server.js
+cd backend && node server.ts
