@@ -9,7 +9,6 @@ export const getEncheresList = async (_: any, res: Response<any[]>) => {
   // Return a lightweight list for initial loading (id, name, date, address)
   const encheres = db.getAll('encheres')
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .map(e => ({ id: e.id, name: e.name, date: e.date, address: e.address || '' }));
   res.json(encheres);
 };
 
