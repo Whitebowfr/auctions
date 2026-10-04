@@ -5,8 +5,8 @@
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node server.ts",
-    "dev": "nodemon server.ts"
+    "start": "cd backend & npx tsx server.ts",
+    "dev": "cd backend && npx tsx watch server.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

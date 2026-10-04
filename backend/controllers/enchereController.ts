@@ -5,8 +5,11 @@ import { Request, Response } from 'express'
 /**
  * Get all encheres (auctions)
  */
-export const getEncheresList = async (_: any, res: Response<Enchere[]>) => {
-  const encheres = db.getAll('encheres').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+export const getEncheresList = async (_: any, res: Response<any[]>) => {
+  // Return a lightweight list for initial loading (id, name, date, address)
+  const encheres = db.getAll('encheres')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .map(e => ({ id: e.id, name: e.name, date: e.date, address: e.address || '' }));
   res.json(encheres);
 };
 
@@ -15,54 +18,8 @@ export const getEncheresList = async (_: any, res: Response<Enchere[]>) => {
  */
 export const getAllEncheres = async (_: any, res: Response<Enchere[]>) => {
   const encheres = db.getAll('encheres').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const lots = db.getAll('lots');
-  const participations = db.getAll('participation');
-  const clients = db.getAll('clients');
 
-  const result = encheres.map((enchere) => {
-    const enchereLots = lots.filter(l => l.enchereId === Number(enchere.id));
-    const enchereParticipations = participations.filter(p => p.enchereId === Number(enchere.id));
-
-    const participants = enchereParticipations.map(p => {
-      const client = clients.find(c => c.id === p.client.id);
-      return {
-        id: client.id,
-        participation_id: p.id,
-        name: client.name,
-        email: client.email,
-        phone: client.phone,
-        address: client.address,
-        local_number: p.localNumber,
-        paid: p.paid !== undefined ? p.paid : null
-
-      };
-    });
-
-    const sales = enchereLots
-      .filter(l => l.soldTo)
-      .map(l => {
-        const participation = enchereParticipations.find(p => p.client.id === l.soldTo.id);
-        const client = clients.find(c => c.id === l.soldTo.id);
-        return {
-          bundleId: l.id,
-          bundleName: l.name,
-          starting_price: l.startingPrice,
-          finalPrice: l.finalPrice,
-          participantId: client.id,
-          participantName: client.name,
-          bidderNumber: participation.localNumber || ''
-        };
-      });
-
-    return {
-      ...enchere,
-      bundles: enchereLots,
-      participants,
-      sales
-    };
-  });
-
-  res.json(result);
+  res.json(encheres);
 };
 
 /**

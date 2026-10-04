@@ -1,15 +1,15 @@
-const express = require('express');
+import express from 'express'
 const router = express.Router();
-const { asyncHandler } = require('../middleware/asyncHandler.ts');
-const {
+import { asyncHandler } from '../middleware/asyncHandler.ts';
+import {
   getAllEncheres,
   getEnchereById,
   createEnchere,
   updateEnchere,
   deleteEnchere,
   getEncheresList
-} = require('../controllers/enchereController.ts');
-const { getLotsForEnchere, createLot } = require('../controllers/lotController.ts');
+} from '../controllers/enchereController.ts';
+import { getLotsForEnchere, createLot } from '../controllers/lotController.ts';
 
 // GET /api/encheres
 router.get('/', asyncHandler(getEncheresList));

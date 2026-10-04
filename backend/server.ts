@@ -24,14 +24,13 @@ app.use('/api/lots', lotRoutes);
 app.use('/api', participationRoutes); // Contains nested routes
 
 // Error handling middleware
-app.use(errorHandler);
 
 // Serve static frontend files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(import.meta.dirname, 'public')));
 
 // Catch-all route for SPA
 app.get('*', function(_: any, res) {
-  res.sendFile(path.resolve(__dirname, './public/index.html'));
+  res.sendFile(path.resolve(import.meta.dirname, './public/index.html'));
 });
 
 // Initialize and start server

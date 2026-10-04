@@ -1,14 +1,14 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { asyncHandler } = require('../middleware/asyncHandler.ts');
-const {
+import { asyncHandler } from '../middleware/asyncHandler.ts';
+import {
   getParticipants,
   addParticipant,
   updateParticipant,
   removeParticipant,
   updatePaymentStatus,
   deleteParticipationById
-} = require('../controllers/participationController.ts');
+} from '../controllers/participationController.ts';
 
 // GET /api/encheres/:enchereId/participants
 router.get('/encheres/:enchereId/participants', asyncHandler(getParticipants));

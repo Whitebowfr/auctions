@@ -2,7 +2,7 @@ import { Client, Participation, Enchere, Lot } from "../types.ts";
 import fs from 'fs';
 import path from 'path';
 
-const DATA_DIR = path.join(__dirname, 'data');
+const DATA_DIR = path.join(import.meta.dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'db.json');
 const BACKUP_FILE = path.join(DATA_DIR, 'db.backup.json');
 
@@ -30,7 +30,7 @@ type LotRow = Lot & {
   image_url?: string;
 };
 
-type ParticipationRow = Participation & {
+type ParticipationRow = Partial<Participation> & {
   created_at?: string;
   participationId?: number;
 };
@@ -180,7 +180,7 @@ const migrateDbFile = () => {
   if (!needsMigration(raw.version)) {
     return;
   }
-
+  console.log("migrating")
   const normalized = normalizeDb(raw);
   const migrated: migrated_db_struct = {
     ...normalized,
