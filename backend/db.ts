@@ -118,8 +118,7 @@ const resolveClient = (clientValue: any, clientById: Map<number, ClientRow>) => 
   return clientById.get(toNumber(clientValue));
 };
 
-const normalizeLot = (lot: any, clientById: Map<number, ClientRow>): LotRow => {
-  const soldToClient = resolveClient(getValue(lot, 'soldTo', 'sold_to'), clientById);
+const normalizeLot = (lot: any): LotRow => {
   return {
     id: toNumber(lot?.id),
     enchereId: toNumber(getValue(lot, 'enchereId', 'enchere_id')),
@@ -127,7 +126,7 @@ const normalizeLot = (lot: any, clientById: Map<number, ClientRow>): LotRow => {
     number: lot?.number || String(lot?.id ?? ''),
     startingPrice: toNumber(getValue(lot, 'startingPrice', 'starting_price')),
     finalPrice: getValue(lot, 'finalPrice', 'sold_price') != null ? toNumber(getValue(lot, 'finalPrice', 'sold_price')) : undefined,
-    soldTo: soldToClient,
+    soldToId: lot?.sold_to,
     created_at: lot?.created_at,
     description: lot?.description,
     category: lot?.category,

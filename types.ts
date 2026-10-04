@@ -6,6 +6,7 @@ export interface Lot {
   startingPrice: number;
   finalPrice?: number;
   soldTo?: Client;
+  soldToId: number;
 }
 
 export interface Enchere {
@@ -38,7 +39,8 @@ export enum PaymentStatus {
 }
 
 export interface Participation {
-  client: Client;
+  client?: Client;
+  clientId: number;
   enchereId: number;
   id: number;
   localNumber: number;
