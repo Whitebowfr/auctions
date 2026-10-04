@@ -16,7 +16,7 @@ type ClientRow = Client & {
   created_at?: string;
 };
 
-type EnchereRow = Omit<Enchere, "bundles" | "participants"> & {
+type EnchereRow = Enchere & {
   created_at?: string;
   metadata?: string;
 };
@@ -170,7 +170,7 @@ const normalizeDb = (data: raw_db_struct): db_struct => {
     version: data.version ?? DB_VERSION,
     clients,
     encheres: (data.encheres || []).map(normalizeEnchere),
-    lots: (data.lots || []).map(lot => normalizeLot(lot, clientById)),
+    lots: (data.lots || []).map(lot => normalizeLot(lot)),
     participation: (data.participation || []).map(participation => normalizeParticipation(participation, clientById))
   });
 };
@@ -299,7 +299,7 @@ const insert = <K extends keyof db_tables>(table: K, obj: any): db_row<K> => {
   } else if (table === 'encheres') {
     record = normalizeEnchere({ id, ...obj, created_at: now });
   } else if (table === 'lots') {
-    record = normalizeLot({ id, ...obj, created_at: now }, new Map(db.clients.map(client => [client.id, client])));
+    record = normalizeLot({ id, ...obj, created_at: now });
   } else {
     record = normalizeParticipation({ id, ...obj, created_at: now }, new Map(db.clients.map(client => [client.id, client])));
   }
@@ -323,7 +323,7 @@ const update = <K extends keyof db_tables>(table: K, id: number, updates: any): 
   } else if (table === 'encheres') {
     items[idx] = normalizeEnchere(merged) as db_row<K>;
   } else if (table === 'lots') {
-    items[idx] = normalizeLot(merged, new Map(db.clients.map(client => [client.id, client]))) as db_row<K>;
+    items[idx] = normalizeLot(merged) as db_row<K>;
   } else {
     items[idx] = normalizeParticipation(merged, new Map(db.clients.map(client => [client.id, client]))) as db_row<K>;
   }
