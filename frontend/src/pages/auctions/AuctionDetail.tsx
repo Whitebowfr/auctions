@@ -3,7 +3,6 @@ import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import {
-  Alert,
   Autocomplete,
   Box,
   Button,
@@ -28,12 +27,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Client, Enchere, Lot, Participation } from '../../../../types.ts';
+import Loading from '../../components/common/Loading.tsx';
 import ParticipantForm from '../../components/participants/ParticipantForm.tsx';
 import PaymentStatusChip from '../../components/PaymentStatusChip.tsx';
 import { useAuction } from '../../context/AuctionContext.tsx';
 import { apiService } from '../../services/api.tsx';
 import { bundleWithSuffixSorter } from '../../utils/bundleUtils.tsx';
-import Loading from '../../components/common/Loading.tsx';
 
 type ParticipantFormType = Omit<Partial<Participation>, 'client'> & {
   client: Partial<Client>

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Client, Enchere, Lot, Participation } from '../../../types';
 import { apiService } from '../services/api.tsx';
-import { Enchere, Client, Lot, Participation } from '../../../types';
+
 type UnfinishedClient = Omit<Client, "id"> & { id?: number };
 
 type Sale = {
