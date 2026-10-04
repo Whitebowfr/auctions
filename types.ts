@@ -16,6 +16,8 @@ export interface Enchere {
   bundles?: Lot[];
   participants?: Participation[];
   managementFeeRate?: number;
+  participantAmount?: number;
+  bundleAmount?: number;
 }
 
 export interface Client {

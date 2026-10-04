@@ -6,7 +6,7 @@ const DATA_DIR = path.join(import.meta.dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'db.json');
 const BACKUP_FILE = path.join(DATA_DIR, 'db.backup.json');
 
-const DB_VERSION = 2.0;
+const DB_VERSION = 2.2;
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -16,7 +16,7 @@ type ClientRow = Client & {
   created_at?: string;
 };
 
-type EnchereRow = Enchere & {
+type EnchereRow = Omit<Enchere, "bundles" | "participants"> & {
   created_at?: string;
   metadata?: string;
 };
@@ -107,11 +107,9 @@ const normalizeEnchere = (enchere: any): EnchereRow => ({
   name: enchere?.name || '',
   date: enchere?.date instanceof Date ? enchere.date : new Date(enchere?.date),
   address: enchere?.address,
-  bundles: enchere?.bundles,
-  participants: enchere?.participants,
   managementFeeRate: enchere?.managementFeeRate,
   created_at: enchere?.created_at,
-  metadata: enchere?.metadata
+  metadata: enchere?.metadata,
 });
 
 const resolveClient = (clientValue: any, clientById: Map<number, ClientRow>) => {

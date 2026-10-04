@@ -147,17 +147,12 @@ const AuctionManagement = () => {
 
                 <Box className={cardStyles.chipContainer}>
                   <Chip
-                    label={`${enchere.participants.length} Participants`}
+                    label={`${enchere.participantAmount} Participants`}
                     size="small"
                     className={cardStyles.modernChip}
                   />
                   <Chip
-                    label={`${enchere.bundles.length} Lots`}
-                    size="small"
-                    className={cardStyles.modernChip}
-                  />
-                  <Chip
-                    label={`${enchere.sales.length} Sales`}
+                    label={`${enchere.bundleAmount} Lots`}
                     size="small"
                     className={cardStyles.modernChip}
                   />
