@@ -53,8 +53,25 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [error, setError] = useState<string | null>(null);
   // Load initial data
   useEffect(() => {
-    loadEncheres();
-    loadClients();
+    // Load lightweight list (names only) initially
+    (async () => {
+      try {
+        setLoading(true);
+        const list = await apiService.getAuctionsList();
+        // map to expected Enchere shape with empty placeholders for participants/bundles/sales
+        const mapped = list.map((l: any) => ({
+          ...l,
+          participants: [],
+          bundles: [],
+          sales: []
+        }));
+        setEncheres(mapped);
+      } catch (e) {
+        handleError(e, 'Loading encheres');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const handleError = (error: Error, context = '') => {
@@ -67,17 +84,56 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       setLoading(true);
       setError(null);
-      const currentEnchere = await apiService.getAuction(id);
+      console.log("Here")
+      // Fetch auction details and participants in parallel
+      const [auctionDetails, participants] = await Promise.all([
+        apiService.getAuction(id),
+        apiService.getParticipants(id)
+      ]);
 
-      let allEncheres = encheres;
-      for (let enchere of encheres) {
-        if (enchere.id === id) {
-          allEncheres = currentEnchere;
+      const normalizedParticipants = (participants || []).map((p: Participation) => ({
+        ...p,
+        paid: p.paid !== undefined ? p.paid : null,
+      }));
+
+      const bundles = auctionDetails.bundles || [];
+
+      const enriched: Enchere = {
+        ...auctionDetails,
+        participants: normalizedParticipants,
+        bundles,
+        sales: bundles
+          .filter((lot: Lot) => lot.soldTo !== null)
+          .map((lot: Lot) => ({
+            id: `sale_${lot.id}`,
+            bundleId: lot.id,
+            bundleName: lot.name || `Lot #${lot.id}`,
+            participantId: lot.soldTo.id,
+            participantName:
+              normalizedParticipants.find(p => p.client.id === lot.soldTo.id)?.client.name || 'Unknown',
+            bidderNumber:
+              normalizedParticipants.find(p => p.client.id === lot.soldTo.id)?.localNumber || '000',
+            startingPrice: lot.startingPrice,
+            finalPrice: lot.finalPrice,
+            profit: (lot.finalPrice || 0) - (lot.startingPrice || 0),
+            date: new Date().toLocaleDateString(),
+            notes: ''
+          })),
+      } as Enchere;
+
+      setEncheres(prev => {
+        const exists = prev.some(e => e.id === id);
+        if (exists) {
+          return prev.map(e => e.id === id ? enriched : e);
         }
-      }
-      setEncheres(allEncheres)
+        return [enriched, ...prev];
+      });
+
+      setCurrentEnchere(enriched);
     } catch (error) {
       handleError(error, 'Loading specific enchere');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -87,43 +143,17 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setLoading(true);
       setError(null);
 
-      const encheresList = await apiService.getAllAuctions();
+      // Lightweight list endpoint — only names/ids for the index page
+      const list = await apiService.getAuctionsList();
+      const mapped = list.map((l: any) => ({
+        ...l,
+        managementFeeRate: l.managementFeeRate || 11.9,
+        participants: [],
+        bundles: [],
+        sales: []
+      }));
 
-      const encheres = encheresList.map((enchere) => {
-        // Parse metadata if it exists
-        let managementFeeRate = enchere?.managementFeeRate || 11.9;
-        const participants = (enchere.participants || []).map(p => ({
-          ...p,
-          paid: p.paid !== undefined ? p.paid : null
-        }));
-        const lots = enchere.bundles || [];
-
-        return {
-          ...enchere,
-          managementFeeRate,
-          participants,
-          bundles: lots,
-          sales: lots
-            .filter(lot => lot.soldTo !== null)
-            .map(lot => ({
-              id: `sale_${lot.id}`,
-              bundleId: lot.id,
-              bundleName: lot.name || `Lot #${lot.id}`,
-              participantId: lot.soldTo.id,
-              participantName:
-                participants.find(p => p.client.id === lot.soldTo.id)?.client.name || 'Unknown',
-              bidderNumber:
-                participants.find(p => p.client.id === lot.soldTo.id)?.localNumber || '000',
-              startingPrice: lot.startingPrice,
-              finalPrice: lot.finalPrice,
-              profit: lot.finalPrice - lot.startingPrice,
-              date: new Date().toLocaleDateString(),
-              notes: ''
-            }))
-        };
-      });
-
-      setEncheres(encheres);
+      setEncheres(mapped);
     } catch (error) {
       handleError(error, 'Loading encheres');
     } finally {
@@ -251,7 +281,7 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       await apiService.addParticipant(enchereId, client.id, localNumber, participantData.client.notes);
 
       // Reload the specific enchere
-      await loadEncheres();
+      await loadSpecificEnchere(enchereId);
     } catch (error) {
       handleError(error, 'Adding participant');
       throw error;
@@ -265,7 +295,7 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       await apiService.removeParticipant(enchereId, participantId);
 
-      await loadEncheres();
+      await loadSpecificEnchere(enchereId);
     } catch (error) {
       handleError(error, 'Adding participant');
       throw error;
@@ -285,7 +315,7 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         startingPrice: bundleData.startingPrice,
       });
 
-      await loadEncheres(); // Reload all encheres
+      await loadSpecificEnchere(enchereId); // Reload this enchere
       return lot;
     } catch (error) {
       handleError(error, 'Adding bundle');
@@ -299,7 +329,13 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setError(null);
 
       await apiService.deleteBundle(bundleId);
-      await loadEncheres();
+      // Try to reload the parent enchere if we can find it, otherwise refresh the list
+      const parent = encheres.find(e => e.bundles?.some(b => b.id === bundleId));
+      if (parent) {
+        await loadSpecificEnchere(parent.id);
+      } else {
+        await loadEncheres();
+      }
     } catch (error) {
       handleError(error, 'Deleting bundle');
       throw error;
@@ -316,7 +352,7 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       // Image uploads are not supported in the lightweight backend; ignore imageFile
 
-      await loadEncheres(); // Reload all encheres
+      await loadSpecificEnchere(bundleData.enchereId); // Reload this enchere
       return true;
     } catch (error) {
       handleError(error, 'Updating bundle');

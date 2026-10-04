@@ -1,4 +1,4 @@
-import { Enchere, Client, Lot } from "../../../types.ts";
+import { Enchere, Client, Lot, Participation } from "../../../types.ts";
 import { getRootUrl } from "../utils/utils.tsx";
 const API_BASE_URL = getRootUrl() + "/api";
 
@@ -33,7 +33,7 @@ class ApiService {
   }
 
   // Client endpoints
-  async getClients() {
+  async getClients(): Promise<Client[]> {
     return this.request('/clients');
   }
 
@@ -62,10 +62,11 @@ class ApiService {
   }
 
   // Auction endpoints - fix these to match your server
-  async getAuctionsList(): Promise<Enchere[]> { // Renamed to avoid duplicate
+  async getAuctionsList(): Promise<Enchere[]> { // lightweight list (id, name, date, address)
     return this.request('/encheres');
   }
 
+  // kept for compatibility (aggregated view)
   async getAllAuctions(): Promise<Enchere[]> {
     return this.request('/encheres/all');
   }
@@ -77,7 +78,7 @@ class ApiService {
     });
   }
 
-  async getAuction(id: number) {
+  async getAuction(id: number): Promise<Enchere> {
     return this.request(`/encheres/${id}`);
   }
 
@@ -98,7 +99,7 @@ class ApiService {
     });
   }
 
-  async getBundles(id: number) {
+  async getBundles(id: number): Promise<Lot[]> {
     return this.request(`/encheres/${id}/lots`);
   }
 
@@ -130,7 +131,7 @@ class ApiService {
   }
 
   // Participation endpoints - fix these
-  async getParticipants(auctionId: number) {
+  async getParticipants(auctionId: number): Promise<Participation[]> {
     return this.request(`/encheres/${auctionId}/participants`);
   }
 
@@ -165,10 +166,6 @@ class ApiService {
 
   async getClientPurchases(auctionId: number, clientId: number) {
     return this.request(`/encheres/${auctionId}/clients/${clientId}/purchases`);
-  }
-
-  async getAuctionReport(auctionId: number) {
-    return this.request(`/encheres/${auctionId}/report`);
   }
 }
 

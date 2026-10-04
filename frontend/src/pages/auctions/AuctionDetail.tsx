@@ -33,6 +33,7 @@ import PaymentStatusChip from '../../components/PaymentStatusChip.tsx';
 import { useAuction } from '../../context/AuctionContext.tsx';
 import { apiService } from '../../services/api.tsx';
 import { bundleWithSuffixSorter } from '../../utils/bundleUtils.tsx';
+import Loading from '../../components/common/Loading.tsx';
 
 type ParticipantForm = Omit<Partial<Participation>, 'client'> & {
   client: Partial<Client>
@@ -42,7 +43,7 @@ const AuctionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { encheres, setCurrentEnchere, addBundle, updateBundle, deleteBundle, addParticipant, deleteParticipant, addSale, clients, loadEncheres } = useAuction();
+  const { encheres, setCurrentEnchere, addBundle, updateBundle, deleteBundle, addParticipant, deleteParticipant, addSale, clients, loadEncheres, loadSpecificEnchere, loading } = useAuction();
   const auction: Enchere = encheres.find((a: Enchere) => a.id === parseInt(id));
 
   // Determine initial tab from query param (?tab=participants) or default to 0 (Lots)
@@ -54,6 +55,15 @@ const AuctionDetail = () => {
   useEffect(() => {
     if (auction) setCurrentEnchere(auction);
   }, [auction, setCurrentEnchere]);
+
+  // If the auction is not present or lacks details, load it when this page mounts
+  useEffect(() => {
+    if (!id) return;
+    const numericId = parseInt(id);
+    if (!auction || ((auction.participants?.length || 0) === 0 && (auction.bundles?.length || 0) === 0)) {
+      loadSpecificEnchere(numericId);
+    }
+  }, [id, auction, loadSpecificEnchere]);
 
   // Bundles inline edit state
   const [bundlePrices, setBundlePrices] = useState({});
@@ -94,9 +104,7 @@ const AuctionDetail = () => {
   }, [auction]);
 
   if (!auction) {
-    return (
-      <Alert severity="error">Vente non trouvée. Veuillez retourner à la liste des ventes.</Alert>
-    );
+    return <Loading message="Chargement de la vente..." />;
   }
 
 
@@ -659,6 +667,7 @@ const AuctionDetail = () => {
               try {
                 setTransfering(true);
                 // Fetch source and target participants
+                console.log("here")
                 const source = await apiService.getParticipants(auction.id);
                 const target = await apiService.getParticipants(transferTargetId);
 
