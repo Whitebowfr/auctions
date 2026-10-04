@@ -58,14 +58,19 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     (async () => {
       try {
         setLoading(true);
-        const list = await apiService.getAuctionsList();
+
+        const [auctionList, clients] = await Promise.all([
+          apiService.getAuctionsList(),
+          apiService.getClients()
+        ]);
         // map to expected Enchere shape with empty placeholders for participants/bundles/sales
-        const mapped = list.map((l: any) => ({
+        const mapped = auctionList.map((l: any) => ({
           ...l,
           participants: [],
           bundles: [],
           sales: []
         }));
+        setClients(clients)
         setEncheres(mapped);
       } catch (e) {
         handleError(e, 'Loading encheres');
@@ -85,7 +90,6 @@ export const AuctionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       setLoading(true);
       setError(null);
-      console.log("Here")
       // Fetch auction details and participants in parallel
       const [auctionDetails, participants] = await Promise.all([
         apiService.getAuction(id),
