@@ -149,35 +149,51 @@ const normalizeParticipation = (participation: any, clientById: Map<number, Clie
   };
 };
 
+const ensureProperDatabase = (db: db_struct): db_struct => {
+  db.encheres.map(enchere => enchere.participantAmount = db.participation.filter(x => x.enchereId === enchere.id).length)
+  db.encheres.map(enchere => enchere.bundleAmount = db.lots.filter(x => x.enchereId === enchere.id).length)
+
+  db.lots.filter(lot => db.encheres.some(enchere => enchere.id === lot.enchereId))
+  db.lots.filter(lot => db.clients.some(client => client.id === lot.soldToId))
+
+  db.participation.filter(participation => db.clients.some(client => client.id === participation.clientId))
+  db.participation.filter(participation => db.encheres.some(enchere => enchere.id === participation.enchereId))
+
+  return db
+}
+
 const normalizeDb = (data: raw_db_struct): db_struct => {
   const clients = (data.clients || []).map(normalizeClient);
   const clientById = new Map<number, ClientRow>(clients.map(client => [client.id, client]));
 
-  return {
+  return ensureProperDatabase({
     version: data.version ?? DB_VERSION,
     clients,
     encheres: (data.encheres || []).map(normalizeEnchere),
     lots: (data.lots || []).map(lot => normalizeLot(lot, clientById)),
     participation: (data.participation || []).map(participation => normalizeParticipation(participation, clientById))
-  };
+  });
 };
 
 const needsMigration = (version: number | undefined) => version !== DB_VERSION;
 
 const migrateDbFile = () => {
   if (!fs.existsSync(DATA_FILE)) {
+    console.log("Database missing, recreating...")
     fs.writeFileSync(DATA_FILE, JSON.stringify(DEFAULT_DB, null, 2));
   }
 
   if (!fs.existsSync(BACKUP_FILE)) {
+    console.log("Backup file not found, recreating...")
     cloneFileAsBackup();
   }
 
   const raw = readBackupDb();
   if (!needsMigration(raw.version)) {
+    console.log("Found DB with version" + raw.version)
     return;
   }
-  console.log("migrating")
+  console.log(`Migrating DB from version ${raw.version} to ${DB_VERSION}`)
   const normalized = normalizeDb(raw);
   const migrated: migrated_db_struct = {
     ...normalized,
