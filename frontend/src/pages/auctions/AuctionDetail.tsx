@@ -679,8 +679,8 @@ const AuctionDetail = () => {
                   // Remove existing participants from target using participation_id (force deletion)
                   for (const p of target) {
                     try {
-                      if (p.participation_id) {
-                        await apiService.deleteParticipation(p.participation_id, true);
+                      if (p.id) {
+                        await apiService.deleteParticipation(p.id, true);
                       } else {
                         // Fallback: remove by client id
                         await apiService.removeParticipant(transferTargetId, p.id);
@@ -695,7 +695,7 @@ const AuctionDetail = () => {
                 for (const p of source) {
                   try {
                     // p.id is client id; preserve local_number and participation_id
-                    await apiService.addParticipant(transferTargetId, p.id, p.local_number || null, '', p.participation_id || null);
+                    await apiService.addParticipant(transferTargetId, p.id, p.localNumber || null, '', p.id || null);
                   } catch (e) {
                     console.error('Failed to add participant', p, e);
                   }
