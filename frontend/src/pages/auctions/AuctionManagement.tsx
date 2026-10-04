@@ -36,7 +36,7 @@ const AuctionManagement = () => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    date: '',
+    date: new Date(),
     location: '',
     description: ''
   });
@@ -87,7 +87,7 @@ const AuctionManagement = () => {
     try {
       setSubmitting(true);
       await addEnchere(formData);
-      setFormData({ name: '', date: '', location: '', description: '' });
+      setFormData({ name: '', date: new Date(), location: '', description: '' });
       setOpen(false);
     } catch (error) {
       console.error('Failed to create enchere:', error);
@@ -139,7 +139,7 @@ const AuctionManagement = () => {
                 </Typography>
 
                 <Typography variant="body2" sx={{ color: '#64748b', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  📅 {formatDate(enchere.date)}
+                  📅 {formatDate(enchere.date.toString())}
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#64748b', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                   📍 {enchere.address}
@@ -235,7 +235,7 @@ const AuctionManagement = () => {
                 label="Date"
                 value={formData.date || null}
                 format='DD/MM/YYYY'
-                onChange={(newVal) => setFormData({ ...formData, date: newVal })}
+                onChange={(newVal) => setFormData({ ...formData, date: new Date(newVal.toString()) })}
                 className={dialogStyles.modernTextField}
                 disabled={submitting}
               />
