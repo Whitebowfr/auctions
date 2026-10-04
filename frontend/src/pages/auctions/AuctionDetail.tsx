@@ -35,7 +35,7 @@ import { apiService } from '../../services/api.tsx';
 import { bundleWithSuffixSorter } from '../../utils/bundleUtils.tsx';
 import Loading from '../../components/common/Loading.tsx';
 
-type ParticipantForm = Omit<Partial<Participation>, 'client'> & {
+type ParticipantFormType = Omit<Partial<Participation>, 'client'> & {
   client: Partial<Client>
 }
 
@@ -75,7 +75,7 @@ const AuctionDetail = () => {
   const [newBundleNumber, setNewBundleNumber] = useState('');
 
   // Participant form state (show inline)
-  const [participantForm, setParticipantForm] = useState<ParticipantForm>({ client: { name: '', email: '', phone: '', address: '', notes: '' }, localNumber: -1 });
+  const [participantForm, setParticipantForm] = useState<ParticipantFormType>({ client: { name: '', email: '', phone: '', address: '', notes: '' }, localNumber: -1 });
   const [selectedParticipant, setSelectedParticipant] = useState(null);
 
   const [submitting, setSubmitting] = useState(false);
@@ -214,7 +214,7 @@ const AuctionDetail = () => {
   const handleSubmitParticipant = async () => {
     setSubmitting(true);
     try {
-      let participantPayload: ParticipantForm = participantForm;
+      let participantPayload: ParticipantFormType = participantForm;
 
       if (selectedParticipant && selectedParticipant.id) {
         // Ensure we create or update client record first via addParticipant implementation
