@@ -316,7 +316,7 @@ const AuctionDetail = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Button onClick={() => navigate('/encheres')}>← Retour aux ventes</Button>
+        <Button onClick={() => navigate('/')}>← Retour aux ventes</Button>
         <Typography variant="h4">{auction.name}</Typography>
         <Box />
       </Box>
